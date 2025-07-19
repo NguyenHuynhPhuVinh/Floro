@@ -11,7 +11,7 @@
 2.  Khi một node được di chuyển, vị trí của nó được cập nhật cho mọi người.
 3.  Khi một node bị xóa, nó biến mất khỏi màn hình của mọi người.
 4.  Đồng bộ hóa diễn ra mượt mà, không cần refresh.
-5.  Sử dụng cơ chế lắng nghe sự kiện của Firestore.
+5.  Sử dụng Supabase Realtime subscriptions cho live updates.
 
 ### Story 3.2: Hiển thị Con trỏ của Người dùng khác
 

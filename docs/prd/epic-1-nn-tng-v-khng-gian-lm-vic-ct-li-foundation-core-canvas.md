@@ -4,14 +4,15 @@
 
 ### Story 1.1: Thiết lập Dự án và Hạ tầng
 
-- **As a** developer, **I want** to set up a new Next.js project with Firebase integration and continuous deployment via Vercel, **so that** we have a solid and automated foundation.
+- **As a** developer, **I want** to set up a new Next.js project with Supabase integration and continuous deployment via Vercel, **so that** we have a solid and automated foundation.
   **Acceptance Criteria:**
 
 1.  Repository mã nguồn mở mới được tạo trên GitHub.
 2.  Dự án Next.js (TypeScript) được khởi tạo trong monorepo.
-3.  Dự án Firebase mới được tạo và kết nối.
-4.  Dự án được kết nối với Vercel và tự động triển khai.
-5.  Trang chủ hiển thị một trang chào mừng.
+3.  Dự án Supabase mới được tạo và kết nối.
+4.  Database schema được thiết lập với tables cho nodes và cursors.
+5.  Dự án được kết nối với Vercel và tự động triển khai.
+6.  Trang chủ hiển thị một trang chào mừng với Supabase connection test.
 
 ### Story 1.2: Triển khai Không gian làm việc 2D
 

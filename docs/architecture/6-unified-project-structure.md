@@ -13,8 +13,8 @@ floro/
 │       │   │   ├── canvas/             # Canvas-specific components
 │       │   │   ├── nodes/              # Node type components
 │       │   │   └── common/             # Shared components
-│       │   ├── services/               # Firebase service layer
-│       │   │   ├── core/               # Core services (firebase, node, storage)
+│       │   ├── services/               # Supabase service layer
+│       │   │   ├── core/               # Core services (supabase, node, storage)
 │       │   │   ├── advanced/           # Advanced services (spatial, cache, performance)
 │       │   │   └── utils/              # Service utilities
 │       │   ├── hooks/                  # Custom React hooks

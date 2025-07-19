@@ -4,7 +4,7 @@
 
 ### 1.1 Introduction
 
-This document outlines the complete fullstack architecture for **Floro**, including the Next.js frontend, Firebase backend, and the integration between them. It serves as the single source of truth for AI-driven development, ensuring consistency across the entire technology stack. This unified approach is designed to streamline development for modern fullstack applications where frontend and backend concerns are increasingly intertwined.
+This document outlines the complete fullstack architecture for **Floro**, including the Next.js frontend, Supabase backend, and the integration between them. It serves as the single source of truth for AI-driven development, ensuring consistency across the entire technology stack. This unified approach is designed to streamline development for modern fullstack applications where frontend and backend concerns are increasingly intertwined.
 
 ### 1.2 Starter Template or Existing Project
 
@@ -20,18 +20,19 @@ This document outlines the complete fullstack architecture for **Floro**, includ
 
 ### 2.1 Technical Summary
 
-The Floro system will be built using a **modern Jamstack architecture combined with a serverless backend**, leveraging the strengths of Next.js for the frontend and the Firebase ecosystem for the backend. Users will interact with a highly performant Next.js application hosted on Vercel. All workspace state data (node positions, metadata) and real-time updates will be managed through **Cloud Firestore**. Large file assets, such as images and documents, will be stored in **Firebase Storage**. This architecture is designed to optimize page load speeds, provide seamless scalability, and minimize operational costs, directly aligning with the goals set forth in the PRD.
+The Floro system will be built using a **modern Jamstack architecture combined with a serverless backend**, leveraging the strengths of Next.js for the frontend and the Supabase ecosystem for the backend. Users will interact with a highly performant Next.js application hosted on Vercel. All workspace state data (node positions, metadata) and real-time updates will be managed through **Supabase Database (PostgreSQL)**. Large file assets, such as images and documents, will be stored in **Supabase Storage**. This architecture is designed to optimize page load speeds, provide seamless scalability, and minimize operational costs while maintaining open-source principles, directly aligning with the goals set forth in the PRD.
 
 ### 2.2 Platform and Infrastructure Choice
 
-- **Platform:** Vercel + Firebase.
+- **Platform:** Vercel + Supabase.
 - **Key Services:**
   - **Vercel:** Primary hosting for the Next.js application, providing CI/CD, and a global Edge Network.
-  - **Firebase:**
-    - **Cloud Firestore:** The primary NoSQL database for storing node metadata and managing real-time state synchronization.
-    - **Realtime Database:** Used as a high-frequency message bus for transient data like cursor positions to optimize performance and cost.
-    - **Firebase Storage:** Handles storage and delivery of user-uploaded file objects (images, documents, etc.).
-- **Deployment Regions:** Infrastructure will be configured to serve users globally with low latency, leveraging the distributed networks of Vercel and Google Cloud.
+  - **Supabase:**
+    - **Supabase Database:** PostgreSQL database for storing node metadata and managing application state with ACID compliance.
+    - **Supabase Realtime:** WebSocket-based real-time subscriptions for live collaboration features like cursor positions and node updates.
+    - **Supabase Storage:** Handles storage and delivery of user-uploaded file objects (images, documents, etc.) with built-in CDN.
+    - **Supabase Auth:** Authentication system for future user management features.
+- **Deployment Regions:** Infrastructure will be configured to serve users globally with low latency, leveraging the distributed networks of Vercel and Supabase's global infrastructure.
 
 ### 2.3 Repository Structure
 
@@ -41,7 +42,7 @@ The Floro system will be built using a **modern Jamstack architecture combined w
   - `apps/web`: The main Next.js application.
   - `packages/shared-types`: TypeScript type definitions shared across the application and future extensions.
   - `packages/eslint-config`: Shared ESLint configuration for consistent code style.
-- **Rationale:** While currently single-app, monorepo structure provides future-proofing for potential Firebase Functions, mobile apps, or admin dashboards while maintaining minimal overhead.
+- **Rationale:** While currently single-app, monorepo structure provides future-proofing for potential Supabase Edge Functions, mobile apps, or admin dashboards while maintaining minimal overhead.
 
 ### 2.4 High-Level Architecture Diagram
 
@@ -51,28 +52,30 @@ graph TD
         A[Next.js Frontend on Vercel]
     end
 
-    subgraph "Firebase Backend"
-        B[Cloud Firestore<br><i>(Node Data)</i>]
-        C[Firebase Storage<br><i>(File Content)</i>]
-        F[Realtime Database<br><i>(Cursor Positions)</i>]
-        D[Firebase Functions - Optional]
+    subgraph "Supabase Backend"
+        B[PostgreSQL Database<br><i>(Node Data & Metadata)</i>]
+        C[Supabase Storage<br><i>(File Content)</i>]
+        F[Realtime Subscriptions<br><i>(Live Collaboration)</i>]
+        D[Supabase Edge Functions<br><i>(Optional Server Logic)</i>]
+        G[Supabase Auth<br><i>(Future User Management)</i>]
     end
 
     E((User)) --> A
-    A -- Reads/Writes Metadata & Real-time Updates --> B
-    A -- Uploads/Downloads Files --> C
-    A -- Sends/Receives Cursor Positions --> F
-    A -- Calls for complex logic --> D
+    A -- SQL Queries & Real-time Subscriptions --> B
+    A -- File Upload/Download --> C
+    A -- WebSocket Connections --> F
+    A -- Server-side Logic --> D
+    A -- Authentication (Future) --> G
 ```
 
 ### 2.5 Architectural Patterns
 
 - **Component-Based UI:** The frontend will be built using reusable React components with clear separation of concerns.
-- **Repository Pattern (Client-Side):** An abstraction layer (`services`) will be created to handle all communication with Firebase, decoupling UI components from the data source.
-- **Observer Pattern (Real-time):** The application will utilize Firestore's `onSnapshot` and Realtime Database's `onValue` listeners to reactively update the UI based on data changes from the backend.
+- **Repository Pattern (Client-Side):** An abstraction layer (`services`) will be created to handle all communication with Supabase, decoupling UI components from the data source.
+- **Observer Pattern (Real-time):** The application will utilize Supabase's real-time subscriptions to reactively update the UI based on data changes from the PostgreSQL database.
 - **Command Pattern:** For undo/redo functionality and action tracking.
 - **Strategy Pattern:** For different node rendering strategies based on zoom level and viewport.
-- **Facade Pattern:** Simplified interfaces for complex Firebase operations.
+- **Facade Pattern:** Simplified interfaces for complex Supabase operations.
 
 ### 2.6 Performance Architecture
 
@@ -81,31 +84,32 @@ graph TD
 - **Level of Detail (LOD):** Render simplified versions of nodes when zoomed out.
 - **Debounced Updates:** Batch and debounce high-frequency updates (cursor positions, node movements).
 - **Lazy Loading:** Load node content (images, files) only when needed.
-- **Caching Strategy:** Multi-layer caching (browser cache, CDN, Firebase cache).
+- **Caching Strategy:** Multi-layer caching (browser cache, CDN, Supabase cache).
 
 ## 3. Tech Stack
 
 This table lists the technologies chosen for the Floro project. Development will adhere to the latest stable versions of these technologies.
 
-| Category               | Technology                   | Purpose                                | Rationale                                                  |
-| :--------------------- | :--------------------------- | :------------------------------------- | :--------------------------------------------------------- |
-| **Language**           | TypeScript                   | Ngôn ngữ phát triển chính              | An toàn kiểu dữ liệu, dễ dàng chia sẻ types.               |
-| **Frontend Framework** | Next.js 14+                  | Xây dựng giao diện người dùng          | Framework React mạnh mẽ, App Router, tích hợp Vercel.      |
-| **Backend Service**    | Firebase                     | Backend-as-a-Service                   | Tối ưu cho real-time, cung cấp các dịch vụ cần thiết.      |
-| **State Database**     | Cloud Firestore              | Lưu trữ metadata và trạng thái node    | NoSQL, real-time, truy vấn mạnh mẽ, khả năng mở rộng lớn.  |
-| **Real-time Bus**      | Realtime Database            | Đồng bộ dữ liệu tần suất cao (con trỏ) | Độ trễ cực thấp, tối ưu chi phí cho các ghi đè liên tục.   |
-| **File Storage**       | Firebase Storage             | Lưu trữ file                           | Tối ưu lưu trữ và phân phối file dung lượng lớn.           |
-| **UI Library**         | Tailwind CSS                 | Styling                                | Xây dựng giao diện nhanh chóng và nhất quán.               |
-| **UI Components**      | Shadcn/ui                    | Thư viện component                     | Cung cấp component đẹp, dễ tùy chỉnh, tái sử dụng.         |
-| **State Management**   | Zustand                      | Quản lý trạng thái client              | Nhẹ, đơn giản, hiệu quả cho nhu cầu dự án.                 |
-| **2D Canvas Library**  | Konva.js                     | Xử lý không gian 2D                    | Thư viện canvas hiệu suất cao, hỗ trợ tốt.                 |
-| **Spatial Indexing**   | Custom Quadtree              | Tối ưu truy vấn không gian             | Hiệu suất cao cho viewport queries và collision detection. |
-| **Error Handling**     | React Error Boundary         | Xử lý lỗi graceful                     | Ngăn crash toàn bộ app, user experience tốt hơn.           |
-| **Performance**        | React.memo, useMemo          | Tối ưu re-rendering                    | Giảm unnecessary renders, cải thiện performance.           |
-| **Testing**            | Jest & React Testing Library | Unit & Integration tests               | Bộ công cụ tiêu chuẩn trong hệ sinh thái React.            |
-| **E2E Testing**        | Playwright                   | End-to-end testing                     | Modern, reliable, cross-browser testing.                   |
-| **Monitoring**         | Vercel Analytics             | Performance monitoring                 | Built-in analytics, Core Web Vitals tracking.              |
-| **Deployment**         | Vercel                       | Nền tảng hosting                       | Tích hợp CI/CD tự động, mạng lưới toàn cầu.                |
+| Category               | Technology                     | Purpose                             | Rationale                                                  |
+| :--------------------- | :----------------------------- | :---------------------------------- | :--------------------------------------------------------- |
+| **Language**           | TypeScript                     | Ngôn ngữ phát triển chính           | An toàn kiểu dữ liệu, dễ dàng chia sẻ types.               |
+| **Frontend Framework** | Next.js 14+                    | Xây dựng giao diện người dùng       | Framework React mạnh mẽ, App Router, tích hợp Vercel.      |
+| **Backend Service**    | Supabase                       | Backend-as-a-Service                | Open source, PostgreSQL, real-time, tích hợp đầy đủ.       |
+| **Database**           | Supabase Database (PostgreSQL) | Lưu trữ metadata và trạng thái node | SQL database mạnh mẽ, ACID compliance, complex queries.    |
+| **Real-time Engine**   | Supabase Realtime              | Đồng bộ dữ liệu real-time           | WebSocket-based, low latency, built-in subscriptions.      |
+| **File Storage**       | Supabase Storage               | Lưu trữ file                        | S3-compatible, CDN tích hợp, policy-based access control.  |
+| **Authentication**     | Supabase Auth                  | Xác thực người dùng (future)        | Multiple providers, JWT tokens, row-level security.        |
+| **UI Library**         | Tailwind CSS                   | Styling                             | Xây dựng giao diện nhanh chóng và nhất quán.               |
+| **UI Components**      | Shadcn/ui                      | Thư viện component                  | Cung cấp component đẹp, dễ tùy chỉnh, tái sử dụng.         |
+| **State Management**   | Zustand                        | Quản lý trạng thái client           | Nhẹ, đơn giản, hiệu quả cho nhu cầu dự án.                 |
+| **2D Canvas Library**  | Konva.js                       | Xử lý không gian 2D                 | Thư viện canvas hiệu suất cao, hỗ trợ tốt.                 |
+| **Spatial Indexing**   | Custom Quadtree                | Tối ưu truy vấn không gian          | Hiệu suất cao cho viewport queries và collision detection. |
+| **Error Handling**     | React Error Boundary           | Xử lý lỗi graceful                  | Ngăn crash toàn bộ app, user experience tốt hơn.           |
+| **Performance**        | React.memo, useMemo            | Tối ưu re-rendering                 | Giảm unnecessary renders, cải thiện performance.           |
+| **Testing**            | Jest & React Testing Library   | Unit & Integration tests            | Bộ công cụ tiêu chuẩn trong hệ sinh thái React.            |
+| **E2E Testing**        | Playwright                     | End-to-end testing                  | Modern, reliable, cross-browser testing.                   |
+| **Monitoring**         | Vercel Analytics               | Performance monitoring              | Built-in analytics, Core Web Vitals tracking.              |
+| **Deployment**         | Vercel                         | Nền tảng hosting                    | Tích hợp CI/CD tự động, mạng lưới toàn cầu.                |
 
 ## 4. Data Models
 
@@ -113,20 +117,19 @@ These TypeScript interfaces, located in `packages/shared-types`, define the core
 
 ```typescript
 // packages/shared-types/src/index.ts
-import { Timestamp } from "firebase/firestore";
 
-// The base for all node types, stored in Firestore
+// The base for all node types, stored in Supabase PostgreSQL
 interface BaseNode {
   id: string;
   sessionId: string; // e.g., "public"
   type: "file" | "text" | "link" | "image";
   position: { x: number; y: number };
   size: { width: number; height: number };
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
   zIndex: number; // For layering
   isLocked?: boolean; // Prevent accidental moves
-  metadata?: Record<string, any>; // Extensible metadata
+  metadata?: Record<string, any>; // JSONB column for extensible metadata
 }
 
 export interface FileNode extends BaseNode {
@@ -168,11 +171,12 @@ export interface ImageNode extends BaseNode {
 
 export type FloroNode = FileNode | TextNode | LinkNode | ImageNode;
 
-// Transient data for cursors, stored in Realtime Database
+// Real-time cursor data, managed via Supabase Realtime
 export interface Cursor {
   id: string; // Anonymous user session ID
+  sessionId: string; // Workspace session
   position: { x: number; y: number };
-  lastUpdate: number; // Using serverTimestamp
+  lastUpdate: string; // ISO timestamp
   color?: string; // User-specific cursor color
   name?: string; // Optional display name
 }
@@ -197,38 +201,61 @@ export interface PerformanceMetrics {
 // Error tracking
 export interface ErrorLog {
   id: string;
-  timestamp: Timestamp;
+  timestamp: string; // ISO timestamp
   error: string;
   stack?: string;
   userAgent: string;
   sessionId: string;
-  context?: Record<string, any>;
+  context?: Record<string, any>; // JSONB column
+}
+
+// Database schema types for Supabase
+export interface Database {
+  public: {
+    Tables: {
+      nodes: {
+        Row: FloroNode;
+        Insert: Omit<FloroNode, "id" | "createdAt" | "updatedAt">;
+        Update: Partial<Omit<FloroNode, "id">>;
+      };
+      cursors: {
+        Row: Cursor;
+        Insert: Omit<Cursor, "lastUpdate">;
+        Update: Partial<Omit<Cursor, "id">>;
+      };
+      error_logs: {
+        Row: ErrorLog;
+        Insert: Omit<ErrorLog, "id" | "timestamp">;
+        Update: Partial<Omit<ErrorLog, "id">>;
+      };
+    };
+  };
 }
 ```
 
 ## 5. API Specification (Client-Side Service Layer)
 
-All Firebase interactions from the Next.js app will be managed through a dedicated service layer located in `apps/web/src/services/`.
+All Supabase interactions from the Next.js app will be managed through a dedicated service layer located in `apps/web/src/services/`.
 
 ### 5.1 Core Services
 
-- **`firebase.ts`:** Centralized initialization of Firebase services (Firestore, Realtime DB, Storage).
-- **`node.service.ts`:** Manages CRUD operations and real-time listeners for `FloroNode` data in **Firestore**.
-- **`storage.service.ts`:** Manages file uploads and retrievals from **Firebase Storage**.
-- **`realtime.service.ts`:** Manages high-frequency updates, like cursor positions, using **Realtime Database**.
+- **`supabase.ts`:** Centralized initialization of Supabase client with TypeScript types.
+- **`node.service.ts`:** Manages CRUD operations and real-time subscriptions for `FloroNode` data in **PostgreSQL**.
+- **`storage.service.ts`:** Manages file uploads and retrievals from **Supabase Storage**.
+- **`realtime.service.ts`:** Manages real-time subscriptions for live collaboration features.
 
 ### 5.2 Advanced Services
 
-- **`spatial.service.ts`:** Handles spatial indexing and viewport-based queries using quadtree implementation.
+- **`spatial.service.ts`:** Handles spatial indexing and viewport-based queries using PostGIS extensions.
 - **`cache.service.ts`:** Manages client-side caching strategies for nodes and assets.
 - **`performance.service.ts`:** Tracks and reports performance metrics.
 - **`error.service.ts`:** Centralized error handling and reporting.
-- **`security.service.ts`:** Input sanitization and rate limiting logic.
+- **`security.service.ts`:** Input sanitization and Row Level Security (RLS) policies.
 
 ### 5.3 Service Layer Architecture
 
 ```typescript
-// Example service interface
+// Example service interface using Supabase
 interface NodeService {
   // CRUD operations
   createNode(
@@ -237,19 +264,23 @@ interface NodeService {
   updateNode(id: string, updates: Partial<FloroNode>): Promise<void>;
   deleteNode(id: string): Promise<void>;
 
-  // Spatial queries
+  // Spatial queries using PostGIS
   getNodesInViewport(bounds: SpatialBounds): Promise<FloroNode[]>;
 
-  // Real-time subscriptions
+  // Real-time subscriptions using Supabase Realtime
   subscribeToNodes(
     sessionId: string,
     callback: (nodes: FloroNode[]) => void
-  ): () => void;
+  ): RealtimeChannel;
 
-  // Batch operations
+  // Batch operations using PostgreSQL transactions
   batchUpdateNodes(
     updates: Array<{ id: string; updates: Partial<FloroNode> }>
   ): Promise<void>;
+
+  // Advanced PostgreSQL features
+  searchNodes(query: string, sessionId: string): Promise<FloroNode[]>;
+  getNodeHistory(nodeId: string): Promise<FloroNode[]>;
 }
 ```
 
@@ -268,8 +299,8 @@ floro/
 │       │   │   ├── canvas/             # Canvas-specific components
 │       │   │   ├── nodes/              # Node type components
 │       │   │   └── common/             # Shared components
-│       │   ├── services/               # Firebase service layer
-│       │   │   ├── core/               # Core services (firebase, node, storage)
+│       │   ├── services/               # Supabase service layer
+│       │   │   ├── core/               # Core services (supabase, node, storage)
 │       │   │   ├── advanced/           # Advanced services (spatial, cache, performance)
 │       │   │   └── utils/              # Service utilities
 │       │   ├── hooks/                  # Custom React hooks
@@ -324,7 +355,7 @@ pnpm install
 
 # Configure environment
 cp apps/web/.env.example apps/web/.env.local
-# Edit .env.local with Firebase credentials
+# Edit .env.local with Supabase credentials
 ```
 
 ### 7.2 Development Commands
@@ -363,7 +394,7 @@ pnpm --filter shared-types build
 ## 8. Deployment Architecture
 
 - **Frontend:** The Next.js app is automatically deployed to Vercel upon pushes to the `main` branch.
-- **Backend:** Firebase Security Rules and configurations are deployed via the Firebase CLI.
+- **Backend:** Supabase database migrations and Row Level Security policies are deployed via the Supabase CLI.
 - **Environments:**
   - **Development:** Local machine.
   - **Preview:** Vercel automatically creates a preview deployment for each Pull Request.
@@ -373,10 +404,10 @@ pnpm --filter shared-types build
 
 ### 9.1 Security Architecture
 
-- **Firebase Security Rules:**
-  - Enforce data validation and access control on the backend
-  - Rate limiting rules at database level
-  - File type and size restrictions
+- **Supabase Row Level Security (RLS):**
+  - Enforce data validation and access control at the database level
+  - Rate limiting policies for database operations
+  - File type and size restrictions via storage policies
 - **Client-Side Security:**
   - Input sanitization for all user-generated content to prevent XSS attacks
   - Content Security Policy (CSP) headers
@@ -400,7 +431,7 @@ pnpm --filter shared-types build
 - **Data Loading:**
   - **Lazy Loading:** Defer loading of images and files until needed
   - **Progressive Loading:** Load thumbnails first, full resolution on demand
-  - **Caching Strategy:** Multi-layer caching (browser, CDN, Firebase)
+  - **Caching Strategy:** Multi-layer caching (browser, CDN, Supabase)
 - **Real-time Optimization:**
   - **Debounced Updates:** Batch high-frequency updates (cursor, drag)
   - **Connection Management:** Automatic reconnection with exponential backoff
@@ -416,7 +447,7 @@ The project will follow the Testing Pyramid model, with a strong emphasis on aut
 
 ### 10.1 Unit Testing (Jest)
 
-- **Services Layer:** Mock Firebase services, test business logic
+- **Services Layer:** Mock Supabase services, test business logic
 - **Utility Functions:** Spatial indexing, performance calculations, validation
 - **Custom Hooks:** Canvas interactions, state management, real-time subscriptions
 - **Components:** Isolated component testing with mocked dependencies
@@ -446,7 +477,7 @@ The project will follow the Testing Pyramid model, with a strong emphasis on aut
 
 - **Input Validation:** XSS prevention, file upload security
 - **Rate Limiting:** Verify abuse prevention mechanisms
-- **Firebase Rules:** Test security rule enforcement
+- **Supabase RLS Policies:** Test Row Level Security policy enforcement
 
 ## 11. Coding Standards
 

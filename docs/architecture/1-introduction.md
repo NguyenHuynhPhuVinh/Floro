@@ -2,7 +2,7 @@
 
 ### 1.1 Introduction
 
-This document outlines the complete fullstack architecture for **Floro**, including the Next.js frontend, Firebase backend, and the integration between them. It serves as the single source of truth for AI-driven development, ensuring consistency across the entire technology stack. This unified approach is designed to streamline development for modern fullstack applications where frontend and backend concerns are increasingly intertwined.
+This document outlines the complete fullstack architecture for **Floro**, including the Next.js frontend, Supabase backend, and the integration between them. It serves as the single source of truth for AI-driven development, ensuring consistency across the entire technology stack. This unified approach is designed to streamline development for modern fullstack applications where frontend and backend concerns are increasingly intertwined.
 
 ### 1.2 Starter Template or Existing Project
 

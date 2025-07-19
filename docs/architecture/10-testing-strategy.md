@@ -4,7 +4,7 @@ The project will follow the Testing Pyramid model, with a strong emphasis on aut
 
 ### 10.1 Unit Testing (Jest)
 
-- **Services Layer:** Mock Firebase services, test business logic
+- **Services Layer:** Mock Supabase services, test business logic
 - **Utility Functions:** Spatial indexing, performance calculations, validation
 - **Custom Hooks:** Canvas interactions, state management, real-time subscriptions
 - **Components:** Isolated component testing with mocked dependencies
@@ -34,5 +34,5 @@ The project will follow the Testing Pyramid model, with a strong emphasis on aut
 
 - **Input Validation:** XSS prevention, file upload security
 - **Rate Limiting:** Verify abuse prevention mechanisms
-- **Firebase Rules:** Test security rule enforcement
+- **Supabase RLS Policies:** Test Row Level Security policy enforcement
 

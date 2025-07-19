@@ -4,20 +4,19 @@ These TypeScript interfaces, located in `packages/shared-types`, define the core
 
 ```typescript
 // packages/shared-types/src/index.ts
-import { Timestamp } from "firebase/firestore";
 
-// The base for all node types, stored in Firestore
+// The base for all node types, stored in Supabase PostgreSQL
 interface BaseNode {
   id: string;
   sessionId: string; // e.g., "public"
   type: "file" | "text" | "link" | "image";
   position: { x: number; y: number };
   size: { width: number; height: number };
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
   zIndex: number; // For layering
   isLocked?: boolean; // Prevent accidental moves
-  metadata?: Record<string, any>; // Extensible metadata
+  metadata?: Record<string, any>; // JSONB column for extensible metadata
 }
 
 export interface FileNode extends BaseNode {
@@ -59,11 +58,12 @@ export interface ImageNode extends BaseNode {
 
 export type FloroNode = FileNode | TextNode | LinkNode | ImageNode;
 
-// Transient data for cursors, stored in Realtime Database
+// Real-time cursor data, managed via Supabase Realtime
 export interface Cursor {
   id: string; // Anonymous user session ID
+  sessionId: string; // Workspace session
   position: { x: number; y: number };
-  lastUpdate: number; // Using serverTimestamp
+  lastUpdate: string; // ISO timestamp
   color?: string; // User-specific cursor color
   name?: string; // Optional display name
 }
@@ -88,12 +88,35 @@ export interface PerformanceMetrics {
 // Error tracking
 export interface ErrorLog {
   id: string;
-  timestamp: Timestamp;
+  timestamp: string; // ISO timestamp
   error: string;
   stack?: string;
   userAgent: string;
   sessionId: string;
-  context?: Record<string, any>;
+  context?: Record<string, any>; // JSONB column
+}
+
+// Database schema types for Supabase
+export interface Database {
+  public: {
+    Tables: {
+      nodes: {
+        Row: FloroNode;
+        Insert: Omit<FloroNode, "id" | "createdAt" | "updatedAt">;
+        Update: Partial<Omit<FloroNode, "id">>;
+      };
+      cursors: {
+        Row: Cursor;
+        Insert: Omit<Cursor, "lastUpdate">;
+        Update: Partial<Omit<Cursor, "id">>;
+      };
+      error_logs: {
+        Row: ErrorLog;
+        Insert: Omit<ErrorLog, "id" | "timestamp">;
+        Update: Partial<Omit<ErrorLog, "id">>;
+      };
+    };
+  };
 }
 ```
 

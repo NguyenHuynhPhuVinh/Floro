@@ -25,7 +25,7 @@
 
 ### 2.2 Non-Functional Requirements (NFR)
 
-- **NFR1:** **Công nghệ:** Dự án phải được xây dựng bằng Next.js (Frontend) và Firebase (Backend, Storage), và được host trên Vercel.
+- **NFR1:** **Công nghệ:** Dự án phải được xây dựng bằng Next.js (Frontend) và Supabase (Backend, Database, Storage), và được host trên Vercel.
 - **NFR2:** **Lưu trữ:** Tất cả các node được tạo ra phải được lưu trữ vĩnh viễn và không tự động bị xóa.
 - **NFR3:** **Truy cập:** Hệ thống phải cho phép truy cập mà không yêu cầu người dùng đăng ký hoặc đăng nhập.
 - **NFR4:** **Hiệu suất:**
@@ -39,7 +39,7 @@
   - Content sanitization cho tất cả text inputs để ngăn XSS.
   - Automatic cleanup cho các sessions không hoạt động >24h.
 - **NFR6:** **Mã nguồn mở:** Toàn bộ mã nguồn của dự án phải được công khai trên một nền tảng như GitHub.
-- **NFR7:** **Kiến trúc cơ sở dữ liệu:** Hệ thống sẽ sử dụng **Cloud Firestore** để lưu trữ dữ liệu node bền vững và **Realtime Database** cho các cập nhật tạm thời, tần suất cao (như vị trí con trỏ) để tối ưu hóa hiệu suất và chi phí.
+- **NFR7:** **Kiến trúc cơ sở dữ liệu:** Hệ thống sẽ sử dụng **Supabase PostgreSQL** để lưu trữ dữ liệu node bền vững và **Supabase Realtime** cho các cập nhật real-time (như vị trí con trỏ và thay đổi node) để tối ưu hóa hiệu suất và đảm bảo tính nhất quán dữ liệu.
 - **NFR8:** **Khả năng mở rộng:**
   - Hỗ trợ tối thiểu 50 concurrent users/workspace.
   - Database queries phải được optimize với proper indexing.

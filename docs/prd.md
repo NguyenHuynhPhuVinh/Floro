@@ -5,7 +5,7 @@
 ### 1.1 Goals
 
 - Cung cấp một công cụ chia sẻ tức thì, hiệu quả và được yêu thích, giúp giải quyết các vấn đề cộng tác trong môi trường học tập CNTT.
-- Xây dựng nền tảng kỹ thuật vững chắc trên Vercel và Firebase, cho phép mở rộng các tính năng cộng tác cao cấp trong tương lai một cách dễ dàng.
+- Xây dựng nền tảng kỹ thuật vững chắc trên Vercel và Supabase, cho phép mở rộng các tính năng cộng tác cao cấp trong tương lai một cách dễ dàng.
 - Tối ưu hóa trải nghiệm người dùng, giảm thiểu mọi rào cản để việc chia sẻ tài nguyên học tập diễn ra một cách liền mạch và tức thời.
 - Tạo ra một dự án mã nguồn mở, miễn phí và có giá trị cho cộng đồng.
 
@@ -46,7 +46,7 @@ Trong các môi trường học tập và làm việc nhóm tốc độ cao, vi�
 
 ### 2.2 Non-Functional Requirements (NFR)
 
-- **NFR1:** **Công nghệ:** Dự án phải được xây dựng bằng Next.js (Frontend) và Firebase (Backend, Storage), và được host trên Vercel.
+- **NFR1:** **Công nghệ:** Dự án phải được xây dựng bằng Next.js (Frontend) và Supabase (Backend, Database, Storage), và được host trên Vercel.
 - **NFR2:** **Lưu trữ:** Tất cả các node được tạo ra phải được lưu trữ vĩnh viễn và không tự động bị xóa.
 - **NFR3:** **Truy cập:** Hệ thống phải cho phép truy cập mà không yêu cầu người dùng đăng ký hoặc đăng nhập.
 - **NFR4:** **Hiệu suất:**
@@ -60,7 +60,7 @@ Trong các môi trường học tập và làm việc nhóm tốc độ cao, vi�
   - Content sanitization cho tất cả text inputs để ngăn XSS.
   - Automatic cleanup cho các sessions không hoạt động >24h.
 - **NFR6:** **Mã nguồn mở:** Toàn bộ mã nguồn của dự án phải được công khai trên một nền tảng như GitHub.
-- **NFR7:** **Kiến trúc cơ sở dữ liệu:** Hệ thống sẽ sử dụng **Cloud Firestore** để lưu trữ dữ liệu node bền vững và **Realtime Database** cho các cập nhật tạm thời, tần suất cao (như vị trí con trỏ) để tối ưu hóa hiệu suất và chi phí.
+- **NFR7:** **Kiến trúc cơ sở dữ liệu:** Hệ thống sẽ sử dụng **Supabase PostgreSQL** để lưu trữ dữ liệu node bền vững và **Supabase Realtime** cho các cập nhật real-time (như vị trí con trỏ và thay đổi node) để tối ưu hóa hiệu suất và đảm bảo tính nhất quán dữ liệu.
 - **NFR8:** **Khả năng mở rộng:**
   - Hỗ trợ tối thiểu 50 concurrent users/workspace.
   - Database queries phải được optimize với proper indexing.
@@ -107,17 +107,17 @@ Giao diện của Floro phải mang lại cảm giác **tức thì, trực quan 
 
 ### 4.2 Service Architecture (Kiến trúc Dịch vụ)
 
-- **Serverless-oriented:** Tận dụng tối đa hệ sinh thái Firebase (Firestore, Storage, Functions) và Vercel.
+- **Serverless-oriented:** Tận dụng tối đa hệ sinh thái Supabase (PostgreSQL, Storage, Edge Functions, Realtime) và Vercel.
 
 ### 4.3 Testing Requirements (Yêu cầu về Kiểm thử)
 
 - **Unit Test là bắt buộc.**
-- Cần có Integration Test cho sự tương tác giữa frontend và Firebase.
+- Cần có Integration Test cho sự tương tác giữa frontend và Supabase.
 - E2E Test sẽ được xem xét sau MVP.
 
 ### 4.4 Additional Technical Assumptions and Requests (Các giả định và yêu cầu kỹ thuật khác)
 
-- **Real-time Communication:** Sử dụng cơ chế lắng nghe sự kiện của Firestore/Realtime Database.
+- **Real-time Communication:** Sử dụng Supabase Realtime với WebSocket connections cho live collaboration.
 - **Error Handling:** Implement comprehensive error boundaries và graceful degradation.
 - **Offline Support:** Basic offline caching cho read-only operations.
 - **Analytics:** Integrate basic usage analytics để track user engagement và performance metrics.
@@ -160,14 +160,15 @@ Giao diện của Floro phải mang lại cảm giác **tức thì, trực quan 
 
 ### Story 1.1: Thiết lập Dự án và Hạ tầng
 
-- **As a** developer, **I want** to set up a new Next.js project with Firebase integration and continuous deployment via Vercel, **so that** we have a solid and automated foundation.
+- **As a** developer, **I want** to set up a new Next.js project with Supabase integration and continuous deployment via Vercel, **so that** we have a solid and automated foundation.
   **Acceptance Criteria:**
 
 1.  Repository mã nguồn mở mới được tạo trên GitHub.
 2.  Dự án Next.js (TypeScript) được khởi tạo trong monorepo.
-3.  Dự án Firebase mới được tạo và kết nối.
-4.  Dự án được kết nối với Vercel và tự động triển khai.
-5.  Trang chủ hiển thị một trang chào mừng.
+3.  Dự án Supabase mới được tạo và kết nối.
+4.  Database schema được thiết lập với tables cho nodes và cursors.
+5.  Dự án được kết nối với Vercel và tự động triển khai.
+6.  Trang chủ hiển thị một trang chào mừng với Supabase connection test.
 
 ### Story 1.2: Triển khai Không gian làm việc 2D
 
@@ -181,7 +182,7 @@ Giao diện của Floro phải mang lại cảm giác **tức thì, trực quan 
 
 ## Epic 2: Quản lý Node Cơ bản (Basic Node Management)
 
-**Mục tiêu Epic:** Cho phép người dùng tạo, di chuyển và xem các loại node, lưu trữ vĩnh viễn trong Firebase.
+**Mục tiêu Epic:** Cho phép người dùng tạo, di chuyển và xem các loại node, lưu trữ vĩnh viễn trong Supabase.
 
 ### Story 2.1: Tạo Node File bằng cách Kéo-thả
 
@@ -190,8 +191,8 @@ Giao diện của Floro phải mang lại cảm giác **tức thì, trực quan 
 
 1.  Node mới xuất hiện tại vị trí thả.
 2.  Node hiển thị tên file và icon.
-3.  File được tải lên Firebase Storage.
-4.  Metadata của node được lưu vào Firestore.
+3.  File được tải lên Supabase Storage.
+4.  Metadata của node được lưu vào PostgreSQL database.
 5.  Node có thể di chuyển được.
 6.  Người dùng có thể nhấp để tải file về.
 
@@ -203,8 +204,8 @@ Giao diện của Floro phải mang lại cảm giác **tức thì, trực quan 
 1.  Khi nhấn `Ctrl+V`, hệ thống kiểm tra clipboard.
 2.  Nếu là văn bản, tạo Node Văn bản.
 3.  Nếu là URL, tạo Node Link.
-4.  Nếu là ảnh, tạo Node Ảnh và tải ảnh lên Storage.
-5.  Tất cả node mới tạo phải được lưu trữ và di chuyển được.
+4.  Nếu là ảnh, tạo Node Ảnh và tải ảnh lên Supabase Storage.
+5.  Tất cả node mới tạo phải được lưu trữ trong PostgreSQL và di chuyển được.
 6.  Người dùng có thể sao chép nội dung từ Node Văn bản và Link.
 
 ## Epic 3: Tương tác và Cộng tác Thời gian thực (Real-time Interaction & Collaboration)
@@ -220,7 +221,7 @@ Giao diện của Floro phải mang lại cảm giác **tức thì, trực quan 
 2.  Khi một node được di chuyển, vị trí của nó được cập nhật cho mọi người.
 3.  Khi một node bị xóa, nó biến mất khỏi màn hình của mọi người.
 4.  Đồng bộ hóa diễn ra mượt mà, không cần refresh.
-5.  Sử dụng cơ chế lắng nghe sự kiện của Firestore.
+5.  Sử dụng Supabase Realtime subscriptions cho live updates.
 
 ### Story 3.2: Hiển thị Con trỏ của Người dùng khác
 

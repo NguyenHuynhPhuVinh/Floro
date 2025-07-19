@@ -3,7 +3,7 @@
 ### 1.1 Goals
 
 - Cung cấp một công cụ chia sẻ tức thì, hiệu quả và được yêu thích, giúp giải quyết các vấn đề cộng tác trong môi trường học tập CNTT.
-- Xây dựng nền tảng kỹ thuật vững chắc trên Vercel và Firebase, cho phép mở rộng các tính năng cộng tác cao cấp trong tương lai một cách dễ dàng.
+- Xây dựng nền tảng kỹ thuật vững chắc trên Vercel và Supabase, cho phép mở rộng các tính năng cộng tác cao cấp trong tương lai một cách dễ dàng.
 - Tối ưu hóa trải nghiệm người dùng, giảm thiểu mọi rào cản để việc chia sẻ tài nguyên học tập diễn ra một cách liền mạch và tức thời.
 - Tạo ra một dự án mã nguồn mở, miễn phí và có giá trị cho cộng đồng.
 

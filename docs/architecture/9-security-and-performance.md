@@ -2,10 +2,10 @@
 
 ### 9.1 Security Architecture
 
-- **Firebase Security Rules:**
-  - Enforce data validation and access control on the backend
-  - Rate limiting rules at database level
-  - File type and size restrictions
+- **Supabase Row Level Security (RLS):**
+  - Enforce data validation and access control at the database level
+  - Rate limiting policies for database operations
+  - File type and size restrictions via storage policies
 - **Client-Side Security:**
   - Input sanitization for all user-generated content to prevent XSS attacks
   - Content Security Policy (CSP) headers
@@ -29,7 +29,7 @@
 - **Data Loading:**
   - **Lazy Loading:** Defer loading of images and files until needed
   - **Progressive Loading:** Load thumbnails first, full resolution on demand
-  - **Caching Strategy:** Multi-layer caching (browser, CDN, Firebase)
+  - **Caching Strategy:** Multi-layer caching (browser, CDN, Supabase)
 - **Real-time Optimization:**
   - **Debounced Updates:** Batch high-frequency updates (cursor, drag)
   - **Connection Management:** Automatic reconnection with exponential backoff
