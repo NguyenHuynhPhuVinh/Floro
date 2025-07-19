@@ -4,6 +4,9 @@ import dynamic from 'next/dynamic';
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 
 import { useCanvasViewport } from '../../hooks/canvas/useCanvasViewport';
+import { CanvasDragDropHandler } from './CanvasDragDropHandler';
+import { useFileUpload } from '../../hooks/nodes/useFileUpload';
+import { FileUploadProgress } from '../nodes/FileUploadProgress';
 
 // Dynamically import Konva wrapper to avoid SSR issues
 const KonvaCanvas = dynamic(() => import('./KonvaCanvas'), {
@@ -25,6 +28,7 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const { stageProps, updateStageDimensions } = useCanvasViewport();
+  const { uploadMultipleFiles, uploadProgress, cancelUpload } = useFileUpload();
 
   // Memoize stage dimensions to prevent unnecessary re-renders
   const stageDimensions = useMemo(
@@ -59,18 +63,43 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
     };
   }, [updateStageDimensions]);
 
+  const handleFileDrop = async (
+    files: File[],
+    position: { x: number; y: number }
+  ) => {
+    try {
+      await uploadMultipleFiles(files, position);
+    } catch (error) {
+      console.error('Failed to upload files:', error);
+    }
+  };
+
   return (
-    <div
-      ref={containerRef}
-      className={`w-full h-full ${className}`}
-      style={{ minHeight: '400px' }}
-    >
-      <KonvaCanvas
-        width={stageDimensions.width}
-        height={stageDimensions.height}
-        stageProps={stageProps}
+    <>
+      <CanvasDragDropHandler
+        onFileDrop={handleFileDrop}
+        className={`w-full h-full ${className}`}
+      >
+        <div
+          ref={containerRef}
+          className="w-full h-full"
+          style={{ minHeight: '400px' }}
+        >
+          <KonvaCanvas
+            width={stageDimensions.width}
+            height={stageDimensions.height}
+            stageProps={stageProps}
+          />
+        </div>
+      </CanvasDragDropHandler>
+
+      {/* File Upload Progress */}
+      <FileUploadProgress
+        uploads={uploadProgress}
+        onCancel={cancelUpload}
+        position="top-right"
       />
-    </div>
+    </>
   );
 };
 

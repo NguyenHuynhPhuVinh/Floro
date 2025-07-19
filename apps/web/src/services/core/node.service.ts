@@ -1,6 +1,7 @@
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../../lib/supabase';
+import { FileNode, FileNodeCreateData } from '../../types';
 
 export interface FloroNode {
   id: string;
@@ -263,5 +264,76 @@ export class NodeService {
     } catch (error) {
       this.handleError('Failed to batch update nodes', error);
     }
+  }
+
+  /**
+   * Create a FileNode with file-specific data
+   */
+  static async createFileNode(
+    fileData: FileNodeCreateData,
+    position: { x: number; y: number },
+    sessionId: string = 'public'
+  ): Promise<FileNode> {
+    const nodeData = {
+      fileName: fileData.fileName,
+      fileType: fileData.fileType,
+      fileURL: fileData.fileURL,
+      fileSize: fileData.fileSize,
+      mimeType: fileData.mimeType,
+      checksum: fileData.checksum,
+    };
+
+    // Calculate default size based on file name length
+    const defaultWidth = Math.max(
+      200,
+      Math.min(300, fileData.fileName.length * 8 + 100)
+    );
+    const defaultHeight = 80;
+
+    const { data, error } = await supabase
+      .from('floro_nodes')
+      .insert({
+        type: 'file',
+        position,
+        data: nodeData,
+        canvas_id: sessionId,
+        metadata: {
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          created_by: `anonymous_${Date.now()}_${Math.random().toString(36).substring(2)}`,
+          version: 1,
+        },
+        size: { width: defaultWidth, height: defaultHeight },
+        z_index: 1,
+        is_locked: false,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      this.handleError('Failed to create file node', error);
+    }
+
+    // Transform the database result to FileNode interface
+    const fileNode: FileNode = {
+      id: data.id,
+      sessionId: data.canvas_id,
+      type: 'file',
+      fileName: data.data.fileName,
+      fileType: data.data.fileType,
+      fileURL: data.data.fileURL,
+      fileSize: data.data.fileSize,
+      mimeType: data.data.mimeType,
+      checksum: data.data.checksum,
+      position: data.position,
+      size: data.size || { width: defaultWidth, height: defaultHeight },
+      createdAt: data.metadata.created_at,
+      updatedAt: data.metadata.updated_at,
+      zIndex: data.z_index || 1,
+      isLocked: data.is_locked || false,
+      metadata: data.metadata,
+    };
+
+    return fileNode;
   }
 }
