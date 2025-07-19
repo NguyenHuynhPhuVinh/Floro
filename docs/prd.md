@@ -53,9 +53,22 @@ Trong các môi trường học tập và làm việc nhóm tốc độ cao, vi�
   - Thời gian tải ban đầu của không gian làm việc phải dưới 3 giây trên kết nối mạng trung bình.
   - Các thao tác di chuyển, phóng to/thu nhỏ phải đạt được 60 FPS.
   - Độ trễ khi cập nhật real-time phải dưới 500ms.
-- **NFR5:** **Bảo mật:** Mặc dù không có đăng nhập, hệ thống cần có cơ chế cơ bản để ngăn chặn các hành vi lạm dụng tự động (ví dụ: rate limiting).
+  - Canvas phải hỗ trợ viewport virtualization để xử lý >1000 nodes mà không giảm performance.
+- **NFR5:** **Bảo mật và Chống lạm dụng:**
+  - Rate limiting: Tối đa 10 nodes/phút/IP, 100 nodes/giờ/IP.
+  - File upload giới hạn: 10MB/file, chỉ cho phép các định dạng an toàn.
+  - Content sanitization cho tất cả text inputs để ngăn XSS.
+  - Automatic cleanup cho các sessions không hoạt động >24h.
 - **NFR6:** **Mã nguồn mở:** Toàn bộ mã nguồn của dự án phải được công khai trên một nền tảng như GitHub.
 - **NFR7:** **Kiến trúc cơ sở dữ liệu:** Hệ thống sẽ sử dụng **Cloud Firestore** để lưu trữ dữ liệu node bền vững và **Realtime Database** cho các cập nhật tạm thời, tần suất cao (như vị trí con trỏ) để tối ưu hóa hiệu suất và chi phí.
+- **NFR8:** **Khả năng mở rộng:**
+  - Hỗ trợ tối thiểu 50 concurrent users/workspace.
+  - Database queries phải được optimize với proper indexing.
+  - CDN caching cho static assets và uploaded files.
+- **NFR9:** **Mobile Responsiveness:**
+  - Touch gestures cho pan/zoom trên mobile devices.
+  - Responsive UI components cho màn hình từ 320px trở lên.
+  - Touch-friendly node manipulation với minimum 44px touch targets.
 
 ## 3. User Interface Design Goals
 
@@ -105,14 +118,41 @@ Giao diện của Floro phải mang lại cảm giác **tức thì, trực quan 
 ### 4.4 Additional Technical Assumptions and Requests (Các giả định và yêu cầu kỹ thuật khác)
 
 - **Real-time Communication:** Sử dụng cơ chế lắng nghe sự kiện của Firestore/Realtime Database.
+- **Error Handling:** Implement comprehensive error boundaries và graceful degradation.
+- **Offline Support:** Basic offline caching cho read-only operations.
+- **Analytics:** Integrate basic usage analytics để track user engagement và performance metrics.
 
-## 5. Epic List
+## 6. Success Metrics và KPIs
+
+### 6.1 User Engagement Metrics
+
+- **Daily Active Users (DAU):** Target 100+ DAU trong 3 tháng đầu.
+- **Session Duration:** Trung bình >5 phút/session.
+- **Node Creation Rate:** Trung bình >3 nodes/session.
+- **Collaboration Rate:** >30% sessions có >1 concurrent user.
+
+### 6.2 Technical Performance Metrics
+
+- **Page Load Time:** <3s cho 95% requests.
+- **Real-time Latency:** <500ms cho 99% updates.
+- **Uptime:** >99.5% availability.
+- **Error Rate:** <1% của tất cả operations.
+
+### 6.3 Content Quality Metrics
+
+- **File Upload Success Rate:** >98%.
+- **Content Retention:** >90% nodes được giữ lại sau 24h.
+- **Abuse Reports:** <0.1% của total content.
+
+## 7. Epic List
 
 - **Epic 1: Nền tảng và Không gian làm việc cốt lõi (Foundation & Core Canvas)**
 - **Epic 2: Quản lý Node Cơ bản (Basic Node Management)**
 - **Epic 3: Tương tác và Cộng tác Thời gian thực (Real-time Interaction & Collaboration)**
-- **Epic 4 (Post-MVP): Tổ chức Không gian Nâng cao (Advanced Spatial Organization)**
-- **Epic 5 (Post-MVP): Chỉnh sửa và Tương tác Nâng cao (Advanced Editing & Interactions)**
+- **Epic 4: Performance Optimization và Security (Performance & Security)**
+- **Epic 5 (Post-MVP): Tổ chức Không gian Nâng cao (Advanced Spatial Organization)**
+- **Epic 6 (Post-MVP): Chỉnh sửa và Tương tác Nâng cao (Advanced Editing & Interactions)**
+- **Epic 7 (Post-MVP): Analytics và Monitoring (Analytics & Monitoring)**
 
 ## Epic 1: Nền tảng và Không gian làm việc cốt lõi (Foundation & Core Canvas)
 
@@ -190,4 +230,29 @@ Giao diện của Floro phải mang lại cảm giác **tức thì, trực quan 
 1.  Vị trí con trỏ của người dùng được gửi đến server.
 2.  Những người dùng khác thấy một biểu tượng con trỏ di chuyển theo thời gian thực.
 3.  Con trỏ biến mất khi người dùng không hoạt động.
-4.  Cơ chế cập nhật được tối ưu hóa.
+4.  Cơ chế cập nhật được tối ưu hóa với debouncing (50ms).
+
+## Epic 4: Performance Optimization và Security (Performance & Security)
+
+**Mục tiêu Epic:** Đảm bảo hệ thống hoạt động mượt mà với nhiều người dùng và bảo vệ khỏi các hành vi lạm dụng.
+
+### Story 4.1: Canvas Virtualization và Spatial Partitioning
+
+- **As a** user, **I want** the canvas to remain smooth even with hundreds of nodes, **so that** I can work efficiently in large workspaces.
+  **Acceptance Criteria:**
+
+1.  Chỉ render nodes trong viewport hiện tại.
+2.  Implement spatial indexing để query nodes hiệu quả.
+3.  Level-of-detail rendering khi zoom out.
+4.  Maintain 60 FPS với >1000 nodes.
+
+### Story 4.2: Rate Limiting và Abuse Prevention
+
+- **As a** system administrator, **I want** to prevent abuse and spam, **so that** the service remains available for legitimate users.
+  **Acceptance Criteria:**
+
+1.  Implement rate limiting theo IP address.
+2.  File upload restrictions (size, type, frequency).
+3.  Content sanitization cho text inputs.
+4.  Automatic cleanup cho inactive sessions.
+5.  Basic monitoring và alerting cho unusual activities.
