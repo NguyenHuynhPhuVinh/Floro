@@ -1,6 +1,5 @@
 'use client';
-
-import Konva from 'konva';
+import type Konva from 'konva';
 import React from 'react';
 import { Stage, Layer } from 'react-konva';
 
