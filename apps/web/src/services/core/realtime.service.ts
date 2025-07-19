@@ -1,8 +1,9 @@
-import { supabase } from '@/lib/supabase';
 import type {
   RealtimeChannel,
   RealtimePostgresChangesPayload,
 } from '@supabase/supabase-js';
+
+import { supabase } from '@/lib/supabase';
 
 export interface CursorPosition {
   id: string;
@@ -15,8 +16,15 @@ export interface CursorPosition {
   timestamp: string;
 }
 
+interface PostgresChangesConfig {
+  event: 'INSERT' | 'UPDATE' | 'DELETE';
+  schema: string;
+  table: string;
+  filter?: string;
+}
+
 export interface RealtimeSubscriptionCallbacks<
-  T extends Record<string, any> = Record<string, any>,
+  T extends Record<string, unknown> = Record<string, unknown>,
 > {
   onInsert?: (payload: RealtimePostgresChangesPayload<T>) => void;
   onUpdate?: (payload: RealtimePostgresChangesPayload<T>) => void;
@@ -29,7 +37,9 @@ export class RealtimeService {
   /**
    * Subscribe to real-time changes on a table
    */
-  static subscribeToTable<T extends Record<string, any> = Record<string, any>>(
+  static subscribeToTable<
+    T extends Record<string, unknown> = Record<string, unknown>,
+  >(
     tableName: string,
     callbacks: RealtimeSubscriptionCallbacks<T>,
     filter?: string
@@ -39,40 +49,43 @@ export class RealtimeService {
     let channel = supabase.channel(channelName);
 
     if (callbacks.onInsert) {
+      const config: PostgresChangesConfig = {
+        event: 'INSERT',
+        schema: 'public',
+        table: tableName,
+        filter,
+      };
       channel = channel.on(
-        'postgres_changes' as any,
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: tableName,
-          filter,
-        } as any,
+        'postgres_changes' as never,
+        config as never,
         callbacks.onInsert
       );
     }
 
     if (callbacks.onUpdate) {
+      const config: PostgresChangesConfig = {
+        event: 'UPDATE',
+        schema: 'public',
+        table: tableName,
+        filter,
+      };
       channel = channel.on(
-        'postgres_changes' as any,
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: tableName,
-          filter,
-        } as any,
+        'postgres_changes' as never,
+        config as never,
         callbacks.onUpdate
       );
     }
 
     if (callbacks.onDelete) {
+      const config: PostgresChangesConfig = {
+        event: 'DELETE',
+        schema: 'public',
+        table: tableName,
+        filter,
+      };
       channel = channel.on(
-        'postgres_changes' as any,
-        {
-          event: 'DELETE',
-          schema: 'public',
-          table: tableName,
-          filter,
-        } as any,
+        'postgres_changes' as never,
+        config as never,
         callbacks.onDelete
       );
     }
@@ -158,7 +171,7 @@ export class RealtimeService {
   static subscribeToPresence(
     canvasId: string,
     userId: string,
-    onPresenceUpdate: (presences: Record<string, any>) => void
+    onPresenceUpdate: (presences: Record<string, unknown>) => void
   ): string {
     const channelName = `presence:${canvasId}`;
 
@@ -168,11 +181,11 @@ export class RealtimeService {
         const presences = channel.presenceState();
         onPresenceUpdate(presences);
       })
-      .on('presence', { event: 'join' }, ({ newPresences }) => {
-        console.log('New users joined:', newPresences);
+      .on('presence', { event: 'join' }, () => {
+        // Handle new users joining
       })
-      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-        console.log('Users left:', leftPresences);
+      .on('presence', { event: 'leave' }, () => {
+        // Handle users leaving
       })
       .subscribe(async status => {
         if (status === 'SUBSCRIBED') {
@@ -202,7 +215,7 @@ export class RealtimeService {
    * Unsubscribe from all channels
    */
   static unsubscribeAll(): void {
-    this.channels.forEach((channel, channelName) => {
+    this.channels.forEach(channel => {
       supabase.removeChannel(channel);
     });
     this.channels.clear();

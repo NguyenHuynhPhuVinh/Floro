@@ -18,6 +18,11 @@ export interface FileMetadata {
 export class StorageService {
   private static readonly BUCKET_NAME = 'floro-assets';
 
+  private static handleError(operation: string, error: unknown): never {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`${operation}: ${message}`);
+  }
+
   /**
    * Upload a file to Supabase Storage
    */
@@ -40,8 +45,7 @@ export class StorageService {
         });
 
       if (error) {
-        console.error('Error uploading file:', error);
-        throw new Error(`Failed to upload file: ${error.message}`);
+        this.handleError('Failed to upload file', error);
       }
 
       // Get public URL
@@ -51,8 +55,7 @@ export class StorageService {
 
       return urlData.publicUrl;
     } catch (error) {
-      console.error('Error in uploadFile:', error);
-      throw error;
+      this.handleError('Error in uploadFile', error);
     }
   }
 
@@ -79,8 +82,7 @@ export class StorageService {
 
       return result;
     } catch (error) {
-      console.error('Error uploading file with progress:', error);
-      throw error;
+      this.handleError('Error uploading file with progress', error);
     }
   }
 
@@ -102,8 +104,7 @@ export class StorageService {
       .remove([path]);
 
     if (error) {
-      console.error('Error deleting file:', error);
-      throw new Error(`Failed to delete file: ${error.message}`);
+      this.handleError('Failed to delete file', error);
     }
   }
 
@@ -120,8 +121,7 @@ export class StorageService {
       });
 
     if (error) {
-      console.error('Error listing files:', error);
-      throw new Error(`Failed to list files: ${error.message}`);
+      this.handleError('Failed to list files', error);
     }
 
     return data.map(file => ({

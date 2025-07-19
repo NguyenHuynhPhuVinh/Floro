@@ -1,5 +1,6 @@
+import type { RealtimeChannel } from '@supabase/supabase-js';
+
 import { supabase } from '@/lib/supabase';
-import type { PostgrestError, RealtimeChannel } from '@supabase/supabase-js';
 
 export interface FloroNode {
   id: string;
@@ -8,7 +9,7 @@ export interface FloroNode {
     x: number;
     y: number;
   };
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   metadata: {
     created_at: string;
     updated_at: string;
@@ -21,18 +22,23 @@ export interface FloroNode {
 export interface NodeCreateInput {
   type: string;
   position: { x: number; y: number };
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   canvas_id: string;
 }
 
 export interface NodeUpdateInput {
   type?: string;
   position?: { x: number; y: number };
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 export class NodeService {
   private static realtimeChannel: RealtimeChannel | null = null;
+
+  private static handleError(operation: string, error: unknown): never {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`${operation}: ${message}`);
+  }
 
   /**
    * Create a new node
@@ -56,8 +62,7 @@ export class NodeService {
       .single();
 
     if (error) {
-      console.error('Error creating node:', error);
-      throw new Error(`Failed to create node: ${error.message}`);
+      this.handleError('Failed to create node', error);
     }
 
     return data as FloroNode;
@@ -77,8 +82,7 @@ export class NodeService {
       if (error.code === 'PGRST116') {
         return null; // Node not found
       }
-      console.error('Error getting node:', error);
-      throw new Error(`Failed to get node: ${error.message}`);
+      this.handleError('Failed to get node', error);
     }
 
     return data as FloroNode;
@@ -105,8 +109,7 @@ export class NodeService {
       .single();
 
     if (error) {
-      console.error('Error updating node:', error);
-      throw new Error(`Failed to update node: ${error.message}`);
+      this.handleError('Failed to update node', error);
     }
 
     return data as FloroNode;
@@ -122,8 +125,7 @@ export class NodeService {
       .eq('id', nodeId);
 
     if (error) {
-      console.error('Error deleting node:', error);
-      throw new Error(`Failed to delete node: ${error.message}`);
+      this.handleError('Failed to delete node', error);
     }
   }
 
@@ -138,8 +140,7 @@ export class NodeService {
       .order('metadata->created_at', { ascending: true });
 
     if (error) {
-      console.error('Error getting nodes by canvas:', error);
-      throw new Error(`Failed to get nodes: ${error.message}`);
+      this.handleError('Failed to get nodes by canvas', error);
     }
 
     return data as FloroNode[];
@@ -167,8 +168,7 @@ export class NodeService {
       .lte('position->y', bounds.maxY);
 
     if (error) {
-      console.error('Error getting nodes in viewport:', error);
-      throw new Error(`Failed to get nodes in viewport: ${error.message}`);
+      this.handleError('Failed to get nodes in viewport', error);
     }
 
     return data as FloroNode[];
@@ -195,7 +195,7 @@ export class NodeService {
           table: 'floro_nodes',
           filter: `canvas_id=eq.${canvasId}`,
         },
-        (payload) => {
+        payload => {
           if (callbacks.onInsert) {
             callbacks.onInsert(payload.new as FloroNode);
           }
@@ -209,7 +209,7 @@ export class NodeService {
           table: 'floro_nodes',
           filter: `canvas_id=eq.${canvasId}`,
         },
-        (payload) => {
+        payload => {
           if (callbacks.onUpdate) {
             callbacks.onUpdate(payload.new as FloroNode);
           }
@@ -223,7 +223,7 @@ export class NodeService {
           table: 'floro_nodes',
           filter: `canvas_id=eq.${canvasId}`,
         },
-        (payload) => {
+        payload => {
           if (callbacks.onDelete) {
             callbacks.onDelete(payload.old.id);
           }
@@ -254,8 +254,7 @@ export class NodeService {
       const results = await Promise.all(promises);
       return results;
     } catch (error) {
-      console.error('Error in batch update:', error);
-      throw new Error('Failed to batch update nodes');
+      this.handleError('Failed to batch update nodes', error);
     }
   }
 }
