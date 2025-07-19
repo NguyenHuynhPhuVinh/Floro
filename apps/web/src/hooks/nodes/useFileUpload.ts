@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { StorageService } from '../../services/core/storage.service';
 import { NodeService } from '../../services/core/node.service';
+import { useNodesStore } from '../../store/nodes.store';
 import {
   FileNode,
   FileUploadProgress,
@@ -30,6 +31,8 @@ export function useFileUpload(): UseFileUploadReturn {
   const [cancelledUploads, setCancelledUploads] = useState<Set<string>>(
     new Set()
   );
+
+  const { addNode } = useNodesStore();
 
   const generateFileId = useCallback(() => {
     return `file_${Date.now()}_${Math.random().toString(36).substring(2)}`;
@@ -133,6 +136,9 @@ export function useFileUpload(): UseFileUploadReturn {
           },
           position
         );
+
+        // Add node to store for immediate UI update
+        addNode(fileNode);
 
         // Mark upload as completed
         updateProgress(fileId, {

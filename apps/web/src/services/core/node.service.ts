@@ -267,6 +267,98 @@ export class NodeService {
   }
 
   /**
+   * Get all nodes for a session
+   */
+  static async getNodesBySession(sessionId: string): Promise<FileNode[]> {
+    try {
+      const { data, error } = await supabase
+        .from('floro_nodes')
+        .select('*')
+        .eq('canvas_id', sessionId);
+
+      if (error) {
+        console.error('Failed to fetch nodes:', error);
+        return [];
+      }
+
+      if (!data || data.length === 0) {
+        return [];
+      }
+
+      // Transform database results to FileNode interface
+      const nodes: FileNode[] = data.map(dbNode => ({
+        id: dbNode.id,
+        sessionId: dbNode.canvas_id,
+        type: 'file',
+        fileName: dbNode.data.fileName,
+        fileType: dbNode.data.fileType,
+        fileURL: dbNode.data.fileURL,
+        fileSize: dbNode.data.fileSize,
+        mimeType: dbNode.data.mimeType,
+        checksum: dbNode.data.checksum,
+        position: dbNode.position,
+        size: dbNode.data.size || { width: 200, height: 80 },
+        createdAt: dbNode.created_at,
+        updatedAt: dbNode.updated_at,
+        zIndex: dbNode.data.zIndex || 1,
+        isLocked: dbNode.data.isLocked || false,
+        metadata: dbNode.metadata,
+      }));
+
+      return nodes;
+    } catch (error) {
+      console.error('Failed to get nodes by session:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Ensures canvas exists, creates if not found
+   */
+  private static async ensureCanvasExists(canvasId: string): Promise<void> {
+    try {
+      console.log('Checking if canvas exists:', canvasId);
+
+      // Check if canvas exists
+      const { data: existingCanvas, error: selectError } = await supabase
+        .from('canvas')
+        .select('id')
+        .eq('id', canvasId)
+        .single();
+
+      console.log('Canvas check result:', { existingCanvas, selectError });
+
+      if (!existingCanvas) {
+        console.log('Creating new canvas:', canvasId);
+
+        // Create canvas if it doesn't exist
+        const { data: newCanvas, error: insertError } = await supabase
+          .from('canvas')
+          .insert({
+            id: canvasId,
+            name:
+              canvasId === 'public' ? 'Public Canvas' : `Canvas ${canvasId}`,
+            description: 'Auto-created canvas for file uploads',
+            settings: {},
+          })
+          .select()
+          .single();
+
+        console.log('Canvas creation result:', { newCanvas, insertError });
+
+        if (insertError) {
+          console.warn(
+            'Failed to create canvas, continuing anyway:',
+            insertError
+          );
+        }
+      }
+    } catch (error) {
+      console.warn('Canvas check/creation failed, continuing anyway:', error);
+    }
+  }
+
+  /**
    * Create a FileNode with file-specific data
    */
   static async createFileNode(
@@ -274,66 +366,85 @@ export class NodeService {
     position: { x: number; y: number },
     sessionId: string = 'public'
   ): Promise<FileNode> {
-    const nodeData = {
-      fileName: fileData.fileName,
-      fileType: fileData.fileType,
-      fileURL: fileData.fileURL,
-      fileSize: fileData.fileSize,
-      mimeType: fileData.mimeType,
-      checksum: fileData.checksum,
-    };
+    try {
+      // Generate UUID for sessionId if it's "public"
+      const canvasId = sessionId === 'public' ? crypto.randomUUID() : sessionId;
 
-    // Calculate default size based on file name length
-    const defaultWidth = Math.max(
-      200,
-      Math.min(300, fileData.fileName.length * 8 + 100)
-    );
-    const defaultHeight = 80;
+      // Skip canvas creation for now since table doesn't exist
+      // await this.ensureCanvasExists(canvasId);
 
-    const { data, error } = await supabase
-      .from('floro_nodes')
-      .insert({
+      // Calculate default size based on file name length
+      const defaultWidth = Math.max(
+        200,
+        Math.min(300, fileData.fileName.length * 8 + 100)
+      );
+      const defaultHeight = 80;
+
+      const nodeData = {
+        fileName: fileData.fileName,
+        fileType: fileData.fileType,
+        fileURL: fileData.fileURL,
+        fileSize: fileData.fileSize,
+        mimeType: fileData.mimeType,
+        checksum: fileData.checksum,
+        size: { width: defaultWidth, height: defaultHeight },
+        zIndex: 1,
+        isLocked: false,
+      };
+
+      const insertData = {
         type: 'file',
         position,
         data: nodeData,
-        canvas_id: sessionId,
+        canvas_id: canvasId,
         metadata: {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           created_by: `anonymous_${Date.now()}_${Math.random().toString(36).substring(2)}`,
           version: 1,
         },
-        size: { width: defaultWidth, height: defaultHeight },
-        z_index: 1,
-        is_locked: false,
-      })
-      .select()
-      .single();
+      };
 
-    if (error) {
-      this.handleError('Failed to create file node', error);
+      console.log('Inserting node data:', JSON.stringify(insertData, null, 2));
+
+      const { data, error } = await supabase
+        .from('floro_nodes')
+        .insert(insertData)
+        .select()
+        .single();
+
+      console.log('Insert result:', { data, error });
+
+      if (error) {
+        this.handleError('Failed to create file node', error);
+      }
+
+      // Transform the database result to FileNode interface
+      const fileNode: FileNode = {
+        id: data.id,
+        sessionId: canvasId,
+        type: 'file',
+        fileName: data.data.fileName,
+        fileType: data.data.fileType,
+        fileURL: data.data.fileURL,
+        fileSize: data.data.fileSize,
+        mimeType: data.data.mimeType,
+        checksum: data.data.checksum,
+        position: data.position,
+        size: data.data.size || { width: defaultWidth, height: defaultHeight },
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        zIndex: data.data.zIndex || 1,
+        isLocked: data.data.isLocked || false,
+        metadata: data.metadata,
+      };
+
+      return fileNode;
+    } catch (error) {
+      console.error('Failed to create file node:', error);
+      throw new Error(
+        `Failed to create file node: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
-
-    // Transform the database result to FileNode interface
-    const fileNode: FileNode = {
-      id: data.id,
-      sessionId: data.canvas_id,
-      type: 'file',
-      fileName: data.data.fileName,
-      fileType: data.data.fileType,
-      fileURL: data.data.fileURL,
-      fileSize: data.data.fileSize,
-      mimeType: data.data.mimeType,
-      checksum: data.data.checksum,
-      position: data.position,
-      size: data.size || { width: defaultWidth, height: defaultHeight },
-      createdAt: data.metadata.created_at,
-      updatedAt: data.metadata.updated_at,
-      zIndex: data.z_index || 1,
-      isLocked: data.is_locked || false,
-      metadata: data.metadata,
-    };
-
-    return fileNode;
   }
 }

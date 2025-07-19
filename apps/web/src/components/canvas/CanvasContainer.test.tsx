@@ -16,6 +16,9 @@ const mockStageProps = {
   onMouseMove: jest.fn(),
   onMouseUp: jest.fn(),
   onWheel: jest.fn(),
+  onTouchStart: jest.fn(),
+  onTouchMove: jest.fn(),
+  onTouchEnd: jest.fn(),
 };
 
 jest.mock('next/dynamic', () => {
@@ -104,9 +107,11 @@ describe('CanvasContainer', () => {
 
     render(<CanvasContainer className={customClass} />);
 
-    const container = screen.getByTestId('konva-canvas').parentElement;
-    expect(container).toHaveClass(customClass);
-    expect(container).toHaveClass('w-full', 'h-full');
+    // The className is now applied to the CanvasDragDropHandler wrapper
+    const dragDropContainer =
+      screen.getByTestId('konva-canvas').parentElement?.parentElement;
+    expect(dragDropContainer).toHaveClass(customClass);
+    expect(dragDropContainer).toHaveClass('w-full', 'h-full');
   });
 
   it('sets default dimensions correctly', () => {

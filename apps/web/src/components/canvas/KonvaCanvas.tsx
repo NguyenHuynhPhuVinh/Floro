@@ -1,7 +1,8 @@
 'use client';
 import type Konva from 'konva';
 import React from 'react';
-import { Stage, Layer } from 'react-konva';
+import { Stage } from 'react-konva';
+import { NodesLayer } from './NodesLayer';
 
 interface StageProps {
   x: number;
@@ -21,16 +22,18 @@ interface KonvaCanvasProps {
   width: number;
   height: number;
   stageProps: StageProps;
+  sessionId?: string;
 }
 
 export const KonvaCanvas: React.FC<KonvaCanvasProps> = ({
   width,
   height,
   stageProps,
+  sessionId = 'public',
 }) => {
   return (
     <Stage width={width} height={height} {...stageProps}>
-      <Layer>{/* Canvas content will be added here */}</Layer>
+      <NodesLayer sessionId={sessionId} />
     </Stage>
   );
 };

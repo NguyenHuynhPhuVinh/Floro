@@ -89,6 +89,7 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
             width={stageDimensions.width}
             height={stageDimensions.height}
             stageProps={stageProps}
+            sessionId="public"
           />
         </div>
       </CanvasDragDropHandler>
