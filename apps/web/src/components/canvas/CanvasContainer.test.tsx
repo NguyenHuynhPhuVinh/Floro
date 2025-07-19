@@ -1,5 +1,9 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
+
+import { useCanvasViewport } from '../../hooks/canvas/useCanvasViewport';
+
+import { CanvasContainer } from './CanvasContainer';
 
 // Mock Next.js dynamic import with proper component
 const mockUpdateStageDimensions = jest.fn();
@@ -16,7 +20,20 @@ const mockStageProps = {
 
 jest.mock('next/dynamic', () => {
   return () => {
-    return function MockKonvaCanvas({ width, height, stageProps }: any) {
+    return function MockKonvaCanvas({
+      width,
+      height,
+      stageProps,
+    }: {
+      width: number;
+      height: number;
+      stageProps: {
+        x: number;
+        y: number;
+        scaleX: number;
+        scaleY: number;
+      };
+    }): React.JSX.Element {
       return (
         <div
           data-testid="konva-canvas"
@@ -34,14 +51,11 @@ jest.mock('next/dynamic', () => {
   };
 });
 
-const mockUseCanvasViewport = jest.fn(() => ({
-  stageProps: mockStageProps,
-  updateStageDimensions: mockUpdateStageDimensions,
-}));
+jest.mock('../../hooks/canvas/useCanvasViewport');
 
-jest.mock('../../hooks/canvas/useCanvasViewport', () => ({
-  useCanvasViewport: mockUseCanvasViewport,
-}));
+const mockUseCanvasViewport = useCanvasViewport as jest.MockedFunction<
+  typeof useCanvasViewport
+>;
 
 // Mock getBoundingClientRect for resize tests
 const mockGetBoundingClientRect = jest.fn(() => ({
@@ -61,8 +75,17 @@ describe('CanvasContainer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCanvasViewport.mockClear();
     mockUpdateStageDimensions.mockClear();
+
+    // Setup mock return value
+    mockUseCanvasViewport.mockReturnValue({
+      viewport: { x: 0, y: 0, scale: 1, width: 800, height: 600 },
+      isDragging: false,
+      isZooming: false,
+      updateStageDimensions: mockUpdateStageDimensions,
+      stageProps: mockStageProps,
+    });
+
     originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
     Element.prototype.getBoundingClientRect = mockGetBoundingClientRect;
   });
@@ -72,13 +95,11 @@ describe('CanvasContainer', () => {
   });
 
   it('renders without crashing', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
     render(<CanvasContainer />);
     expect(screen.getByTestId('konva-canvas')).toBeInTheDocument();
   });
 
   it('applies custom className to container', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
     const customClass = 'custom-canvas-class';
 
     render(<CanvasContainer className={customClass} />);
@@ -89,7 +110,6 @@ describe('CanvasContainer', () => {
   });
 
   it('sets default dimensions correctly', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
     render(<CanvasContainer />);
 
     const canvas = screen.getByTestId('konva-canvas');
@@ -98,7 +118,6 @@ describe('CanvasContainer', () => {
   });
 
   it('passes stage props from useCanvasViewport hook', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
     render(<CanvasContainer />);
 
     const canvas = screen.getByTestId('konva-canvas');
@@ -109,7 +128,6 @@ describe('CanvasContainer', () => {
   });
 
   it('has minimum height style on container', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
     render(<CanvasContainer />);
 
     const container = screen.getByTestId('konva-canvas').parentElement;
@@ -117,15 +135,12 @@ describe('CanvasContainer', () => {
   });
 
   it('calls useCanvasViewport hook', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
-
     render(<CanvasContainer />);
 
     expect(mockUseCanvasViewport).toHaveBeenCalled();
   });
 
   it('uses memoized stage dimensions', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
     const { rerender } = render(<CanvasContainer />);
 
     // First render
@@ -143,8 +158,6 @@ describe('CanvasContainer', () => {
   });
 
   it('renders with React.memo optimization', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
-
     // Component should be memoized
     expect(CanvasContainer.$$typeof).toBeDefined(); // React.memo creates this property
 
@@ -153,7 +166,6 @@ describe('CanvasContainer', () => {
   });
 
   it('handles empty className prop', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
     render(<CanvasContainer className="" />);
 
     const container = screen.getByTestId('konva-canvas').parentElement;
@@ -161,7 +173,6 @@ describe('CanvasContainer', () => {
   });
 
   it('handles undefined className prop', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
     render(<CanvasContainer />);
 
     const container = screen.getByTestId('konva-canvas').parentElement;
@@ -169,7 +180,6 @@ describe('CanvasContainer', () => {
   });
 
   it('passes all stage props to KonvaCanvas', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
     render(<CanvasContainer />);
 
     const canvas = screen.getByTestId('konva-canvas');
@@ -186,7 +196,6 @@ describe('CanvasContainer', () => {
   });
 
   it('calls updateStageDimensions when component mounts', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
     render(<CanvasContainer />);
 
     // updateStageDimensions should be called during useEffect
@@ -194,8 +203,6 @@ describe('CanvasContainer', () => {
   });
 
   it('calls useCanvasViewport hook during render', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
-
     render(<CanvasContainer />);
     // Hook should be called at least once (may be called multiple times due to React StrictMode)
     expect(mockUseCanvasViewport).toHaveBeenCalled();
@@ -209,8 +216,6 @@ describe('CanvasContainer', () => {
   });
 
   it('handles multiple hook calls gracefully', () => {
-    const { CanvasContainer } = require('./CanvasContainer');
-
     // Clear mock before test
     mockUseCanvasViewport.mockClear();
 
@@ -226,8 +231,11 @@ describe('CanvasContainer', () => {
 
     // Verify the hook returns expected values regardless of call count
     expect(mockUseCanvasViewport).toHaveReturnedWith({
-      stageProps: mockStageProps,
+      viewport: { x: 0, y: 0, scale: 1, width: 800, height: 600 },
+      isDragging: false,
+      isZooming: false,
       updateStageDimensions: mockUpdateStageDimensions,
+      stageProps: mockStageProps,
     });
   });
 });

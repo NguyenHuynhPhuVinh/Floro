@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
-import { useCanvasStore } from '../../store/canvas.store';
 import Konva from 'konva';
+import { useCallback, useRef } from 'react';
+
+import { useCanvasStore } from '../../store/canvas.store';
 
 const ZOOM_SPEED = 0.1;
 const MIN_ZOOM = 0.1;
@@ -13,7 +14,16 @@ interface TouchState {
   lastCenter: { x: number; y: number } | null;
 }
 
-export const useCanvasZoom = () => {
+export const useCanvasZoom = (): {
+  isZooming: boolean;
+  zoomHandlers: {
+    onWheel: (e: Konva.KonvaEventObject<WheelEvent>) => void;
+    onTouchStart: (e: Konva.KonvaEventObject<TouchEvent>) => void;
+    onTouchMove: (e: Konva.KonvaEventObject<TouchEvent>) => void;
+    onTouchEnd: (e: Konva.KonvaEventObject<TouchEvent>) => void;
+  };
+  zoomAtPoint: (point: { x: number; y: number }, scaleBy: number) => void;
+} => {
   const { viewport, isZooming, setZooming, updateScale, updatePosition } =
     useCanvasStore();
   const touchStateRef = useRef<TouchState>({

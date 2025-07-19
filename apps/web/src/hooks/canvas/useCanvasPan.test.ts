@@ -1,6 +1,9 @@
 import { renderHook, act } from '@testing-library/react';
-import { useCanvasPan } from './useCanvasPan';
+import Konva from 'konva';
+
 import { useCanvasStore } from '../../store/canvas.store';
+
+import { useCanvasPan } from './useCanvasPan';
 
 // Mock the canvas store
 jest.mock('../../store/canvas.store');
@@ -22,7 +25,9 @@ describe('useCanvasPan', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCanvasStore.mockReturnValue(mockStoreState as any);
+    mockUseCanvasStore.mockReturnValue(
+      mockStoreState as ReturnType<typeof useCanvasStore>
+    );
   });
 
   it('returns isDragging state and pan handlers', () => {
@@ -54,7 +59,9 @@ describe('useCanvasPan', () => {
       };
 
       act(() => {
-        result.current.panHandlers.onMouseDown(mockEvent as any);
+        result.current.panHandlers.onMouseDown(
+          mockEvent as unknown as Konva.KonvaEventObject<MouseEvent>
+        );
       });
 
       expect(mockSetDragging).toHaveBeenCalledWith(true);
@@ -76,7 +83,9 @@ describe('useCanvasPan', () => {
       };
 
       act(() => {
-        result.current.panHandlers.onMouseDown(mockEvent as any);
+        result.current.panHandlers.onMouseDown(
+          mockEvent as unknown as Konva.KonvaEventObject<MouseEvent>
+        );
       });
 
       expect(mockSetDragging).not.toHaveBeenCalled();
@@ -113,7 +122,9 @@ describe('useCanvasPan', () => {
       };
 
       act(() => {
-        result.current.panHandlers.onTouchStart(mockEvent as any);
+        result.current.panHandlers.onTouchStart(
+          mockEvent as unknown as Konva.KonvaEventObject<TouchEvent>
+        );
       });
 
       expect(mockSetDragging).toHaveBeenCalledWith(true);
@@ -132,7 +143,9 @@ describe('useCanvasPan', () => {
       };
 
       act(() => {
-        result.current.panHandlers.onTouchStart(mockEvent as any);
+        result.current.panHandlers.onTouchStart(
+          mockEvent as unknown as Konva.KonvaEventObject<TouchEvent>
+        );
       });
 
       expect(mockSetDragging).not.toHaveBeenCalled();
@@ -176,12 +189,16 @@ describe('useCanvasPan', () => {
 
       // First simulate mouse down to start dragging and set initial position
       act(() => {
-        result.current.panHandlers.onMouseDown(mockDownEvent as any);
+        result.current.panHandlers.onMouseDown(
+          mockDownEvent as unknown as Konva.KonvaEventObject<MouseEvent>
+        );
       });
 
       // Then simulate mouse move
       act(() => {
-        result.current.panHandlers.onMouseMove(mockMoveEvent as any);
+        result.current.panHandlers.onMouseMove(
+          mockMoveEvent as unknown as Konva.KonvaEventObject<MouseEvent>
+        );
       });
 
       // Should update position with delta (50, 50)
@@ -202,7 +219,9 @@ describe('useCanvasPan', () => {
       };
 
       act(() => {
-        result.current.panHandlers.onMouseMove(mockEvent as any);
+        result.current.panHandlers.onMouseMove(
+          mockEvent as unknown as Konva.KonvaEventObject<MouseEvent>
+        );
       });
 
       expect(mockUpdatePosition).not.toHaveBeenCalled();

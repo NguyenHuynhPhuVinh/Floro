@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useRef, useEffect, useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
+
 import { useCanvasViewport } from '../../hooks/canvas/useCanvasViewport';
 
 // Dynamically import Konva wrapper to avoid SSR issues
@@ -35,7 +36,7 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
   );
 
   useEffect(() => {
-    const updateDimensions = () => {
+    const updateDimensions = (): void => {
       if (containerRef.current) {
         const { clientWidth, clientHeight } = containerRef.current;
         const newDimensions = {
@@ -53,7 +54,7 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
     // Listen for window resize
     window.addEventListener('resize', updateDimensions);
 
-    return () => {
+    return (): void => {
       window.removeEventListener('resize', updateDimensions);
     };
   }, [updateStageDimensions]);

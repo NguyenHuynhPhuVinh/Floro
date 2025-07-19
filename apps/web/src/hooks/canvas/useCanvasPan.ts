@@ -1,15 +1,26 @@
 'use client';
 
-import { useCallback, useRef } from 'react';
-import { useCanvasStore } from '../../store/canvas.store';
 import Konva from 'konva';
+import { useCallback, useRef } from 'react';
+
+import { useCanvasStore } from '../../store/canvas.store';
 
 interface PanState {
   isDragging: boolean;
   lastPointerPosition: { x: number; y: number } | null;
 }
 
-export const useCanvasPan = () => {
+export const useCanvasPan = (): {
+  isDragging: boolean;
+  panHandlers: {
+    onMouseDown: (e: Konva.KonvaEventObject<MouseEvent>) => void;
+    onMouseMove: (e: Konva.KonvaEventObject<MouseEvent>) => void;
+    onMouseUp: () => void;
+    onTouchStart: (e: Konva.KonvaEventObject<TouchEvent>) => void;
+    onTouchMove: (e: Konva.KonvaEventObject<TouchEvent>) => void;
+    onTouchEnd: () => void;
+  };
+} => {
   const { viewport, isDragging, setDragging, updatePosition } =
     useCanvasStore();
   const panStateRef = useRef<PanState>({

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+
 import { performanceMonitor } from '../lib/performance/monitor';
 
 // Canvas viewport state interface
@@ -64,45 +65,45 @@ const initialPerformance: PerformanceMetrics = {
 
 export const useCanvasStore = create<CanvasState>()(
   devtools(
-    (set: any, get: any) => ({
+    (set, get) => ({
       viewport: initialViewport,
       performance: initialPerformance,
       isDragging: false,
       isZooming: false,
 
-      setViewport: (newViewport: Partial<CanvasViewport>) =>
-        set((state: any) => ({
+      setViewport: (newViewport: Partial<CanvasViewport>): void =>
+        set(state => ({
           viewport: { ...state.viewport, ...newViewport },
         })),
 
-      updatePosition: (x: number, y: number) =>
-        set((state: any) => ({
+      updatePosition: (x: number, y: number): void =>
+        set(state => ({
           viewport: { ...state.viewport, x, y },
         })),
 
-      updateScale: (scale: number) => {
+      updateScale: (scale: number): void => {
         // Clamp scale between 0.1 and 5
         const clampedScale = Math.max(0.1, Math.min(5, scale));
-        set((state: any) => ({
+        set(state => ({
           viewport: { ...state.viewport, scale: clampedScale },
         }));
       },
 
-      setDimensions: (width: number, height: number) =>
-        set((state: any) => ({
+      setDimensions: (width: number, height: number): void =>
+        set(state => ({
           viewport: { ...state.viewport, width, height },
         })),
 
-      setDragging: (isDragging: boolean) => set({ isDragging }),
+      setDragging: (isDragging: boolean): void => set({ isDragging }),
 
-      setZooming: (isZooming: boolean) => set({ isZooming }),
+      setZooming: (isZooming: boolean): void => set({ isZooming }),
 
-      updatePerformance: (metrics: Partial<PerformanceMetrics>) =>
-        set((state: any) => ({
+      updatePerformance: (metrics: Partial<PerformanceMetrics>): void =>
+        set(state => ({
           performance: { ...state.performance, ...metrics },
         })),
 
-      resetViewport: () =>
+      resetViewport: (): void =>
         set({
           viewport: {
             ...initialViewport,
@@ -112,19 +113,19 @@ export const useCanvasStore = create<CanvasState>()(
         }),
 
       // Performance monitoring actions
-      startPerformanceMonitoring: () => {
+      startPerformanceMonitoring: (): void => {
         performanceMonitor.startFPSMonitoring();
       },
 
-      stopPerformanceMonitoring: () => {
+      stopPerformanceMonitoring: (): void => {
         performanceMonitor.stopFPSMonitoring();
       },
 
-      updatePerformanceFromMonitor: () => {
+      updatePerformanceFromMonitor: (): void => {
         const currentFPS = performanceMonitor.getCurrentFPS();
         const memoryUsage = performanceMonitor.getMemoryUsage();
 
-        set((state: any) => ({
+        set(state => ({
           performance: {
             ...state.performance,
             fps: currentFPS,

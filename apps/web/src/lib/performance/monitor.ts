@@ -31,7 +31,7 @@ class PerformanceMonitor {
   end(name: string): number {
     const entry = this.entries.get(name);
     if (!entry) {
-      console.warn(`Performance entry "${name}" not found`);
+      // Performance entry not found - return 0 instead of console.warn
       return 0;
     }
 
@@ -99,8 +99,9 @@ class PerformanceMonitor {
    */
   getMemoryUsage(): number | undefined {
     if ('memory' in performance) {
-      const memory = (performance as any).memory;
-      return memory.usedJSHeapSize;
+      const memory = (performance as { memory?: { usedJSHeapSize: number } })
+        .memory;
+      return memory?.usedJSHeapSize;
     }
     return undefined;
   }
@@ -170,19 +171,25 @@ export const performanceMonitor = new PerformanceMonitor();
 /**
  * Decorator for measuring function performance
  */
-export function measurePerformance(name: string) {
-  return function <T extends (...args: any[]) => any>(
-    target: any,
+export function measurePerformance(
+  name: string
+): <T extends (...args: unknown[]) => unknown>(
+  target: unknown,
+  propertyKey: string,
+  descriptor: TypedPropertyDescriptor<T>
+) => TypedPropertyDescriptor<T> | void {
+  return function <T extends (...args: unknown[]) => unknown>(
+    target: unknown,
     propertyKey: string,
     descriptor: TypedPropertyDescriptor<T>
-  ) {
+  ): TypedPropertyDescriptor<T> | void {
     const originalMethod = descriptor.value;
 
     if (!originalMethod) return;
 
-    descriptor.value = function (this: any, ...args: any[]) {
+    descriptor.value = function (this: unknown, ...args: unknown[]): unknown {
       performanceMonitor.start(name);
-      const result = originalMethod.apply(this, args);
+      const result = originalMethod.apply(this, args as Parameters<T>);
       performanceMonitor.end(name);
       return result;
     } as T;
@@ -194,11 +201,10 @@ export function measurePerformance(name: string) {
 /**
  * Higher-order function for measuring async function performance
  */
-export function withPerformanceTracking<T extends (...args: any[]) => any>(
-  name: string,
-  func: T
-): T {
-  return ((...args: any[]) => {
+export function withPerformanceTracking<
+  T extends (...args: unknown[]) => unknown,
+>(name: string, func: T): T {
+  return ((...args: unknown[]) => {
     performanceMonitor.start(name);
     const result = func(...args);
 

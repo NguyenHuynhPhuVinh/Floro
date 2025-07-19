@@ -1,13 +1,43 @@
 'use client';
 
+import Konva from 'konva';
 import { useEffect, useCallback, useRef } from 'react';
+
+import { debounce } from '../../lib/performance/debounce';
 import { useCanvasStore } from '../../store/canvas.store';
+
 import { useCanvasPan } from './useCanvasPan';
 import { useCanvasZoom } from './useCanvasZoom';
-import { debounce, rafThrottle } from '../../lib/performance/debounce';
-import Konva from 'konva';
 
-export const useCanvasViewport = () => {
+interface CanvasViewport {
+  x: number;
+  y: number;
+  scale: number;
+  width: number;
+  height: number;
+}
+
+interface StageProps {
+  x: number;
+  y: number;
+  scaleX: number;
+  scaleY: number;
+  onMouseDown: (e: Konva.KonvaEventObject<MouseEvent>) => void;
+  onMouseMove: (e: Konva.KonvaEventObject<MouseEvent>) => void;
+  onMouseUp: () => void;
+  onWheel: (e: Konva.KonvaEventObject<WheelEvent>) => void;
+  onTouchStart: (e: Konva.KonvaEventObject<TouchEvent>) => void;
+  onTouchMove: (e: Konva.KonvaEventObject<TouchEvent>) => void;
+  onTouchEnd: (e: Konva.KonvaEventObject<TouchEvent>) => void;
+}
+
+export const useCanvasViewport = (): {
+  viewport: CanvasViewport;
+  isDragging: boolean;
+  isZooming: boolean;
+  updateStageDimensions: (width: number, height: number) => void;
+  stageProps: StageProps;
+} => {
   const {
     viewport,
     setDimensions,
@@ -42,7 +72,7 @@ export const useCanvasViewport = () => {
       debouncedPerformanceUpdate();
     }, 1000);
 
-    return () => {
+    return (): void => {
       stopPerformanceMonitoring();
       clearInterval(performanceInterval);
     };
@@ -110,7 +140,7 @@ export const useCanvasViewport = () => {
 
   // Keyboard shortcuts for zoom
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.ctrlKey || e.metaKey) {
         switch (e.key) {
           case '=':
@@ -137,7 +167,7 @@ export const useCanvasViewport = () => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => {
+    return (): void => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [viewport.width, viewport.height, viewport.scale, zoomAtPoint]);
