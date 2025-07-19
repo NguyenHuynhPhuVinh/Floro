@@ -54,7 +54,7 @@ export class NodeService {
         metadata: {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          created_by: 'anonymous', // TODO: Replace with actual user ID
+          created_by: `anonymous_${Date.now()}_${Math.random().toString(36).substring(2)}`, // Unique anonymous ID for public collaboration
           version: 1,
         },
       })

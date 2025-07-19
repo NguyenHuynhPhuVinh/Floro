@@ -16,23 +16,24 @@ if (!supabaseAnonKey) {
 }
 
 /**
- * Supabase client instance configured for the Floro application.
+ * Supabase client instance configured for the Floro public collaboration platform.
  *
  * Features:
- * - Persistent authentication sessions
- * - Automatic token refresh
- * - Real-time subscriptions with rate limiting
+ * - Public access without authentication required
+ * - Real-time subscriptions for live collaboration
+ * - Anonymous user support for public canvas collaboration
+ * - Unlimited file uploads and storage access
  *
  * @see {@link https://supabase.com/docs/reference/javascript/initializing}
  */
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
+    persistSession: false, // No authentication required for public platform
+    autoRefreshToken: false,
   },
   realtime: {
     params: {
-      eventsPerSecond: 10,
+      eventsPerSecond: 20, // Higher rate for active collaboration
     },
   },
 });

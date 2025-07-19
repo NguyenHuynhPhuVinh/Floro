@@ -31,9 +31,9 @@ export function WelcomeHero(): React.JSX.Element {
 
         {/* Description */}
         <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-          Tạo, kết nối và cộng tác theo thời gian thực với canvas trực quan sáng
-          tạo. Xây dựng quy trình phức tạp thông qua tương tác node trực quan và
-          dễ sử dụng.
+          Nền tảng cộng tác mở hoàn toàn miễn phí! Tạo, kết nối và cộng tác theo
+          thời gian thực với canvas trực quan sáng tạo. Không cần đăng ký - bắt
+          đầu ngay lập tức!
         </p>
 
         {/* Features Grid */}
