@@ -271,10 +271,15 @@ export class NodeService {
    */
   static async getNodesBySession(sessionId: string): Promise<FileNode[]> {
     try {
-      const { data, error } = await supabase
-        .from('floro_nodes')
-        .select('*')
-        .eq('canvas_id', sessionId);
+      // For "public" session, we need to get all nodes since we generate UUIDs
+      // This is a temporary solution until we implement proper session management
+      let query = supabase.from('floro_nodes').select('*');
+
+      if (sessionId !== 'public') {
+        query = query.eq('canvas_id', sessionId);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Failed to fetch nodes:', error);

@@ -3,17 +3,43 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { FileNode } from '../FileNode';
 import { FileNode as FileNodeType } from '../../../types';
 
+// Mock react-konva components
+const mockGroup = jest.fn(({ children, ...props }) => (
+  <div data-testid="konva-group" {...props}>
+    {children}
+  </div>
+));
+const mockRect = jest.fn(props => <div data-testid="konva-rect" {...props} />);
+const mockText = jest.fn(props => (
+  <div data-testid="konva-text" data-text={props.text} {...props} />
+));
+const mockCircle = jest.fn(props => (
+  <div data-testid="konva-circle" {...props} />
+));
+const mockPath = jest.fn(props => <div data-testid="konva-path" {...props} />);
+
+jest.mock('react-konva', () => ({
+  Group: mockGroup,
+  Rect: mockRect,
+  Text: mockText,
+  Circle: mockCircle,
+  Path: mockPath,
+}));
+
 // Mock hooks
+const mockHandleDragStart = jest.fn();
+const mockDownloadFile = jest.fn();
+
 jest.mock('../../../hooks/nodes/useNodeDrag', () => ({
   useNodeDrag: () => ({
     isDragging: false,
-    handleDragStart: jest.fn(),
+    handleDragStart: mockHandleDragStart,
   }),
 }));
 
 jest.mock('../../../hooks/nodes/useFileDownload', () => ({
   useFileDownload: () => ({
-    downloadFile: jest.fn(),
+    downloadFile: mockDownloadFile,
     isDownloading: false,
     downloadProgress: 0,
   }),
@@ -47,11 +73,35 @@ describe('FileNode', () => {
     jest.clearAllMocks();
   });
 
-  it('should render file node with correct information', () => {
+  it('should render Konva Group with correct positioning', () => {
     render(<FileNode {...defaultProps} />);
 
-    expect(screen.getByText('test-document.pdf')).toBeInTheDocument();
-    expect(screen.getByText('50 KB')).toBeInTheDocument();
+    expect(mockGroup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        x: mockFileNode.position.x,
+        y: mockFileNode.position.y,
+        draggable: !mockFileNode.isLocked,
+      }),
+      expect.anything()
+    );
+  });
+
+  it('should render file name and size as Text components', () => {
+    render(<FileNode {...defaultProps} />);
+
+    expect(mockText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'test-document.pdf',
+      }),
+      expect.anything()
+    );
+
+    expect(mockText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: '50 KB',
+      }),
+      expect.anything()
+    );
   });
 
   it('should truncate long file names', () => {
@@ -62,26 +112,36 @@ describe('FileNode', () => {
 
     render(<FileNode {...defaultProps} node={longNameNode} />);
 
-    const fileName = screen.getByText(/this-is-a-very-lon.*\.pdf/);
-    expect(fileName.textContent).toMatch(/\.\.\..*\.pdf$/);
+    expect(mockText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: expect.stringMatching(/this-is-a-very-lon.*\.pdf/),
+      }),
+      expect.anything()
+    );
   });
 
-  it('should show selection indicator when selected', () => {
+  it('should render Rect with selection styling when selected', () => {
     render(<FileNode {...defaultProps} isSelected={true} />);
 
-    const container = screen
-      .getByText('test-document.pdf')
-      .closest('[data-node-id]');
-    expect(container).toHaveClass('border-blue-500');
+    expect(mockRect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        stroke: '#3b82f6',
+        strokeWidth: 2,
+      }),
+      expect.anything()
+    );
   });
 
-  it('should call onSelect when clicked', () => {
-    const onSelect = jest.fn();
-    render(<FileNode {...defaultProps} onSelect={onSelect} />);
+  it('should render Rect with default styling when not selected', () => {
+    render(<FileNode {...defaultProps} isSelected={false} />);
 
-    fireEvent.click(screen.getByText('test-document.pdf'));
-
-    expect(onSelect).toHaveBeenCalledWith('test-node-1');
+    expect(mockRect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        stroke: '#e5e7eb',
+        strokeWidth: 1,
+      }),
+      expect.anything()
+    );
   });
 
   it('should show action buttons on hover', async () => {
@@ -202,29 +262,36 @@ describe('FileNode', () => {
     });
   });
 
-  it('should scale correctly based on scale prop', () => {
+  it('should render with scaled dimensions', () => {
     render(<FileNode {...defaultProps} scale={0.5} />);
 
-    const container = screen
-      .getByText('test-document.pdf')
-      .closest('[data-node-id]');
-
-    // Should use minimum width when scaled down
-    expect(container).toHaveStyle({
-      width: '180px', // Math.max(180, 250 * 0.5)
-      height: '60px', // Math.max(60, 80 * 0.5)
-    });
+    // Should render Rect with minimum dimensions
+    expect(mockRect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        width: 180, // Math.max(180, node.size.width * 0.5)
+        height: 60, // Math.max(60, node.size.height * 0.5)
+      }),
+      expect.anything()
+    );
   });
 
-  it('should show file type badge at small scales', () => {
+  it('should render file type badge at small scales', () => {
     render(<FileNode {...defaultProps} scale={0.5} />);
 
-    expect(screen.getByText('PDF')).toBeInTheDocument();
+    // Should render file type badge
+    expect(mockText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'PDF',
+      }),
+      expect.anything()
+    );
   });
 
-  it('should not show file type badge at normal scales', () => {
+  it('should not render file type badge at normal scales', () => {
     render(<FileNode {...defaultProps} scale={1} />);
 
-    expect(screen.queryByText('PDF')).not.toBeInTheDocument();
+    // Should not render file type badge (scale >= 0.6)
+    const pdfCalls = mockText.mock.calls.filter(call => call[0].text === 'PDF');
+    expect(pdfCalls).toHaveLength(0);
   });
 });

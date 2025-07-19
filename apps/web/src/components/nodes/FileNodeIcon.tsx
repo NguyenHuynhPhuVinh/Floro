@@ -1,26 +1,31 @@
 'use client';
 
 import React from 'react';
+import { Group, Circle, Path } from 'react-konva';
 import { FileCategory } from '../../types';
 
 interface FileNodeIconProps {
   fileType: string;
   mimeType: string;
   size?: 'small' | 'medium' | 'large';
-  className?: string;
+  x?: number;
+  y?: number;
 }
 
 export function FileNodeIcon({
   fileType,
   mimeType,
   size = 'medium',
-  className = '',
+  x = 0,
+  y = 0,
 }: FileNodeIconProps): React.JSX.Element {
-  const sizeClasses = {
-    small: 'w-4 h-4',
-    medium: 'w-6 h-6',
-    large: 'w-8 h-8',
+  const sizeMap = {
+    small: 16,
+    medium: 24,
+    large: 32,
   };
+
+  const iconSize = sizeMap[size];
 
   const getFileCategory = (fileType: string): FileCategory => {
     const extension = fileType.toLowerCase();
@@ -94,190 +99,137 @@ export function FileNodeIcon({
 
   const getIconAndColor = (
     category: FileCategory
-  ): { icon: React.JSX.Element; color: string } => {
+  ): { pathData: string; color: string } => {
     switch (category) {
       case 'document':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ),
-          color: 'text-red-500',
+          // Lucide File-Text icon
+          pathData:
+            'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM14 2v6h6M16 13H8M16 17H8M10 9H8',
+          color: '#ef4444',
         };
 
       case 'image':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ),
-          color: 'text-green-500',
+          // Lucide Image icon
+          pathData:
+            'M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM3 21l6-6 4 4 6-6',
+          color: '#22c55e',
         };
 
       case 'archive':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-            </svg>
-          ),
-          color: 'text-yellow-500',
+          // Lucide Archive icon
+          pathData: 'M21 8v13H3V8M1 3h22v5H1zM10 12h4',
+          color: '#eab308',
         };
 
       case 'spreadsheet':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ),
-          color: 'text-emerald-500',
+          // Lucide Table icon
+          pathData: 'M3 3h18v18H3zM21 9H3M21 15H3M12 3v18',
+          color: '#10b981',
         };
 
       case 'presentation':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M3 4a1 1 0 011-1h12a1 1 0 011 1v8a1 1 0 01-1 1h-5v2a1 1 0 01-1.707.707L7.586 14H4a1 1 0 01-1-1V4z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ),
-          color: 'text-orange-500',
+          // Lucide Presentation icon
+          pathData: 'M2 3h20v14H2zM2 17l4 4M22 17l-4 4M12 9v4M9 11h6',
+          color: '#f97316',
         };
 
       case 'web-code':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ),
-          color: 'text-blue-500',
+          // Lucide Code icon
+          pathData: 'M16 18l6-6-6-6M8 6l-6 6 6 6',
+          color: '#3b82f6',
         };
 
       case 'backend-code':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z"
-                clipRule="evenodd"
-              />
-              <path d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V9a1 1 0 00-1-1h-1v4a2 2 0 01-2 2H4.828a2 2 0 01-1.414-.586l-.828-.828A2 2 0 012 12.172V6a2 2 0 012-2h2V3a1 1 0 011-1h1a1 1 0 011 1v1h2a2 2 0 012 2v1z" />
-            </svg>
-          ),
-          color: 'text-purple-500',
+          // Lucide Server icon
+          pathData:
+            'M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM6 7h.01M6 10h.01M6 13h.01',
+          color: '#a855f7',
         };
 
       case 'mobile-code':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M7 2a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V4a2 2 0 00-2-2H7zM8 5a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1zm1 9a1 1 0 100 2h2a1 1 0 100-2H9z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ),
-          color: 'text-pink-500',
+          // Lucide Smartphone icon
+          pathData:
+            'M5 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM9 18h.01',
+          color: '#ec4899',
         };
 
       case 'system-code':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ),
-          color: 'text-gray-600',
+          // Lucide Terminal icon
+          pathData: 'M4 17l6-6-6-6M12 19h8',
+          color: '#4b5563',
         };
 
       case 'script-code':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-            </svg>
-          ),
-          color: 'text-indigo-500',
+          // Lucide FileCode icon
+          pathData:
+            'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM14 2v6h6M10 13l-2 2 2 2M14 13l2 2-2 2',
+          color: '#6366f1',
         };
 
       case 'config-code':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ),
-          color: 'text-slate-500',
+          // Lucide Settings icon
+          pathData:
+            'M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2zM12 15a3 3 0 1 1 0-6 3 3 0 0 1 0 6z',
+          color: '#64748b',
         };
 
       case 'data-file':
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 01-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15.586 13H14a1 1 0 01-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ),
-          color: 'text-cyan-500',
+          // Lucide Database icon
+          pathData:
+            'M4 6c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V6zM4 14c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2v-2z',
+          color: '#06b6d4',
         };
 
       case 'text-file':
       default:
         return {
-          icon: (
-            <svg fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
-                clipRule="evenodd"
-              />
-            </svg>
-          ),
-          color: 'text-gray-500',
+          // Lucide FileText icon
+          pathData:
+            'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zM14 2v6h6M16 13H8M16 17H8M10 9H8',
+          color: '#6b7280',
         };
     }
   };
 
   const category = getFileCategory(fileType);
-  const { icon, color } = getIconAndColor(category);
+  const { pathData, color } = getIconAndColor(category);
 
   return (
-    <div className={`${sizeClasses[size]} ${color} ${className}`}>{icon}</div>
+    <Group x={x} y={y}>
+      {/* Background circle */}
+      <Circle
+        x={iconSize / 2}
+        y={iconSize / 2}
+        radius={iconSize / 2}
+        fill="#ffffff"
+        stroke="#e5e7eb"
+        strokeWidth={1}
+      />
+      {/* Lucide icon path */}
+      <Path
+        x={iconSize * 0.15}
+        y={iconSize * 0.15}
+        data={pathData}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        scaleX={iconSize / 24}
+        scaleY={iconSize / 24}
+      />
+    </Group>
   );
 }

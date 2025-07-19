@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import { Group, Rect, Text, Circle, Path } from 'react-konva';
 import { FileNode as FileNodeType } from '../../types';
 import { FileNodeIcon } from './FileNodeIcon';
 import { useNodeDrag } from '../../hooks/nodes/useNodeDrag';
@@ -110,148 +111,166 @@ export function FileNode({
   const fontSize = Math.max(12, 14 * scale);
   const iconSize = scale > 0.8 ? 'medium' : 'small';
 
+  const handleKonvaClick = useCallback(
+    async (e: any) => {
+      // Stop event propagation to prevent canvas interactions
+      e.cancelBubble = true;
+
+      // If it's a double-click or right-click, trigger download
+      if (e.evt.detail === 2 || e.evt.button === 2) {
+        try {
+          await downloadFile(node);
+          if (onDownload) {
+            onDownload(node);
+          }
+        } catch (error) {
+          console.error('Download failed:', error);
+        }
+      } else {
+        // Single click - select node
+        if (onSelect) {
+          onSelect(node.id);
+        }
+      }
+    },
+    [node, onSelect, onDownload, downloadFile]
+  );
+
+  const handleKonvaMouseDown = useCallback(() => {
+    if (!node.isLocked) {
+      // Konva drag will be handled by the Group's draggable prop
+    }
+  }, [node.isLocked]);
+
   return (
-    <div
-      className={`
-        absolute bg-white rounded-lg border-2 shadow-lg transition-all duration-200
-        ${isSelected ? 'border-blue-500 shadow-blue-200' : 'border-gray-200 hover:border-gray-300'}
-        ${isHovered ? 'shadow-xl' : ''}
-        ${isDragging ? 'cursor-grabbing shadow-2xl scale-105' : node.isLocked ? 'cursor-not-allowed opacity-75' : 'cursor-grab'}
-      `}
-      style={{
-        left: node.position.x,
-        top: node.position.y,
-        width: scaledWidth,
-        height: scaledHeight,
-        zIndex: isDragging ? 9999 : node.zIndex,
-      }}
-      data-node-id={node.id}
-      onClick={handleClick}
-      onMouseDown={handleMouseDown}
+    <Group
+      x={node.position.x}
+      y={node.position.y}
+      draggable={!node.isLocked}
+      onClick={handleKonvaClick}
+      onMouseDown={handleKonvaMouseDown}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Main content */}
-      <div className="flex items-center p-3 h-full">
-        {/* File icon */}
-        <div className="flex-shrink-0 mr-3">
-          <FileNodeIcon
-            fileType={node.fileType}
-            mimeType={node.mimeType}
-            size={iconSize}
+      {/* Main background */}
+      <Rect
+        width={scaledWidth}
+        height={scaledHeight}
+        fill="#ffffff"
+        stroke={isSelected ? '#3b82f6' : '#e5e7eb'}
+        strokeWidth={isSelected ? 2 : 1}
+        cornerRadius={8}
+        shadowColor="#000000"
+        shadowBlur={isHovered ? 10 : 4}
+        shadowOpacity={isHovered ? 0.15 : 0.1}
+        shadowOffsetY={2}
+      />
+
+      {/* File icon */}
+      <FileNodeIcon
+        fileType={node.fileType}
+        mimeType={node.mimeType}
+        size={iconSize}
+        x={12}
+        y={scaledHeight / 2 - 12}
+      />
+
+      {/* File name */}
+      <Text
+        text={truncateFileName(node.fileName)}
+        x={48}
+        y={scaledHeight / 2 - fontSize}
+        fontSize={fontSize}
+        fontFamily="Arial, sans-serif"
+        fontStyle="bold"
+        fill="#111827"
+        width={scaledWidth - 80}
+        ellipsis={true}
+      />
+
+      {/* File size */}
+      <Text
+        text={formatFileSize(node.fileSize)}
+        x={48}
+        y={scaledHeight / 2 + 4}
+        fontSize={Math.max(10, fontSize - 2)}
+        fontFamily="Arial, sans-serif"
+        fill="#6b7280"
+        width={scaledWidth - 80}
+      />
+
+      {/* Download icon (visible on hover) */}
+      {isHovered && (
+        <>
+          <Circle
+            x={scaledWidth - 20}
+            y={scaledHeight / 2}
+            radius={8}
+            fill="#3b82f6"
+            opacity={0.8}
           />
-        </div>
-
-        {/* File info */}
-        <div className="flex-1 min-w-0">
-          <div
-            className="font-medium text-gray-900 truncate"
-            style={{ fontSize }}
-            title={node.fileName}
-          >
-            {truncateFileName(node.fileName)}
-          </div>
-          <div
-            className="text-gray-500 text-xs mt-1"
-            style={{ fontSize: Math.max(10, fontSize - 2) }}
-          >
-            {formatFileSize(node.fileSize)}
-          </div>
-        </div>
-
-        {/* Action buttons (visible on hover or selection) */}
-        {(isHovered || isSelected) && (
-          <div className="flex-shrink-0 ml-2 flex space-x-1">
-            {/* Download button */}
-            {onDownload && (
-              <button
-                onClick={handleDownload}
-                disabled={isDownloading}
-                className={`p-1 rounded transition-colors ${
-                  isDownloading
-                    ? 'text-blue-500 cursor-not-allowed'
-                    : 'hover:bg-gray-100 text-gray-600 hover:text-blue-600'
-                }`}
-                title={
-                  isDownloading
-                    ? `Downloading... ${downloadProgress}%`
-                    : 'Download file'
-                }
-              >
-                {isDownloading ? (
-                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                )}
-              </button>
-            )}
-
-            {/* Delete button */}
-            {onDelete && !node.isLocked && (
-              <button
-                onClick={handleDelete}
-                className="p-1 rounded hover:bg-red-50 text-gray-600 hover:text-red-600 transition-colors"
-                title="Delete file node"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+          <Path
+            x={scaledWidth - 24}
+            y={scaledHeight / 2 - 4}
+            data="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
+            fill="none"
+            stroke="#ffffff"
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            scaleX={0.33}
+            scaleY={0.33}
+          />
+          <Text
+            text="Double-click to download"
+            x={48}
+            y={scaledHeight - 16}
+            fontSize={Math.max(8, fontSize - 4)}
+            fontFamily="Arial, sans-serif"
+            fill="#9ca3af"
+            width={scaledWidth - 60}
+          />
+        </>
+      )}
 
       {/* Selection indicator */}
       {isSelected && (
-        <div className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-full border-2 border-white" />
+        <Rect
+          x={-2}
+          y={-2}
+          width={6}
+          height={6}
+          fill="#3b82f6"
+          cornerRadius={3}
+        />
       )}
 
       {/* Lock indicator */}
       {node.isLocked && (
-        <div className="absolute top-1 right-1">
-          <svg
-            className="w-3 h-3 text-gray-400"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </div>
+        <Text text="🔒" x={scaledWidth - 20} y={4} fontSize={12} />
       )}
 
-      {/* File type badge (visible at smaller scales) */}
+      {/* File type badge for small scales */}
       {scale < 0.6 && (
-        <div className="absolute bottom-1 right-1 bg-gray-800 text-white text-xs px-1 py-0.5 rounded">
-          {node.fileType.toUpperCase()}
-        </div>
+        <>
+          <Rect
+            x={scaledWidth - 40}
+            y={scaledHeight - 20}
+            width={36}
+            height={16}
+            fill="#1f2937"
+            cornerRadius={4}
+          />
+          <Text
+            text={node.fileType.toUpperCase()}
+            x={scaledWidth - 38}
+            y={scaledHeight - 16}
+            fontSize={10}
+            fontFamily="Arial, sans-serif"
+            fill="#ffffff"
+          />
+        </>
       )}
-    </div>
+    </Group>
   );
 }

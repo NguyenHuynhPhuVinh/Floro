@@ -107,3 +107,28 @@ jest.mock('@supabase/supabase-js', () => ({
     },
   })),
 }));
+
+// Mock Konva and react-konva for testing
+jest.mock('konva', () => ({
+  Stage: jest.fn(),
+  Layer: jest.fn(),
+  Group: jest.fn(),
+  Rect: jest.fn(),
+  Circle: jest.fn(),
+  Text: jest.fn(),
+  Path: jest.fn(),
+  Line: jest.fn(),
+  Image: jest.fn(),
+}));
+
+jest.mock('react-konva', () => ({
+  Stage: jest.fn(({ children }) => children),
+  Layer: jest.fn(({ children }) => children),
+  Group: jest.fn(({ children }) => children),
+  Rect: jest.fn(() => null),
+  Circle: jest.fn(() => null),
+  Text: jest.fn(() => null),
+  Path: jest.fn(() => null),
+  Line: jest.fn(() => null),
+  Image: jest.fn(() => null),
+}));
