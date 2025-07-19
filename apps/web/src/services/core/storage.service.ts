@@ -124,6 +124,10 @@ export class StorageService {
       this.handleError('Failed to list files', error);
     }
 
+    if (!data) {
+      return [];
+    }
+
     return data.map(file => ({
       name: file.name,
       size: file.metadata?.size || 0,

@@ -95,13 +95,20 @@ export class NodeService {
     nodeId: string,
     updates: NodeUpdateInput
   ): Promise<FloroNode> {
+    // First get current node to increment version
+    const currentNode = await this.getNode(nodeId);
+    if (!currentNode) {
+      throw new Error(`Node with ID ${nodeId} not found`);
+    }
+
     const { data, error } = await supabase
       .from('floro_nodes')
       .update({
         ...updates,
         metadata: {
+          ...currentNode.metadata,
           updated_at: new Date().toISOString(),
-          version: supabase.rpc('increment_version', { node_id: nodeId }),
+          version: currentNode.metadata.version + 1,
         },
       })
       .eq('id', nodeId)
