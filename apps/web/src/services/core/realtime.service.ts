@@ -1,169 +1,234 @@
-import {
-  ref,
-  set,
-  get,
-  update,
-  remove,
-  onValue,
-  off,
-  push,
-  serverTimestamp,
-  DataSnapshot,
-} from 'firebase/database';
+import { supabase } from '@/lib/supabase';
+import type {
+  RealtimeChannel,
+  RealtimePostgresChangesPayload,
+} from '@supabase/supabase-js';
 
-import { realtimeDb } from '@/lib/firebase';
+export interface CursorPosition {
+  id: string;
+  user_id: string;
+  canvas_id: string;
+  position: {
+    x: number;
+    y: number;
+  };
+  timestamp: string;
+}
+
+export interface RealtimeSubscriptionCallbacks<
+  T extends Record<string, any> = Record<string, any>,
+> {
+  onInsert?: (payload: RealtimePostgresChangesPayload<T>) => void;
+  onUpdate?: (payload: RealtimePostgresChangesPayload<T>) => void;
+  onDelete?: (payload: RealtimePostgresChangesPayload<T>) => void;
+}
 
 export class RealtimeService {
+  private static channels: Map<string, RealtimeChannel> = new Map();
+
   /**
-   * Set data at a specific path
+   * Subscribe to real-time changes on a table
    */
-  static async setValue(path: string, value: any): Promise<void> {
-    try {
-      const dbRef = ref(realtimeDb, path);
-      await set(dbRef, {
-        ...value,
-        timestamp: serverTimestamp(),
+  static subscribeToTable<T extends Record<string, any> = Record<string, any>>(
+    tableName: string,
+    callbacks: RealtimeSubscriptionCallbacks<T>,
+    filter?: string
+  ): string {
+    const channelName = `${tableName}:${filter || 'all'}:${Date.now()}`;
+
+    let channel = supabase.channel(channelName);
+
+    if (callbacks.onInsert) {
+      channel = channel.on(
+        'postgres_changes' as any,
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: tableName,
+          filter,
+        } as any,
+        callbacks.onInsert
+      );
+    }
+
+    if (callbacks.onUpdate) {
+      channel = channel.on(
+        'postgres_changes' as any,
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: tableName,
+          filter,
+        } as any,
+        callbacks.onUpdate
+      );
+    }
+
+    if (callbacks.onDelete) {
+      channel = channel.on(
+        'postgres_changes' as any,
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: tableName,
+          filter,
+        } as any,
+        callbacks.onDelete
+      );
+    }
+
+    channel.subscribe();
+    this.channels.set(channelName, channel);
+
+    return channelName;
+  }
+
+  /**
+   * Subscribe to cursor movements for real-time collaboration
+   */
+  static subscribeToCursors(
+    canvasId: string,
+    onCursorUpdate: (cursor: CursorPosition) => void,
+    onCursorRemove: (userId: string) => void
+  ): string {
+    const channelName = `cursors:${canvasId}`;
+
+    const channel = supabase
+      .channel(channelName)
+      .on('broadcast', { event: 'cursor_move' }, ({ payload }) => {
+        onCursorUpdate(payload as CursorPosition);
+      })
+      .on('broadcast', { event: 'cursor_leave' }, ({ payload }) => {
+        onCursorRemove(payload.user_id);
+      })
+      .subscribe();
+
+    this.channels.set(channelName, channel);
+    return channelName;
+  }
+
+  /**
+   * Broadcast cursor position to other users
+   */
+  static async broadcastCursorPosition(
+    canvasId: string,
+    position: { x: number; y: number },
+    userId: string
+  ): Promise<void> {
+    const channelName = `cursors:${canvasId}`;
+    const channel = this.channels.get(channelName);
+
+    if (channel) {
+      await channel.send({
+        type: 'broadcast',
+        event: 'cursor_move',
+        payload: {
+          id: `${userId}_${Date.now()}`,
+          user_id: userId,
+          canvas_id: canvasId,
+          position,
+          timestamp: new Date().toISOString(),
+        } as CursorPosition,
       });
-    } catch (error) {
-      console.error('Error setting value:', error);
-      throw error;
     }
   }
 
   /**
-   * Get data from a specific path
+   * Broadcast cursor leave event
    */
-  static async getValue<T = any>(path: string): Promise<T | null> {
-    try {
-      const dbRef = ref(realtimeDb, path);
-      const snapshot = await get(dbRef);
+  static async broadcastCursorLeave(
+    canvasId: string,
+    userId: string
+  ): Promise<void> {
+    const channelName = `cursors:${canvasId}`;
+    const channel = this.channels.get(channelName);
 
-      if (snapshot.exists()) {
-        return snapshot.val() as T;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Error getting value:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Update data at a specific path
-   */
-  static async updateValue(path: string, updates: Record<string, any>): Promise<void> {
-    try {
-      const dbRef = ref(realtimeDb, path);
-      await update(dbRef, {
-        ...updates,
-        timestamp: serverTimestamp(),
+    if (channel) {
+      await channel.send({
+        type: 'broadcast',
+        event: 'cursor_leave',
+        payload: { user_id: userId },
       });
-    } catch (error) {
-      console.error('Error updating value:', error);
-      throw error;
     }
   }
 
   /**
-   * Remove data at a specific path
+   * Subscribe to presence (who's online)
    */
-  static async removeValue(path: string): Promise<void> {
-    try {
-      const dbRef = ref(realtimeDb, path);
-      await remove(dbRef);
-    } catch (error) {
-      console.error('Error removing value:', error);
-      throw error;
-    }
-  }
+  static subscribeToPresence(
+    canvasId: string,
+    userId: string,
+    onPresenceUpdate: (presences: Record<string, any>) => void
+  ): string {
+    const channelName = `presence:${canvasId}`;
 
-  /**
-   * Push data to a list
-   */
-  static async pushValue(path: string, value: any): Promise<string> {
-    try {
-      const dbRef = ref(realtimeDb, path);
-      const newRef = push(dbRef, {
-        ...value,
-        timestamp: serverTimestamp(),
+    const channel = supabase
+      .channel(channelName)
+      .on('presence', { event: 'sync' }, () => {
+        const presences = channel.presenceState();
+        onPresenceUpdate(presences);
+      })
+      .on('presence', { event: 'join' }, ({ newPresences }) => {
+        console.log('New users joined:', newPresences);
+      })
+      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
+        console.log('Users left:', leftPresences);
+      })
+      .subscribe(async status => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({
+            user_id: userId,
+            online_at: new Date().toISOString(),
+          });
+        }
       });
 
-      return newRef.key!;
-    } catch (error) {
-      console.error('Error pushing value:', error);
-      throw error;
+    this.channels.set(channelName, channel);
+    return channelName;
+  }
+
+  /**
+   * Unsubscribe from a channel
+   */
+  static unsubscribe(channelName: string): void {
+    const channel = this.channels.get(channelName);
+    if (channel) {
+      supabase.removeChannel(channel);
+      this.channels.delete(channelName);
     }
   }
 
   /**
-   * Subscribe to data changes at a specific path
+   * Unsubscribe from all channels
    */
-  static subscribeToValue<T = any>(
-    path: string,
-    callback: (data: T | null) => void
-  ): () => void {
-    const dbRef = ref(realtimeDb, path);
-
-    const unsubscribe = onValue(dbRef, (snapshot: DataSnapshot) => {
-      if (snapshot.exists()) {
-        callback(snapshot.val() as T);
-      } else {
-        callback(null);
-      }
+  static unsubscribeAll(): void {
+    this.channels.forEach((channel, channelName) => {
+      supabase.removeChannel(channel);
     });
-
-    return () => off(dbRef, 'value', unsubscribe);
+    this.channels.clear();
   }
 
   /**
-   * Subscribe to child events (added, changed, removed)
+   * Get connection status
    */
-  static subscribeToChildEvents<T = any>(
-    path: string,
-    callbacks: {
-      onChildAdded?: (data: T, key: string) => void;
-      onChildChanged?: (data: T, key: string) => void;
-      onChildRemoved?: (key: string) => void;
-    }
+  static getConnectionStatus(): string {
+    // Supabase doesn't expose connection status directly
+    // This is a simplified implementation
+    return 'connected';
+  }
+
+  /**
+   * Subscribe to connection status changes
+   */
+  static subscribeToConnectionStatus(
+    onStatusChange: (status: string) => void
   ): () => void {
-    const dbRef = ref(realtimeDb, path);
-    const unsubscribeFunctions: (() => void)[] = [];
+    // Supabase doesn't have direct connection status events
+    // This is a placeholder implementation
+    const interval = setInterval(() => {
+      onStatusChange(this.getConnectionStatus());
+    }, 5000);
 
-    if (callbacks.onChildAdded) {
-      const unsubscribeAdded = onValue(dbRef, (snapshot: DataSnapshot) => {
-        snapshot.forEach(childSnapshot => {
-          callbacks.onChildAdded!(childSnapshot.val() as T, childSnapshot.key!);
-        });
-      });
-      unsubscribeFunctions.push(() => off(dbRef, 'value', unsubscribeAdded));
-    }
-
-    // Return function to unsubscribe from all events
-    return () => {
-      unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
-    };
-  }
-
-  /**
-   * Batch update multiple paths
-   */
-  static async batchUpdate(updates: Record<string, any>): Promise<void> {
-    try {
-      const timestampedUpdates: Record<string, any> = {};
-
-      Object.keys(updates).forEach(path => {
-        timestampedUpdates[path] = {
-          ...updates[path],
-          timestamp: serverTimestamp(),
-        };
-      });
-
-      const dbRef = ref(realtimeDb);
-      await update(dbRef, timestampedUpdates);
-    } catch (error) {
-      console.error('Error batch updating:', error);
-      throw error;
-    }
+    return () => clearInterval(interval);
   }
 }

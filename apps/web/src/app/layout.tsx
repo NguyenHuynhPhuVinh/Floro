@@ -23,6 +23,7 @@ export const metadata: Metadata = {
     'canvas',
     'thời gian thực',
     'quy trình',
+    'supabase',
     'collaboration',
     'visual',
     'real-time',

@@ -88,7 +88,7 @@ describe('WelcomeHero Component', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          /được xây dựng với next.js, typescript, tailwind css và firebase/i
+          /được xây dựng với next.js, typescript, tailwind css và supabase/i
         )
       ).toBeInTheDocument();
       expect(screen.getByText(/phiên bản 1.0.0/i)).toBeInTheDocument();

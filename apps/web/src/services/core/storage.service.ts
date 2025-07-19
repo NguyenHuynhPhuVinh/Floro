@@ -1,21 +1,8 @@
-import {
-  ref,
-  uploadBytes,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-  listAll,
-  getMetadata,
-  updateMetadata,
-  UploadTask,
-  StorageReference,
-} from 'firebase/storage';
-
-import { storage } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 
 export interface UploadProgress {
-  bytesTransferred: number;
-  totalBytes: number;
+  loaded: number;
+  total: number;
   progress: number;
 }
 
@@ -23,170 +10,153 @@ export interface FileMetadata {
   name: string;
   size: number;
   contentType: string;
-  timeCreated: string;
-  updated: string;
-  downloadURL: string;
+  lastModified: string;
+  publicUrl: string;
+  path: string;
 }
 
 export class StorageService {
+  private static readonly BUCKET_NAME = 'floro-assets';
+
   /**
-   * Upload a file to Firebase Storage
+   * Upload a file to Supabase Storage
    */
   static async uploadFile(
     path: string,
     file: File | Blob,
-    metadata?: Record<string, string>
+    options?: {
+      cacheControl?: string;
+      contentType?: string;
+      upsert?: boolean;
+    }
   ): Promise<string> {
     try {
-      const storageRef = ref(storage, path);
-      const uploadResult = await uploadBytes(storageRef, file, {
-        customMetadata: metadata,
-      });
+      const { data, error } = await supabase.storage
+        .from(this.BUCKET_NAME)
+        .upload(path, file, {
+          cacheControl: options?.cacheControl || '3600',
+          contentType: options?.contentType || file.type,
+          upsert: options?.upsert || false,
+        });
 
-      return await getDownloadURL(uploadResult.ref);
+      if (error) {
+        console.error('Error uploading file:', error);
+        throw new Error(`Failed to upload file: ${error.message}`);
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from(this.BUCKET_NAME)
+        .getPublicUrl(data.path);
+
+      return urlData.publicUrl;
     } catch (error) {
-      console.error('Error uploading file:', error);
+      console.error('Error in uploadFile:', error);
       throw error;
     }
   }
 
   /**
-   * Upload a file with progress tracking
+   * Upload file with progress tracking
    */
-  static uploadFileWithProgress(
+  static async uploadFileWithProgress(
     path: string,
-    file: File | Blob,
-    onProgress?: (progress: UploadProgress) => void,
-    metadata?: Record<string, string>
+    file: File,
+    onProgress?: (progress: UploadProgress) => void
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const storageRef = ref(storage, path);
-      const uploadTask = uploadBytesResumable(storageRef, file, {
-        customMetadata: metadata,
-      });
+    // Note: Supabase doesn't have built-in progress tracking
+    // This is a simplified implementation
+    if (onProgress) {
+      onProgress({ loaded: 0, total: file.size, progress: 0 });
+    }
 
-      uploadTask.on(
-        'state_changed',
-        snapshot => {
-          if (onProgress) {
-            const progress = {
-              bytesTransferred: snapshot.bytesTransferred,
-              totalBytes: snapshot.totalBytes,
-              progress: (snapshot.bytesTransferred / snapshot.totalBytes) * 100,
-            };
-            onProgress(progress);
-          }
-        },
-        error => {
-          console.error('Error uploading file:', error);
-          reject(error);
-        },
-        async () => {
-          try {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            resolve(downloadURL);
-          } catch (error) {
-            reject(error);
-          }
-        }
-      );
-    });
-  }
-
-  /**
-   * Get download URL for a file
-   */
-  static async getFileURL(path: string): Promise<string> {
     try {
-      const storageRef = ref(storage, path);
-      return await getDownloadURL(storageRef);
+      const result = await this.uploadFile(path, file);
+
+      if (onProgress) {
+        onProgress({ loaded: file.size, total: file.size, progress: 100 });
+      }
+
+      return result;
     } catch (error) {
-      console.error('Error getting file URL:', error);
+      console.error('Error uploading file with progress:', error);
       throw error;
     }
   }
 
   /**
-   * Delete a file from Firebase Storage
+   * Get public URL for a file
+   */
+  static getFileURL(path: string): string {
+    const { data } = supabase.storage.from(this.BUCKET_NAME).getPublicUrl(path);
+
+    return data.publicUrl;
+  }
+
+  /**
+   * Delete a file from storage
    */
   static async deleteFile(path: string): Promise<void> {
-    try {
-      const storageRef = ref(storage, path);
-      await deleteObject(storageRef);
-    } catch (error) {
+    const { error } = await supabase.storage
+      .from(this.BUCKET_NAME)
+      .remove([path]);
+
+    if (error) {
       console.error('Error deleting file:', error);
-      throw error;
+      throw new Error(`Failed to delete file: ${error.message}`);
     }
   }
 
   /**
-   * List all files in a directory
+   * List files in a directory
    */
-  static async listFiles(path: string): Promise<FileMetadata[]> {
-    try {
-      const storageRef = ref(storage, path);
-      const result = await listAll(storageRef);
-
-      const filePromises = result.items.map(async itemRef => {
-        const metadata = await getMetadata(itemRef);
-        const downloadURL = await getDownloadURL(itemRef);
-
-        return {
-          name: metadata.name,
-          size: metadata.size,
-          contentType: metadata.contentType || 'unknown',
-          timeCreated: metadata.timeCreated,
-          updated: metadata.updated,
-          downloadURL,
-        };
+  static async listFiles(path: string = ''): Promise<FileMetadata[]> {
+    const { data, error } = await supabase.storage
+      .from(this.BUCKET_NAME)
+      .list(path, {
+        limit: 100,
+        offset: 0,
+        sortBy: { column: 'name', order: 'asc' },
       });
 
-      return await Promise.all(filePromises);
-    } catch (error) {
+    if (error) {
       console.error('Error listing files:', error);
-      throw error;
+      throw new Error(`Failed to list files: ${error.message}`);
     }
+
+    return data.map(file => ({
+      name: file.name,
+      size: file.metadata?.size || 0,
+      contentType: file.metadata?.mimetype || 'unknown',
+      lastModified: file.updated_at || file.created_at,
+      publicUrl: this.getFileURL(`${path}/${file.name}`),
+      path: `${path}/${file.name}`,
+    }));
   }
 
   /**
    * Get file metadata
    */
   static async getFileMetadata(path: string): Promise<FileMetadata> {
-    try {
-      const storageRef = ref(storage, path);
-      const metadata = await getMetadata(storageRef);
-      const downloadURL = await getDownloadURL(storageRef);
-
-      return {
-        name: metadata.name,
-        size: metadata.size,
-        contentType: metadata.contentType || 'unknown',
-        timeCreated: metadata.timeCreated,
-        updated: metadata.updated,
-        downloadURL,
-      };
-    } catch (error) {
-      console.error('Error getting file metadata:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Update file metadata
-   */
-  static async updateFileMetadata(
-    path: string,
-    metadata: Record<string, string>
-  ): Promise<void> {
-    try {
-      const storageRef = ref(storage, path);
-      await updateMetadata(storageRef, {
-        customMetadata: metadata,
+    const { data, error } = await supabase.storage
+      .from(this.BUCKET_NAME)
+      .list(path.split('/').slice(0, -1).join('/'), {
+        search: path.split('/').pop(),
       });
-    } catch (error) {
-      console.error('Error updating file metadata:', error);
-      throw error;
+
+    if (error || !data || data.length === 0) {
+      throw new Error(`File not found: ${path}`);
     }
+
+    const file = data[0];
+    return {
+      name: file.name,
+      size: file.metadata?.size || 0,
+      contentType: file.metadata?.mimetype || 'unknown',
+      lastModified: file.updated_at || file.created_at,
+      publicUrl: this.getFileURL(path),
+      path,
+    };
   }
 
   /**

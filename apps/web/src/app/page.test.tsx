@@ -58,7 +58,7 @@ describe('Home Page', () => {
     render(<Home />);
 
     const techStack = screen.getByText(
-      /được xây dựng với next.js, typescript, tailwind css và firebase/i
+      /được xây dựng với next.js, typescript, tailwind css và supabase/i
     );
     expect(techStack).toBeInTheDocument();
   });

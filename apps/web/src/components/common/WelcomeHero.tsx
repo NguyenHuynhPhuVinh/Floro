@@ -131,7 +131,7 @@ export function WelcomeHero(): React.JSX.Element {
         {/* Footer */}
         <div className="mt-16 text-center">
           <p className="text-sm text-gray-500 dark:text-gray-500">
-            Được xây dựng với Next.js, TypeScript, Tailwind CSS và Firebase
+            Được xây dựng với Next.js, TypeScript, Tailwind CSS và Supabase
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-600 mt-2">
             Phiên bản 1.0.0 • {new Date().getFullYear()} Đội ngũ Floro
