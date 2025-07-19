@@ -44,12 +44,7 @@ jest.mock('next/navigation', () => ({
   },
 }));
 
-// Mock Firebase
-jest.mock('@/lib/firebase', () => ({
-  db: {},
-  realtimeDb: {},
-  storage: {},
-}));
+// Firebase will be mocked in individual test files when needed
 
 // Global test utilities
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
