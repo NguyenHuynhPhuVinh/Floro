@@ -1,13 +1,14 @@
 'use client';
-'use client';
 
 import React from 'react';
-import { X, Monitor, Grid, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { X, Monitor, Grid, Users } from 'lucide-react';
+
 import { useSettingsStore } from '../../store/settings.store';
-import { DisplaySettings } from './settings/DisplaySettings';
-import { CanvasSettings } from './settings/CanvasSettings';
+
 import { CollaborationSettings } from './settings/CollaborationSettings';
+import { CanvasSettings } from './settings/CanvasSettings';
+import { DisplaySettings } from './settings/DisplaySettings';
 
 interface SettingsCategory {
   id: string;

@@ -2,14 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
+
 import { useSettingsStore } from '../../store/settings.store';
 
 interface I18nProviderProps {
   children: React.ReactNode;
 }
 
-export function I18nProvider({ children }: I18nProviderProps) {
-  const [i18n, setI18n] = useState<any>(null);
+export function I18nProvider({
+  children,
+}: I18nProviderProps): React.JSX.Element {
+  const [i18n, setI18n] = useState<typeof import('i18next').default | null>(
+    null
+  );
   const { collaboration } = useSettingsStore();
 
   useEffect(() => {
@@ -23,7 +28,7 @@ export function I18nProvider({ children }: I18nProviderProps) {
         i18nInstance.changeLanguage(collaboration.language);
       }
     });
-  }, []);
+  }, [collaboration.language]);
 
   useEffect(() => {
     // Change language when settings change

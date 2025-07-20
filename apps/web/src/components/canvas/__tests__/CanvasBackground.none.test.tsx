@@ -10,14 +10,14 @@ const mockCanvasSettings = {
 };
 
 jest.mock('../../../store/settings.store', () => ({
-  useSettingsStore: () => ({
+  useSettingsStore: (): object => ({
     canvas: mockCanvasSettings,
   }),
 }));
 
 // Mock next-themes
 jest.mock('next-themes', () => ({
-  useTheme: () => ({
+  useTheme: (): object => ({
     theme: 'light',
   }),
 }));
@@ -30,31 +30,31 @@ const mockViewport = {
 };
 
 jest.mock('../../../store/canvas.store', () => ({
-  useCanvasStore: () => ({
+  useCanvasStore: (): object => ({
     viewport: mockViewport,
   }),
 }));
 
 // Mock background components
 jest.mock('../GridBackground', () => ({
-  GridBackground: () => (
+  GridBackground: (): React.JSX.Element => (
     <div data-testid="grid-background">Grid Background</div>
   ),
 }));
 
 jest.mock('../DotsBackground', () => ({
-  DotsBackground: () => (
+  DotsBackground: (): React.JSX.Element => (
     <div data-testid="dots-background">Dots Background</div>
   ),
 }));
 
-describe('CanvasBackground with none type', () => {
-  it('does not render when background type is none', () => {
+describe('CanvasBackground with none type', (): void => {
+  it('does not render when background type is none', (): void => {
     const { container } = render(<CanvasBackground />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('returns null early when backgroundType is none', () => {
+  it('returns null early when backgroundType is none', (): void => {
     const { container } = render(<CanvasBackground />);
 
     // Should not render any background components

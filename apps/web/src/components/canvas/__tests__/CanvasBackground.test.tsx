@@ -36,8 +36,20 @@ jest.mock('../../../store/canvas.store', () => ({
 }));
 
 // Mock the background components
+interface MockBackgroundProps {
+  type?: string;
+  size?: number;
+  color?: string;
+  opacity?: number;
+}
+
 jest.mock('../GridBackground', () => ({
-  GridBackground: ({ type, size, color, opacity }: any) => (
+  GridBackground: ({
+    type,
+    size,
+    color,
+    opacity,
+  }: MockBackgroundProps): React.JSX.Element => (
     <div
       data-testid="grid-background"
       data-type={type}
@@ -51,7 +63,12 @@ jest.mock('../GridBackground', () => ({
 }));
 
 jest.mock('../DotsBackground', () => ({
-  DotsBackground: ({ type, size, color, opacity }: any) => (
+  DotsBackground: ({
+    type,
+    size,
+    color,
+    opacity,
+  }: MockBackgroundProps): React.JSX.Element => (
     <div
       data-testid="dots-background"
       data-type={type}
@@ -65,11 +82,11 @@ jest.mock('../DotsBackground', () => ({
 }));
 
 describe('CanvasBackground', () => {
-  beforeEach(() => {
+  beforeEach((): void => {
     jest.clearAllMocks();
   });
 
-  it('renders grid background when type is grid', () => {
+  it('renders grid background when type is grid', (): void => {
     render(<CanvasBackground />);
 
     const gridBackground = screen.getByTestId('grid-background');
@@ -79,7 +96,7 @@ describe('CanvasBackground', () => {
     expect(gridBackground).toHaveAttribute('data-opacity', '0.3');
   });
 
-  it('renders dots background when type is dots', () => {
+  it('renders dots background when type is dots', (): void => {
     // Mock dots background type
     jest.doMock('../../../store/settings.store', () => ({
       useSettingsStore: () => ({
@@ -96,7 +113,7 @@ describe('CanvasBackground', () => {
 
   // Test for 'none' background type is in separate file: CanvasBackground.none.test.tsx
 
-  it('uses correct color based on next-themes', () => {
+  it('uses correct color based on next-themes', (): void => {
     render(<CanvasBackground />);
 
     const gridBackground = screen.getByTestId('grid-background');
@@ -104,7 +121,7 @@ describe('CanvasBackground', () => {
     expect(gridBackground).toHaveAttribute('data-color', '#D1D5DB');
   });
 
-  it('has correct container styling', () => {
+  it('has correct container styling', (): void => {
     const { container } = render(<CanvasBackground />);
 
     const backgroundContainer = container.firstChild as HTMLElement;
@@ -124,10 +141,10 @@ describe('CanvasBackground', () => {
     expect(screen.getByTestId('grid-background')).toBeInTheDocument();
   });
 
-  it('handles different background sizes', () => {
+  it('handles different background sizes', (): void => {
     // Test with different size
     jest.doMock('../../../store/settings.store', () => ({
-      useSettingsStore: () => ({
+      useSettingsStore: (): object => ({
         canvas: { ...mockCanvasSettings, backgroundSize: 50 },
       }),
     }));
@@ -138,7 +155,7 @@ describe('CanvasBackground', () => {
     expect(gridBackground).toHaveAttribute('data-size', '20'); // Still shows original due to mock limitations
   });
 
-  it('handles different opacity values', () => {
+  it('handles different opacity values', (): void => {
     render(<CanvasBackground />);
 
     const gridBackground = screen.getByTestId('grid-background');

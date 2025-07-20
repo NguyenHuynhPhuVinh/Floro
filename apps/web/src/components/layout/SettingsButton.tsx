@@ -1,8 +1,10 @@
 'use client';
+
 import React from 'react';
-import { Settings } from 'lucide-react';
-import { useSettingsStore } from '../../store/settings.store';
 import { useTranslation } from 'react-i18next';
+import { Settings } from 'lucide-react';
+
+import { useSettingsStore } from '../../store/settings.store';
 
 interface SettingsButtonProps {
   className?: string;
@@ -18,7 +20,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({
   const { openModal } = useSettingsStore();
   const { t, ready } = useTranslation('common');
 
-  const handleClick = () => {
+  const handleClick = (): void => {
     openModal();
   };
 

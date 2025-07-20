@@ -2,12 +2,12 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 // Import all translation files directly to avoid dynamic imports
-import viCommon from '../locales/vi/common.json';
-import viSettings from '../locales/vi/settings.json';
-import viCanvas from '../locales/vi/canvas.json';
+import enCanvas from '../locales/en/canvas.json';
 import enCommon from '../locales/en/common.json';
 import enSettings from '../locales/en/settings.json';
-import enCanvas from '../locales/en/canvas.json';
+import viCanvas from '../locales/vi/canvas.json';
+import viCommon from '../locales/vi/common.json';
+import viSettings from '../locales/vi/settings.json';
 
 const resources = {
   vi: {

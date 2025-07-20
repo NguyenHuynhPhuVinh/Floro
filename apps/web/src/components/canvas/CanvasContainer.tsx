@@ -3,19 +3,12 @@
 import dynamic from 'next/dynamic';
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 
-// eslint-disable-next-line import/order
 import { useCanvasViewport } from '../../hooks/canvas/useCanvasViewport';
-// eslint-disable-next-line import/order
 import { useFileUpload } from '../../hooks/nodes/useFileUpload';
-// eslint-disable-next-line import/order
 import { FileUploadProgress } from '../nodes/FileUploadProgress';
-// eslint-disable-next-line import/order
 import { CanvasDragDropHandler } from './CanvasDragDropHandler';
-// eslint-disable-next-line import/order
 import { ConfirmDialog } from '../ui/ConfirmDialog';
-// eslint-disable-next-line import/order
 import { useNodeDelete } from '../../hooks/nodes/useNodeDelete';
-// eslint-disable-next-line import/order
 import { CanvasBackground } from './CanvasBackground';
 
 // Dynamically import Konva wrapper to avoid SSR issues

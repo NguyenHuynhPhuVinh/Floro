@@ -1,16 +1,19 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
+
 import { AppHeader } from '../AppHeader';
 
 // Mock SettingsButton component
 jest.mock('../SettingsButton', () => ({
-  SettingsButton: () => <button data-testid="settings-button">Settings</button>,
+  SettingsButton: (): React.JSX.Element => (
+    <button data-testid="settings-button">Settings</button>
+  ),
 }));
 
 // Mock react-i18next
 jest.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
+  useTranslation: (): object => ({
+    t: (key: string): string => {
       const translations: Record<string, string> = {
         appTitle: 'Floro',
       };
@@ -20,8 +23,8 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-describe('AppHeader', () => {
-  it('renders with correct structure', () => {
+describe('AppHeader', (): void => {
+  it('renders with correct structure', (): void => {
     render(<AppHeader />);
 
     const header = screen.getByRole('banner');

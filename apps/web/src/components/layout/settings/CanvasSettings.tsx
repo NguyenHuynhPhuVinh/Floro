@@ -1,10 +1,12 @@
 'use client';
 
 import React from 'react';
-import { useSettingsStore } from '../../../store/settings.store';
 import { useTranslation } from 'react-i18next';
-import { ThemeToggle } from '../ThemeToggle';
+
+import { useSettingsStore } from '../../../store/settings.store';
 import type { CanvasBackgroundType } from '../../../store/settings.store';
+
+import { ThemeToggle } from '../ThemeToggle';
 
 /**
  * Canvas settings component for configuring background, theme, and visual options.

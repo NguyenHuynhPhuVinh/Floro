@@ -76,7 +76,7 @@ const defaultCollaborationSettings: CollaborationSettings = {
  */
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set, get) => ({
+    set => ({
       // Initial state
       isModalOpen: false,
       activeCategory: 'display',
@@ -85,29 +85,31 @@ export const useSettingsStore = create<SettingsState>()(
       collaboration: defaultCollaborationSettings,
 
       // Modal actions
-      openModal: () => set({ isModalOpen: true }),
-      closeModal: () => set({ isModalOpen: false }),
-      setActiveCategory: (category: string) =>
+      openModal: (): void => set({ isModalOpen: true }),
+      closeModal: (): void => set({ isModalOpen: false }),
+      setActiveCategory: (category: string): void =>
         set({ activeCategory: category }),
 
       // Settings update actions
-      updateDisplaySettings: (settings: Partial<DisplaySettings>) =>
+      updateDisplaySettings: (settings: Partial<DisplaySettings>): void =>
         set(state => ({
           display: { ...state.display, ...settings },
         })),
 
-      updateCanvasSettings: (settings: Partial<CanvasSettings>) =>
+      updateCanvasSettings: (settings: Partial<CanvasSettings>): void =>
         set(state => ({
           canvas: { ...state.canvas, ...settings },
         })),
 
-      updateCollaborationSettings: (settings: Partial<CollaborationSettings>) =>
+      updateCollaborationSettings: (
+        settings: Partial<CollaborationSettings>
+      ): void =>
         set(state => ({
           collaboration: { ...state.collaboration, ...settings },
         })),
 
       // Reset to defaults
-      resetToDefaults: () =>
+      resetToDefaults: (): void =>
         set({
           display: defaultDisplaySettings,
           canvas: defaultCanvasSettings,

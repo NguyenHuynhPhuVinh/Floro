@@ -2,10 +2,13 @@
 
 import React from 'react';
 import { useTheme } from 'next-themes';
-import { useSettingsStore } from '../../store/settings.store';
+
 import { useCanvasStore } from '../../store/canvas.store';
-import { GridBackground } from './GridBackground';
+import { useSettingsStore } from '../../store/settings.store';
+
 import { DotsBackground } from './DotsBackground';
+import { GridBackground } from './GridBackground';
+
 import type { CanvasBackgroundType } from '../../store/settings.store';
 
 export interface CanvasViewport {
@@ -57,10 +60,10 @@ export const CanvasBackground: React.FC = () => {
 
   // Background rendering strategies
   const backgroundRenderers = {
-    grid: () => <GridBackground {...backgroundProps} />,
-    dots: () => <DotsBackground {...backgroundProps} />,
-    lines: () => <GridBackground {...backgroundProps} />, // Use grid for lines for now
-    none: () => null,
+    grid: (): React.JSX.Element => <GridBackground {...backgroundProps} />,
+    dots: (): React.JSX.Element => <DotsBackground {...backgroundProps} />,
+    lines: (): React.JSX.Element => <GridBackground {...backgroundProps} />, // Use grid for lines for now
+    none: (): null => null,
   };
 
   const BackgroundComponent = backgroundRenderers[canvas.backgroundType];

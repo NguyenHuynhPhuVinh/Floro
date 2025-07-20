@@ -1,4 +1,5 @@
 import React from 'react';
+
 import type { CanvasBackgroundProps } from './CanvasBackground';
 
 /**
@@ -21,7 +22,7 @@ export const GridBackground: React.FC<CanvasBackgroundProps> = ({
   const scaledSize = size * viewport.scale;
   const visibleWidth = width * viewport.scale;
   const visibleHeight = height * viewport.scale;
-  
+
   const gridLinesX = Math.ceil(visibleWidth / scaledSize) + 2;
   const gridLinesY = Math.ceil(visibleHeight / scaledSize) + 2;
 
@@ -83,14 +84,10 @@ export const GridBackground: React.FC<CanvasBackgroundProps> = ({
           />
         </pattern>
       </defs>
-      
+
       {/* Use pattern for better performance */}
-      <rect
-        width="100%"
-        height="100%"
-        fill="url(#grid-pattern)"
-      />
-      
+      <rect width="100%" height="100%" fill="url(#grid-pattern)" />
+
       {/* Fallback: individual lines for better control */}
       <g style={{ display: 'none' }}>
         {verticalLines}

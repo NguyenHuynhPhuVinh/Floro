@@ -5,7 +5,10 @@ import { ComponentProps } from 'react';
 
 type ThemeProviderProps = ComponentProps<typeof NextThemesProvider>;
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+export function ThemeProvider({
+  children,
+  ...props
+}: ThemeProviderProps): React.JSX.Element {
   return (
     <NextThemesProvider
       attribute="class"

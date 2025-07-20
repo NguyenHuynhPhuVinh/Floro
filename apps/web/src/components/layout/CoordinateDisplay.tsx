@@ -3,9 +3,10 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { useCanvasStore } from '../../store/canvas.store';
 import { useSettingsStore } from '../../store/settings.store';
 import { useMousePosition } from '../../hooks/ui/useMousePosition';
-import { useCanvasStore } from '../../store/canvas.store';
 
 /**
  * Coordinate display component that shows mouse and canvas coordinates

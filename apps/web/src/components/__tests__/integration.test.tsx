@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+
 import { AppLayout } from '../layout/AppLayout';
 import { ClientProviders } from '../providers/ClientProviders';
 

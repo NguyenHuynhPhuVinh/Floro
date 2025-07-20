@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import { AppHeader } from './AppHeader';
 import { CoordinateDisplay } from './CoordinateDisplay';
 import { SettingsModal } from './SettingsModal';

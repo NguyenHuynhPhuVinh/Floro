@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { SettingsButton } from './SettingsButton';
 import { useTranslation } from 'react-i18next';
+
+import { SettingsButton } from './SettingsButton';
 
 interface AppHeaderProps {
   className?: string;
