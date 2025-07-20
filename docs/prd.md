@@ -206,7 +206,7 @@ Giao diện của Floro phải mang lại cảm giác **tức thì, trực quan 
 3.  Người dùng có thể kéo thả node để cập nhật vị trí, lưu vào database.
 4.  Người dùng có thể xóa node bằng phím Delete hoặc context menu.
 5.  Hệ thống hiển thị loading states khi thực hiện các thao tác.
-6.  Tất cả thay đổi được đồng bộ với database và hiển thị real-time.
+6.  Tất cả thay đổi được lưu vào database và cập nhật UI ngay lập tức.
 
 ### Story 2.3: Cải thiện Giao diện Node với Konva
 

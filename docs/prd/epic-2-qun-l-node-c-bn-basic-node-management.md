@@ -24,7 +24,7 @@
 3.  Người dùng có thể kéo thả node để cập nhật vị trí, lưu vào database.
 4.  Người dùng có thể xóa node bằng phím Delete hoặc context menu.
 5.  Hệ thống hiển thị loading states khi thực hiện các thao tác.
-6.  Tất cả thay đổi được đồng bộ với database và hiển thị real-time.
+6.  Tất cả thay đổi được lưu vào database và cập nhật UI ngay lập tức.
 
 ### Story 2.3: Cải thiện Giao diện Node với Konva
 
@@ -61,4 +61,4 @@
 4.  Nếu là ảnh, tạo Node Ảnh và tải ảnh lên Supabase Storage.
 5.  Tất cả node mới tạo phải được lưu trữ trong PostgreSQL và di chuyển được.
 6.  Người dùng có thể sao chép nội dung từ Node Văn bản và Link.
-
+
