@@ -267,6 +267,92 @@ export class NodeService {
   }
 
   /**
+   * NEW: Update multiple nodes with batch operation for multi-select
+   */
+  static async updateMultipleNodes(
+    updates: Array<{ nodeId: string; data: Partial<FileNode> }>
+  ): Promise<FloroNode[]> {
+    const promises = updates.map(({ nodeId, data }) =>
+      this.updateNode(nodeId, {
+        position: data.position,
+        data: data as Record<string, unknown>,
+      })
+    );
+
+    try {
+      const results = await Promise.all(promises);
+      return results;
+    } catch (error) {
+      this.handleError('Failed to update multiple nodes', error);
+    }
+  }
+
+  /**
+   * NEW: Delete multiple nodes for batch operations
+   */
+  static async deleteMultipleNodes(nodeIds: string[]): Promise<void> {
+    const { error } = await supabase
+      .from('floro_nodes')
+      .delete()
+      .in('id', nodeIds);
+
+    if (error) {
+      this.handleError('Failed to delete multiple nodes', error);
+    }
+  }
+
+  /**
+   * NEW: Delete a FileNode with file cleanup in Supabase Storage
+   */
+  static async deleteFileNode(nodeId: string): Promise<void> {
+    try {
+      // First get the node to access file information
+      const node = await this.getNode(nodeId);
+      if (!node) {
+        throw new Error(`Node with ID ${nodeId} not found`);
+      }
+
+      // Extract file URL to get storage path
+      const fileURL = node.data.fileURL as string;
+      if (fileURL) {
+        try {
+          // Extract file path from URL
+          // Assuming URL format: https://[project].supabase.co/storage/v1/object/public/[bucket]/[path]
+          const urlParts = fileURL.split('/');
+          const bucketIndex = urlParts.findIndex(part => part === 'public') + 1;
+          if (bucketIndex > 0 && bucketIndex < urlParts.length) {
+            const bucket = urlParts[bucketIndex];
+            const filePath = urlParts.slice(bucketIndex + 1).join('/');
+
+            // Delete file from storage
+            const { error: storageError } = await supabase.storage
+              .from(bucket)
+              .remove([filePath]);
+
+            if (storageError) {
+              // eslint-disable-next-line no-console
+              console.warn('Failed to delete file from storage:', storageError);
+              // Continue with node deletion even if file deletion fails
+            }
+          }
+        } catch (storageError) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            'Failed to parse file URL for storage cleanup:',
+            storageError
+          );
+          // Continue with node deletion even if file cleanup fails
+        }
+      }
+
+      // Delete the node from database
+      await this.deleteNode(nodeId);
+    } catch (error) {
+      this.handleError('Failed to delete file node', error);
+    }
+  }
+
+  /**
    * Get all nodes for a session
    */
   static async getNodesBySession(sessionId: string): Promise<FileNode[]> {

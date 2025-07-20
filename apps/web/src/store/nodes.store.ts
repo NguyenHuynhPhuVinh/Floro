@@ -18,6 +18,7 @@ interface NodesState {
   selectNode: (id: string) => void;
   deselectNode: (id: string) => void;
   clearSelection: () => void;
+  setSelectedNodeIds: (nodeIds: Set<string>) => void;
   setNodes: (nodes: FileNode[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -76,6 +77,11 @@ export const useNodesStore = create<NodesState>()(
       clearSelection: (): void =>
         set(() => ({
           selectedNodeIds: new Set(),
+        })),
+
+      setSelectedNodeIds: (nodeIds: Set<string>): void =>
+        set(() => ({
+          selectedNodeIds: nodeIds,
         })),
 
       setNodes: (nodes: FileNode[]): void =>

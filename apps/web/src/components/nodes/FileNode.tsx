@@ -5,6 +5,7 @@ import React, { useState, useCallback } from 'react';
 import { Group, Rect, Text, Circle, Path } from 'react-konva';
 
 import { useFileDownload } from '../../hooks/nodes/useFileDownload';
+import { useNodeDrag } from '../../hooks/nodes/useNodeDrag';
 import { FileNode as FileNodeType } from '../../types';
 
 import { FileNodeIcon } from './FileNodeIcon';
@@ -12,22 +13,35 @@ import { FileNodeIcon } from './FileNodeIcon';
 interface FileNodeProps {
   node: FileNodeType;
   isSelected?: boolean;
-  onSelect?: (nodeId: string) => void;
+  isLoading?: boolean; // NEW: For operation feedback
+  onSelect?: (nodeId: string, multiSelect?: boolean) => void;
   onDownload?: (node: FileNodeType) => void;
+  onDelete?: (nodeId: string) => void;
+  onContextMenu?: (nodeId: string, position: { x: number; y: number }) => void; // NEW
   scale: number; // Canvas zoom level
 }
 
 export function FileNode({
   node,
   isSelected = false,
+  isLoading = false,
   onSelect,
   onDownload,
+  onDelete,
+  onContextMenu,
   scale,
 }: FileNodeProps): React.JSX.Element {
   const [isHovered, setIsHovered] = useState(false);
 
   // Download functionality
   const { downloadFile } = useFileDownload();
+
+  // Drag functionality
+  const {
+    handleDragStart,
+    handleDragEnd,
+    isLoading: isDragLoading,
+  } = useNodeDrag();
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -62,8 +76,14 @@ export function FileNode({
       // Stop event propagation to prevent canvas interactions
       e.cancelBubble = true;
 
-      // If it's a double-click or right-click, trigger download
-      if (e.evt.detail === 2 || e.evt.button === 2) {
+      // Check for platform-specific multi-select modifier
+      const isMac =
+        typeof navigator !== 'undefined' &&
+        navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const isMultiSelect = isMac ? e.evt.metaKey : e.evt.ctrlKey;
+
+      // If it's a double-click, trigger download
+      if (e.evt.detail === 2) {
         try {
           await downloadFile(node);
           if (onDownload) {
@@ -73,14 +93,23 @@ export function FileNode({
           // eslint-disable-next-line no-console
           console.error('Download failed:', error);
         }
+      } else if (e.evt.button === 2) {
+        // Right-click - context menu
+        if (onContextMenu) {
+          const stage = e.target.getStage();
+          const pointerPosition = stage?.getPointerPosition();
+          if (pointerPosition) {
+            onContextMenu(node.id, pointerPosition);
+          }
+        }
       } else {
-        // Single click - select node
+        // Single click - select node with multi-select support
         if (onSelect) {
-          onSelect(node.id);
+          onSelect(node.id, isMultiSelect);
         }
       }
     },
-    [node, onSelect, onDownload, downloadFile]
+    [node, onSelect, onDownload, onContextMenu, downloadFile]
   );
 
   const handleKonvaMouseDown = useCallback(() => {
@@ -98,12 +127,15 @@ export function FileNode({
       onMouseDown={handleKonvaMouseDown}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      nodeId={node.id} // Custom attribute for drag system
     >
       {/* Main background */}
       <Rect
         width={scaledWidth}
         height={scaledHeight}
-        fill="#ffffff"
+        fill={isLoading || isDragLoading ? '#f9fafb' : '#ffffff'}
         stroke={isSelected ? '#3b82f6' : '#e5e7eb'}
         strokeWidth={isSelected ? 2 : 1}
         cornerRadius={8}
@@ -111,7 +143,25 @@ export function FileNode({
         shadowBlur={isHovered ? 10 : 4}
         shadowOpacity={isHovered ? 0.15 : 0.1}
         shadowOffsetY={2}
+        opacity={isLoading || isDragLoading ? 0.7 : 1}
       />
+
+      {/* Selection highlight */}
+      {isSelected && (
+        <Rect
+          x={-2}
+          y={-2}
+          width={scaledWidth + 4}
+          height={scaledHeight + 4}
+          fill="transparent"
+          stroke="#3b82f6"
+          strokeWidth={2}
+          cornerRadius={10}
+          shadowColor="#3b82f6"
+          shadowBlur={8}
+          shadowOpacity={0.2}
+        />
+      )}
 
       {/* File icon */}
       <FileNodeIcon
@@ -179,15 +229,14 @@ export function FileNode({
         </>
       )}
 
-      {/* Selection indicator */}
-      {isSelected && (
-        <Rect
-          x={-2}
-          y={-2}
-          width={6}
-          height={6}
+      {/* Loading spinner */}
+      {(isLoading || isDragLoading) && (
+        <Circle
+          x={scaledWidth - 20}
+          y={20}
+          radius={8}
           fill="#3b82f6"
-          cornerRadius={3}
+          opacity={0.8}
         />
       )}
 
