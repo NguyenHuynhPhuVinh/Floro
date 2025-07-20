@@ -11,7 +11,24 @@ floro/
 │       │   ├── components/             # React components
 │       │   │   ├── ui/                 # Shadcn/ui components
 │       │   │   ├── canvas/             # Canvas-specific components
+│       │   │   │   ├── CanvasContainer.tsx
+│       │   │   │   ├── KonvaCanvas.tsx
+│       │   │   │   ├── NodesLayer.tsx
+│       │   │   │   ├── CanvasDragDropHandler.tsx
+│       │   │   │   └── CanvasBackground.tsx
 │       │   │   ├── nodes/              # Node type components
+│       │   │   │   ├── FileNode.tsx
+│       │   │   │   ├── FileNodeIcon.tsx
+│       │   │   │   ├── TextNode.tsx
+│       │   │   │   ├── LinkNode.tsx
+│       │   │   │   ├── ImageNode.tsx
+│       │   │   │   └── FileUploadProgress.tsx
+│       │   │   ├── layout/             # Application shell components
+│       │   │   │   ├── AppLayout.tsx
+│       │   │   │   ├── AppHeader.tsx
+│       │   │   │   ├── SettingsModal.tsx
+│       │   │   │   ├── SettingsButton.tsx
+│       │   │   │   └── CoordinateDisplay.tsx
 │       │   │   └── common/             # Shared components
 │       │   ├── services/               # Supabase service layer
 │       │   │   ├── core/               # Core services (supabase, node, storage)
@@ -19,11 +36,26 @@ floro/
 │       │   │   └── utils/              # Service utilities
 │       │   ├── hooks/                  # Custom React hooks
 │       │   │   ├── canvas/             # Canvas-related hooks
+│       │   │   │   ├── useCanvasPan.ts
+│       │   │   │   ├── useCanvasZoom.ts
+│       │   │   │   ├── useCanvasViewport.ts
+│       │   │   │   └── useMousePosition.ts
 │       │   │   ├── nodes/              # Node management hooks
+│       │   │   │   ├── useNodes.ts
+│       │   │   │   ├── useFileUpload.ts
+│       │   │   │   ├── useFileDownload.ts
+│       │   │   │   ├── useNodeDrag.ts
+│       │   │   │   ├── useNodeSelection.ts
+│       │   │   │   └── useClipboard.ts
+│       │   │   ├── ui/                 # UI-related hooks
+│       │   │   │   ├── useSettings.ts
+│       │   │   │   ├── useTheme.ts
+│       │   │   │   └── useLocalization.ts
 │       │   │   └── realtime/           # Real-time data hooks
 │       │   ├── store/                  # Zustand stores
-│       │   │   ├── canvas.store.ts     # Canvas state (zoom, pan, viewport)
-│       │   │   ├── nodes.store.ts      # Node management state
+│       │   │   ├── canvas.store.ts     # Canvas state (zoom, pan, viewport, UI)
+│       │   │   ├── nodes.store.ts      # Node management state (selection, history)
+│       │   │   ├── settings.store.ts   # Application settings state
 │       │   │   └── realtime.store.ts   # Real-time collaboration state
 │       │   ├── lib/                    # Utility libraries
 │       │   │   ├── spatial/            # Quadtree and spatial indexing

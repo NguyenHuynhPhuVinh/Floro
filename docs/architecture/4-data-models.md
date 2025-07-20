@@ -96,6 +96,78 @@ export interface ErrorLog {
   context?: Record<string, any>; // JSONB column
 }
 
+// Node Selection and Management (Epic 2.2)
+export interface NodeSelectionState {
+  selectedNodeIds: Set<string>;
+  lastSelectedId?: string;
+  selectionBounds?: SpatialBounds;
+  isMultiSelect: boolean;
+}
+
+export interface NodeOperation {
+  type: "create" | "update" | "delete" | "move";
+  nodeId: string;
+  timestamp: string;
+  data?: Partial<FloroNode>;
+  previousData?: Partial<FloroNode>;
+}
+
+// UI State Management (Epic 2.3, 2.4)
+export interface UIState {
+  theme: "light" | "dark" | "auto";
+  language: "vi" | "en";
+  showCoordinates: boolean;
+  showGrid: boolean;
+  gridSize: number;
+  canvasBackground: "none" | "grid" | "dots";
+}
+
+export interface SettingsConfig {
+  ui: UIState;
+  canvas: {
+    defaultZoom: number;
+    minZoom: number;
+    maxZoom: number;
+    panSensitivity: number;
+    zoomSensitivity: number;
+  };
+  collaboration: {
+    showCursors: boolean;
+    cursorUpdateInterval: number;
+    enableRealtime: boolean;
+  };
+}
+
+// Clipboard Integration (Epic 2.5)
+export interface ClipboardContent {
+  type: "text" | "url" | "image" | "file";
+  data: string | File | Blob;
+  mimeType?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface ClipboardOperation {
+  content: ClipboardContent;
+  position: { x: number; y: number };
+  timestamp: string;
+}
+
+// Animation and Interaction States
+export interface NodeInteractionState {
+  isHovered: boolean;
+  isDragging: boolean;
+  isSelected: boolean;
+  isLoading: boolean;
+  dragOffset?: { x: number; y: number };
+  hoverStartTime?: number;
+}
+
+export interface AnimationConfig {
+  duration: number;
+  easing: "linear" | "ease-in" | "ease-out" | "ease-in-out";
+  delay?: number;
+}
+
 // Database schema types for Supabase
 export interface Database {
   public: {

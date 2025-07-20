@@ -12,9 +12,10 @@ This document outlines the complete fullstack architecture for **Floro**, includ
 
 ### 1.3 Change Log
 
-| Date             | Version | Description                | Author              |
-| :--------------- | :------ | :------------------------- | :------------------ |
-| {{current_date}} | 1.0     | Initial Architecture Draft | Winston (Architect) |
+| Date             | Version | Description                                                        | Author              |
+| :--------------- | :------ | :----------------------------------------------------------------- | :------------------ |
+| {{current_date}} | 1.0     | Initial Architecture Draft                                         | Winston (Architect) |
+| {{current_date}} | 1.1     | Epic 2 Updates: UI Components, State Management, Application Shell | Winston (Architect) |
 
 ## 2. High-Level Architecture
 
@@ -110,6 +111,71 @@ This table lists the technologies chosen for the Floro project. Development will
 | **E2E Testing**        | Playwright                     | End-to-end testing                  | Modern, reliable, cross-browser testing.                   |
 | **Monitoring**         | Vercel Analytics               | Performance monitoring              | Built-in analytics, Core Web Vitals tracking.              |
 | **Deployment**         | Vercel                         | Nền tảng hosting                    | Tích hợp CI/CD tự động, mạng lưới toàn cầu.                |
+
+## 3.1. UI Components Architecture
+
+### 3.1.1 Konva-Based Component System
+
+The application uses a hybrid approach combining HTML components for UI shell and Konva components for canvas elements.
+
+| Component Type          | Technology                         | Purpose                      | Implementation               |
+| :---------------------- | :--------------------------------- | :--------------------------- | :--------------------------- |
+| **Canvas Components**   | Konva.js + react-konva             | Node rendering, interactions | High-performance 2D graphics |
+| **UI Shell Components** | React + Tailwind CSS               | Application layout, modals   | Traditional HTML/CSS         |
+| **Icon System**         | Lucide React                       | Professional icons           | SVG-based, tree-shakeable    |
+| **Animation System**    | Konva animations + CSS transitions | Smooth UX                    | Hardware-accelerated         |
+
+### 3.1.2 Component Architecture Patterns
+
+```typescript
+// Canvas Component Pattern
+interface KonvaComponentProps {
+  x: number;
+  y: number;
+  scale: number;
+  isSelected?: boolean;
+  onSelect?: (id: string) => void;
+}
+
+// UI Shell Component Pattern
+interface UIComponentProps {
+  className?: string;
+  children?: React.ReactNode;
+  variant?: "primary" | "secondary";
+}
+```
+
+### 3.1.3 Icon System Architecture
+
+- **File Type Icons**: Lucide icons with category-based mapping
+- **Color Coding**: Semantic colors for different file categories
+- **Scalable Rendering**: Vector-based icons that scale with canvas zoom
+- **Performance**: Optimized icon caching and reuse
+
+### 3.1.4 Theme and Localization System
+
+```typescript
+interface ThemeConfig {
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+  };
+  typography: {
+    fontFamily: string;
+    fontSize: Record<string, number>;
+  };
+  spacing: Record<string, number>;
+}
+
+interface LocalizationConfig {
+  language: "vi" | "en";
+  messages: Record<string, string>;
+  dateFormat: string;
+  numberFormat: Intl.NumberFormatOptions;
+}
+```
 
 ## 4. Data Models
 
@@ -209,6 +275,78 @@ export interface ErrorLog {
   context?: Record<string, any>; // JSONB column
 }
 
+// Node Selection and Management (Epic 2.2)
+export interface NodeSelectionState {
+  selectedNodeIds: Set<string>;
+  lastSelectedId?: string;
+  selectionBounds?: SpatialBounds;
+  isMultiSelect: boolean;
+}
+
+export interface NodeOperation {
+  type: "create" | "update" | "delete" | "move";
+  nodeId: string;
+  timestamp: string;
+  data?: Partial<FloroNode>;
+  previousData?: Partial<FloroNode>;
+}
+
+// UI State Management (Epic 2.3, 2.4)
+export interface UIState {
+  theme: "light" | "dark" | "auto";
+  language: "vi" | "en";
+  showCoordinates: boolean;
+  showGrid: boolean;
+  gridSize: number;
+  canvasBackground: "none" | "grid" | "dots";
+}
+
+export interface SettingsConfig {
+  ui: UIState;
+  canvas: {
+    defaultZoom: number;
+    minZoom: number;
+    maxZoom: number;
+    panSensitivity: number;
+    zoomSensitivity: number;
+  };
+  collaboration: {
+    showCursors: boolean;
+    cursorUpdateInterval: number;
+    enableRealtime: boolean;
+  };
+}
+
+// Clipboard Integration (Epic 2.5)
+export interface ClipboardContent {
+  type: "text" | "url" | "image" | "file";
+  data: string | File | Blob;
+  mimeType?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface ClipboardOperation {
+  content: ClipboardContent;
+  position: { x: number; y: number };
+  timestamp: string;
+}
+
+// Animation and Interaction States
+export interface NodeInteractionState {
+  isHovered: boolean;
+  isDragging: boolean;
+  isSelected: boolean;
+  isLoading: boolean;
+  dragOffset?: { x: number; y: number };
+  hoverStartTime?: number;
+}
+
+export interface AnimationConfig {
+  duration: number;
+  easing: "linear" | "ease-in" | "ease-out" | "ease-in-out";
+  delay?: number;
+}
+
 // Database schema types for Supabase
 export interface Database {
   public: {
@@ -297,7 +435,24 @@ floro/
 │       │   ├── components/             # React components
 │       │   │   ├── ui/                 # Shadcn/ui components
 │       │   │   ├── canvas/             # Canvas-specific components
+│       │   │   │   ├── CanvasContainer.tsx
+│       │   │   │   ├── KonvaCanvas.tsx
+│       │   │   │   ├── NodesLayer.tsx
+│       │   │   │   ├── CanvasDragDropHandler.tsx
+│       │   │   │   └── CanvasBackground.tsx
 │       │   │   ├── nodes/              # Node type components
+│       │   │   │   ├── FileNode.tsx
+│       │   │   │   ├── FileNodeIcon.tsx
+│       │   │   │   ├── TextNode.tsx
+│       │   │   │   ├── LinkNode.tsx
+│       │   │   │   ├── ImageNode.tsx
+│       │   │   │   └── FileUploadProgress.tsx
+│       │   │   ├── layout/             # Application shell components
+│       │   │   │   ├── AppLayout.tsx
+│       │   │   │   ├── AppHeader.tsx
+│       │   │   │   ├── SettingsModal.tsx
+│       │   │   │   ├── SettingsButton.tsx
+│       │   │   │   └── CoordinateDisplay.tsx
 │       │   │   └── common/             # Shared components
 │       │   ├── services/               # Supabase service layer
 │       │   │   ├── core/               # Core services (supabase, node, storage)
@@ -305,11 +460,26 @@ floro/
 │       │   │   └── utils/              # Service utilities
 │       │   ├── hooks/                  # Custom React hooks
 │       │   │   ├── canvas/             # Canvas-related hooks
+│       │   │   │   ├── useCanvasPan.ts
+│       │   │   │   ├── useCanvasZoom.ts
+│       │   │   │   ├── useCanvasViewport.ts
+│       │   │   │   └── useMousePosition.ts
 │       │   │   ├── nodes/              # Node management hooks
+│       │   │   │   ├── useNodes.ts
+│       │   │   │   ├── useFileUpload.ts
+│       │   │   │   ├── useFileDownload.ts
+│       │   │   │   ├── useNodeDrag.ts
+│       │   │   │   ├── useNodeSelection.ts
+│       │   │   │   └── useClipboard.ts
+│       │   │   ├── ui/                 # UI-related hooks
+│       │   │   │   ├── useSettings.ts
+│       │   │   │   ├── useTheme.ts
+│       │   │   │   └── useLocalization.ts
 │       │   │   └── realtime/           # Real-time data hooks
 │       │   ├── store/                  # Zustand stores
-│       │   │   ├── canvas.store.ts     # Canvas state (zoom, pan, viewport)
-│       │   │   ├── nodes.store.ts      # Node management state
+│       │   │   ├── canvas.store.ts     # Canvas state (zoom, pan, viewport, UI)
+│       │   │   ├── nodes.store.ts      # Node management state (selection, history)
+│       │   │   ├── settings.store.ts   # Application settings state
 │       │   │   └── realtime.store.ts   # Real-time collaboration state
 │       │   ├── lib/                    # Utility libraries
 │       │   │   ├── spatial/            # Quadtree and spatial indexing
@@ -339,6 +509,271 @@ floro/
 ├── .gitignore
 ├── README.md
 └── LICENSE
+```
+
+## 6.1. State Management Architecture
+
+### 6.1.1 Zustand Store Architecture
+
+The application uses Zustand for client-side state management with a modular store approach.
+
+```typescript
+// Enhanced Canvas Store (Epic 2.2, 2.3)
+interface CanvasState {
+  // Viewport state
+  viewport: {
+    x: number;
+    y: number;
+    scale: number;
+    width: number;
+    height: number;
+  };
+
+  // UI state
+  ui: {
+    showGrid: boolean;
+    showCoordinates: boolean;
+    gridSize: number;
+    theme: "light" | "dark";
+    language: "vi" | "en";
+  };
+
+  // Performance tracking
+  performance: PerformanceMetrics;
+
+  // Actions
+  updateViewport: (viewport: Partial<CanvasState["viewport"]>) => void;
+  updateUI: (ui: Partial<CanvasState["ui"]>) => void;
+  resetCanvas: () => void;
+}
+
+// Enhanced Nodes Store (Epic 2.2)
+interface NodesState {
+  // Node data
+  nodes: FloroNode[];
+
+  // Selection state
+  selection: NodeSelectionState;
+
+  // Operation history for undo/redo
+  history: NodeOperation[];
+  historyIndex: number;
+
+  // Loading states
+  isLoading: boolean;
+  error: string | null;
+
+  // Actions
+  addNode: (node: FloroNode) => void;
+  updateNode: (id: string, updates: Partial<FloroNode>) => void;
+  deleteNode: (id: string) => void;
+  selectNode: (id: string, multiSelect?: boolean) => void;
+  clearSelection: () => void;
+  undo: () => void;
+  redo: () => void;
+}
+
+// Settings Store (Epic 2.4)
+interface SettingsState {
+  config: SettingsConfig;
+  isModalOpen: boolean;
+
+  // Actions
+  updateSettings: (updates: Partial<SettingsConfig>) => void;
+  resetSettings: () => void;
+  openModal: () => void;
+  closeModal: () => void;
+}
+```
+
+### 6.1.2 State Synchronization Patterns
+
+- **Local-First**: UI state changes immediately, then sync to database
+- **Optimistic Updates**: Show changes instantly, rollback on error
+- **Real-time Sync**: Supabase Realtime for collaborative updates
+- **Conflict Resolution**: Last-write-wins with timestamp comparison
+
+### 6.1.3 Command Pattern for Undo/Redo
+
+```typescript
+interface Command {
+  execute(): Promise<void>;
+  undo(): Promise<void>;
+  canUndo(): boolean;
+  description: string;
+}
+
+class MoveNodeCommand implements Command {
+  constructor(
+    private nodeId: string,
+    private oldPosition: { x: number; y: number },
+    private newPosition: { x: number; y: number }
+  ) {}
+
+  async execute(): Promise<void> {
+    // Move node to new position
+  }
+
+  async undo(): Promise<void> {
+    // Move node back to old position
+  }
+}
+```
+
+## 6.2. Application Shell Architecture
+
+### 6.2.1 Layout System (Epic 2.4)
+
+The application uses a layered layout approach with clear separation between UI shell and canvas content.
+
+```typescript
+// Application Layout Structure
+interface AppLayoutProps {
+  children: React.ReactNode;
+}
+
+const AppLayout: React.FC<AppLayoutProps> = ({ children }) => (
+  <div className="h-screen w-screen flex flex-col">
+    {/* Header with Logo and Settings */}
+    <AppHeader />
+
+    {/* Main Canvas Area */}
+    <main className="flex-1 relative overflow-hidden">{children}</main>
+
+    {/* Floating UI Elements */}
+    <CoordinateDisplay />
+    <SettingsModal />
+  </div>
+);
+```
+
+### 6.2.2 Header Component Architecture
+
+```typescript
+interface AppHeaderProps {
+  className?: string;
+}
+
+const AppHeader: React.FC<AppHeaderProps> = ({ className }) => (
+  <header className={`bg-white border-b border-gray-200 ${className}`}>
+    <div className="flex items-center justify-between px-6 py-3">
+      {/* Left: Navigation or breadcrumbs (future) */}
+      <div className="flex-1" />
+
+      {/* Center: Logo */}
+      <div className="flex items-center">
+        <h1 className="text-2xl font-bold text-gray-900">Floro</h1>
+      </div>
+
+      {/* Right: Settings and actions */}
+      <div className="flex-1 flex justify-end">
+        <SettingsButton />
+      </div>
+    </div>
+  </header>
+);
+```
+
+### 6.2.3 Settings System Architecture
+
+```typescript
+// Settings Modal Component
+interface SettingsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+// Settings Categories
+interface SettingsCategory {
+  id: string;
+  title: string;
+  icon: React.ComponentType;
+  component: React.ComponentType<SettingsCategoryProps>;
+}
+
+const settingsCategories: SettingsCategory[] = [
+  {
+    id: "display",
+    title: "Hiển thị",
+    icon: Monitor,
+    component: DisplaySettings,
+  },
+  {
+    id: "canvas",
+    title: "Canvas",
+    icon: Grid,
+    component: CanvasSettings,
+  },
+  {
+    id: "collaboration",
+    title: "Cộng tác",
+    icon: Users,
+    component: CollaborationSettings,
+  },
+];
+```
+
+### 6.2.4 Canvas Background System
+
+```typescript
+// Canvas Background Types
+type CanvasBackgroundType = "none" | "grid" | "dots" | "lines";
+
+interface CanvasBackgroundProps {
+  type: CanvasBackgroundType;
+  size: number;
+  color: string;
+  opacity: number;
+  viewport: CanvasViewport;
+}
+
+// Background Rendering Strategies
+const backgroundRenderers = {
+  grid: (props: CanvasBackgroundProps) => <GridBackground {...props} />,
+  dots: (props: CanvasBackgroundProps) => <DotsBackground {...props} />,
+  lines: (props: CanvasBackgroundProps) => <LinesBackground {...props} />,
+  none: () => null,
+};
+```
+
+### 6.2.5 Coordinate Display System
+
+```typescript
+interface CoordinateDisplayProps {
+  position: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  showCanvasCoords: boolean;
+  showMouseCoords: boolean;
+  format: "decimal" | "integer";
+}
+
+const CoordinateDisplay: React.FC<CoordinateDisplayProps> = ({
+  position,
+  showCanvasCoords,
+  showMouseCoords,
+  format,
+}) => {
+  const { viewport } = useCanvasStore();
+  const mousePosition = useMousePosition();
+
+  return (
+    <div
+      className={`fixed ${positionClasses[position]} bg-black/75 text-white px-2 py-1 rounded text-xs font-mono`}
+    >
+      {showCanvasCoords && (
+        <div>
+          Canvas: {formatCoordinate(viewport.x, format)},{" "}
+          {formatCoordinate(viewport.y, format)}
+        </div>
+      )}
+      {showMouseCoords && (
+        <div>
+          Mouse: {formatCoordinate(mousePosition.x, format)},{" "}
+          {formatCoordinate(mousePosition.y, format)}
+        </div>
+      )}
+    </div>
+  );
+};
 ```
 
 ## 7. Development Workflow
