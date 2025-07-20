@@ -1,6 +1,9 @@
 'use client';
+'use client';
+
 import React from 'react';
 import { X, Monitor, Grid, Users } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../../store/settings.store';
 import { DisplaySettings } from './settings/DisplaySettings';
 import { CanvasSettings } from './settings/CanvasSettings';
@@ -8,31 +11,10 @@ import { CollaborationSettings } from './settings/CollaborationSettings';
 
 interface SettingsCategory {
   id: string;
-  title: string;
+  titleKey: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   component: React.ComponentType;
 }
-
-const settingsCategories: SettingsCategory[] = [
-  {
-    id: 'display',
-    title: 'Hiển thị',
-    icon: Monitor,
-    component: DisplaySettings,
-  },
-  {
-    id: 'canvas',
-    title: 'Canvas',
-    icon: Grid,
-    component: CanvasSettings,
-  },
-  {
-    id: 'collaboration',
-    title: 'Cộng tác',
-    icon: Users,
-    component: CollaborationSettings,
-  },
-];
 
 /**
  * Settings modal component with Vietnamese content and tabbed interface.
@@ -41,6 +23,28 @@ const settingsCategories: SettingsCategory[] = [
 export const SettingsModal: React.FC = () => {
   const { isModalOpen, activeCategory, closeModal, setActiveCategory } =
     useSettingsStore();
+  const { t } = useTranslation('settings');
+
+  const settingsCategories: SettingsCategory[] = [
+    {
+      id: 'display',
+      titleKey: 'categories.display',
+      icon: Monitor,
+      component: DisplaySettings,
+    },
+    {
+      id: 'canvas',
+      titleKey: 'categories.canvas',
+      icon: Grid,
+      component: CanvasSettings,
+    },
+    {
+      id: 'collaboration',
+      titleKey: 'categories.collaboration',
+      icon: Users,
+      component: CollaborationSettings,
+    },
+  ];
 
   if (!isModalOpen) {
     return null;
@@ -53,22 +57,24 @@ export const SettingsModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] overflow-hidden transition-colors duration-300">
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Cài đặt</h2>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            {t('title')}
+          </h2>
           <button
             onClick={closeModal}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="Đóng"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            aria-label={t('common:close')}
           >
-            <X size={20} className="text-gray-500" />
+            <X size={20} className="text-gray-500 dark:text-gray-400" />
           </button>
         </div>
 
         <div className="flex h-[500px]">
           {/* Sidebar */}
-          <div className="w-64 bg-gray-50 border-r border-gray-200">
+          <div className="w-64 bg-gray-50 dark:bg-gray-700 border-r border-gray-200 dark:border-gray-600">
             <nav className="p-4 space-y-2">
               {settingsCategories.map(category => {
                 const Icon = category.icon;
@@ -83,13 +89,13 @@ export const SettingsModal: React.FC = () => {
                       transition-colors duration-200
                       ${
                         isActive
-                          ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700'
+                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
                       }
                     `}
                   >
                     <Icon size={18} />
-                    <span className="font-medium">{category.title}</span>
+                    <span className="font-medium">{t(category.titleKey)}</span>
                   </button>
                 );
               })}
@@ -97,7 +103,7 @@ export const SettingsModal: React.FC = () => {
           </div>
 
           {/* Content Area */}
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="flex-1 p-6 overflow-y-auto bg-white dark:bg-gray-800">
             <ActiveComponent />
           </div>
         </div>

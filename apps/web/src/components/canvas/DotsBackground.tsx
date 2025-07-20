@@ -10,8 +10,6 @@ export const DotsBackground: React.FC<CanvasBackgroundProps> = ({
   color,
   opacity,
   viewport,
-  width,
-  height,
 }) => {
   // Calculate dot offset based on viewport position
   const offsetX = (-viewport.x * viewport.scale) % (size * viewport.scale);
@@ -19,34 +17,10 @@ export const DotsBackground: React.FC<CanvasBackgroundProps> = ({
 
   // Calculate scaled values
   const scaledSize = size * viewport.scale;
-  const dotRadius = Math.max(1, viewport.scale * 1.5); // Minimum 1px, scales with zoom
-  
-  // Calculate visible area
-  const visibleWidth = width * viewport.scale;
-  const visibleHeight = height * viewport.scale;
-  
-  const dotsX = Math.ceil(visibleWidth / scaledSize) + 2;
-  const dotsY = Math.ceil(visibleHeight / scaledSize) + 2;
+  const dotRadius = Math.max(1, Math.min(viewport.scale * 1.5, scaledSize / 8)); // Limit dot size
 
-  // Generate dots
-  const dots = [];
-  for (let i = 0; i < dotsX; i++) {
-    for (let j = 0; j < dotsY; j++) {
-      const x = offsetX + i * scaledSize;
-      const y = offsetY + j * scaledSize;
-      
-      dots.push(
-        <circle
-          key={`dot-${i}-${j}`}
-          cx={x}
-          cy={y}
-          r={dotRadius}
-          fill={color}
-          opacity={opacity}
-        />
-      );
-    }
-  }
+  // Create unique pattern ID to avoid conflicts
+  const patternId = `dots-pattern-${Math.round(scaledSize)}-${Math.round(dotRadius)}`;
 
   return (
     <svg
@@ -57,7 +31,7 @@ export const DotsBackground: React.FC<CanvasBackgroundProps> = ({
     >
       <defs>
         <pattern
-          id="dots-pattern"
+          id={patternId}
           width={scaledSize}
           height={scaledSize}
           patternUnits="userSpaceOnUse"
@@ -73,18 +47,9 @@ export const DotsBackground: React.FC<CanvasBackgroundProps> = ({
           />
         </pattern>
       </defs>
-      
+
       {/* Use pattern for better performance */}
-      <rect
-        width="100%"
-        height="100%"
-        fill="url(#dots-pattern)"
-      />
-      
-      {/* Fallback: individual dots for better control */}
-      <g style={{ display: 'none' }}>
-        {dots}
-      </g>
+      <rect width="100%" height="100%" fill={`url(#${patternId})`} />
     </svg>
   );
 };

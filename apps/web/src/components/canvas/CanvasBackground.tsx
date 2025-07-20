@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { useTheme } from 'next-themes';
 import { useSettingsStore } from '../../store/settings.store';
 import { useCanvasStore } from '../../store/canvas.store';
 import { GridBackground } from './GridBackground';
@@ -28,6 +31,7 @@ export interface CanvasBackgroundProps {
 export const CanvasBackground: React.FC = () => {
   const { canvas } = useSettingsStore();
   const { viewport } = useCanvasStore();
+  const { theme } = useTheme();
 
   // Don't render if background is disabled
   if (canvas.backgroundType === 'none') {
@@ -38,8 +42,8 @@ export const CanvasBackground: React.FC = () => {
   const canvasWidth = 2000; // Default canvas width
   const canvasHeight = 2000; // Default canvas height
 
-  // Determine background color based on theme
-  const backgroundColor = canvas.theme === 'dark' ? '#374151' : '#9CA3AF';
+  // Determine background color based on current theme
+  const backgroundColor = theme === 'dark' ? '#4B5563' : '#D1D5DB';
 
   const backgroundProps: CanvasBackgroundProps = {
     type: canvas.backgroundType,
@@ -62,10 +66,7 @@ export const CanvasBackground: React.FC = () => {
   const BackgroundComponent = backgroundRenderers[canvas.backgroundType];
 
   return (
-    <div 
-      className="absolute inset-0 pointer-events-none"
-      style={{ zIndex: 0 }}
-    >
+    <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
       <BackgroundComponent />
     </div>
   );

@@ -1,5 +1,8 @@
 'use client';
+'use client';
+
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../../store/settings.store';
 import { useMousePosition } from '../../hooks/ui/useMousePosition';
 import { useCanvasStore } from '../../store/canvas.store';
@@ -12,6 +15,7 @@ export const CoordinateDisplay: React.FC = () => {
   const { display } = useSettingsStore();
   const mousePosition = useMousePosition();
   const { viewport } = useCanvasStore();
+  const { t } = useTranslation('canvas');
 
   // Don't render if coordinates are disabled
   if (!display.showCoordinates) {
@@ -45,12 +49,13 @@ export const CoordinateDisplay: React.FC = () => {
     >
       {display.showCanvasCoords && (
         <div className="mb-1">
-          Canvas: {formatCoordinate(viewport.x)}, {formatCoordinate(viewport.y)}
+          {t('coordinates.canvas')}: {formatCoordinate(viewport.x)},{' '}
+          {formatCoordinate(viewport.y)}
         </div>
       )}
       {display.showMouseCoords && (
         <div>
-          Chuột: {formatCoordinate(mousePosition.x)},{' '}
+          {t('coordinates.mouse')}: {formatCoordinate(mousePosition.x)},{' '}
           {formatCoordinate(mousePosition.y)}
         </div>
       )}

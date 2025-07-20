@@ -1,0 +1,10 @@
+{
+  "coordinates": {
+    "mouse": "Chuột",
+    "canvas": "Canvas"
+  },
+  "loading": "Đang tải Canvas...",
+  "background": {
+    "loading": "Đang tải nền..."
+  }
+}

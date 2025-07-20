@@ -1,0 +1,58 @@
+{
+  "title": "Settings",
+  "categories": {
+    "display": "Display",
+    "canvas": "Canvas",
+    "collaboration": "Collaboration"
+  },
+  "display": {
+    "title": "Display Settings",
+    "showCoordinates": "Show Coordinates",
+    "mouseCoordinates": "Mouse Coordinates",
+    "canvasCoordinates": "Canvas Coordinates",
+    "coordinateFormat": "Coordinate Format",
+    "coordinatePosition": "Display Position",
+    "formats": {
+      "decimal": "Decimal",
+      "integer": "Integer"
+    },
+    "positions": {
+      "topLeft": "Top Left",
+      "topRight": "Top Right",
+      "bottomLeft": "Bottom Left",
+      "bottomRight": "Bottom Right"
+    }
+  },
+  "canvas": {
+    "title": "Canvas Settings",
+    "backgroundType": "Background Type",
+    "backgroundSize": "Background Size",
+    "backgroundOpacity": "Opacity",
+    "theme": "Theme",
+    "backgrounds": {
+      "none": "None",
+      "grid": "Grid",
+      "dots": "Dots",
+      "lines": "Lines"
+    },
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+  "collaboration": {
+    "title": "Collaboration Settings",
+    "language": "Interface Language",
+    "languages": {
+      "vi": "Vietnamese",
+      "en": "English"
+    },
+    "futureFeatures": "Collaboration Features (Coming Soon)",
+    "features": {
+      "realtimeSharing": "Real-time canvas sharing",
+      "commentsAndNotes": "Comments and notes",
+      "accessManagement": "Access management"
+    }
+  }
+}

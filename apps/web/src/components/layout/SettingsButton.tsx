@@ -2,6 +2,7 @@
 import React from 'react';
 import { Settings } from 'lucide-react';
 import { useSettingsStore } from '../../store/settings.store';
+import { useTranslation } from 'react-i18next';
 
 interface SettingsButtonProps {
   className?: string;
@@ -15,6 +16,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({
   className = '',
 }) => {
   const { openModal } = useSettingsStore();
+  const { t, ready } = useTranslation('common');
 
   const handleClick = () => {
     openModal();
@@ -24,16 +26,21 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({
     <button
       onClick={handleClick}
       className={`
-        p-2 rounded-lg border border-gray-300 bg-white
-        hover:bg-gray-50 hover:border-gray-400
+        p-2 rounded-lg border border-gray-300 dark:border-gray-600
+        bg-white dark:bg-gray-700
+        hover:bg-gray-50 dark:hover:bg-gray-600
+        hover:border-gray-400 dark:hover:border-gray-500
         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
         transition-colors duration-200
         ${className}
       `}
-      aria-label="Cài đặt"
-      title="Cài đặt"
+      aria-label={ready ? t('settings') : 'Cài đặt'}
+      title={ready ? t('settings') : 'Cài đặt'}
     >
-      <Settings size={20} className="text-gray-600 hover:text-gray-800" />
+      <Settings
+        size={20}
+        className="text-gray-600 dark:text-gray-200 hover:text-gray-800 dark:hover:text-white"
+      />
     </button>
   );
 };

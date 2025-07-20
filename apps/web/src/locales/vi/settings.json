@@ -1,0 +1,58 @@
+{
+  "title": "Cài đặt",
+  "categories": {
+    "display": "Hiển thị",
+    "canvas": "Canvas",
+    "collaboration": "Cộng tác"
+  },
+  "display": {
+    "title": "Cài đặt hiển thị",
+    "showCoordinates": "Hiển thị tọa độ",
+    "mouseCoordinates": "Tọa độ chuột",
+    "canvasCoordinates": "Tọa độ canvas",
+    "coordinateFormat": "Định dạng tọa độ",
+    "coordinatePosition": "Vị trí hiển thị",
+    "formats": {
+      "decimal": "Thập phân",
+      "integer": "Số nguyên"
+    },
+    "positions": {
+      "topLeft": "Trên trái",
+      "topRight": "Trên phải",
+      "bottomLeft": "Dưới trái",
+      "bottomRight": "Dưới phải"
+    }
+  },
+  "canvas": {
+    "title": "Cài đặt Canvas",
+    "backgroundType": "Loại nền",
+    "backgroundSize": "Kích thước nền",
+    "backgroundOpacity": "Độ trong suốt",
+    "theme": "Giao diện",
+    "backgrounds": {
+      "none": "Không có",
+      "grid": "Lưới",
+      "dots": "Chấm",
+      "lines": "Đường kẻ"
+    },
+    "themes": {
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Theo hệ thống"
+    }
+  },
+  "collaboration": {
+    "title": "Cài đặt cộng tác",
+    "language": "Ngôn ngữ giao diện",
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
+    "futureFeatures": "Tính năng cộng tác (sắp ra mắt)",
+    "features": {
+      "realtimeSharing": "Chia sẻ canvas theo thời gian thực",
+      "commentsAndNotes": "Bình luận và ghi chú",
+      "accessManagement": "Quản lý quyền truy cập"
+    }
+  }
+}

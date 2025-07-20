@@ -1,6 +1,8 @@
+'use client';
+
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../../../store/settings.store';
-import { useLocalization } from '../../../hooks/ui/useLocalization';
 import type {
   CoordinateFormat,
   CoordinatePosition,
@@ -12,36 +14,36 @@ import type {
  */
 export const DisplaySettings: React.FC = () => {
   const { display, updateDisplaySettings } = useSettingsStore();
-  const { getText } = useLocalization();
+  const { t } = useTranslation('settings');
 
   const coordinateFormatOptions: { value: CoordinateFormat; label: string }[] =
     [
-      { value: 'integer', label: getText('integer') },
-      { value: 'decimal', label: getText('decimal') },
+      { value: 'integer', label: t('display.formats.integer') },
+      { value: 'decimal', label: t('display.formats.decimal') },
     ];
 
   const coordinatePositionOptions: {
     value: CoordinatePosition;
     label: string;
   }[] = [
-    { value: 'top-left', label: getText('topLeft') },
-    { value: 'top-right', label: getText('topRight') },
-    { value: 'bottom-left', label: getText('bottomLeft') },
-    { value: 'bottom-right', label: getText('bottomRight') },
+    { value: 'top-left', label: t('display.positions.topLeft') },
+    { value: 'top-right', label: t('display.positions.topRight') },
+    { value: 'bottom-left', label: t('display.positions.bottomLeft') },
+    { value: 'bottom-right', label: t('display.positions.bottomRight') },
   ];
 
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">
-          {getText('display')} {getText('settings')}
+          {t('display.title')}
         </h3>
 
         {/* Show Coordinates Toggle */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700">
-              {getText('showCoordinates')}
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t('display.showCoordinates')}
             </label>
             <input
               type="checkbox"
@@ -49,16 +51,18 @@ export const DisplaySettings: React.FC = () => {
               onChange={e =>
                 updateDisplaySettings({ showCoordinates: e.target.checked })
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
             />
           </div>
 
           {/* Coordinate Type Options - only show if coordinates are enabled */}
           {display.showCoordinates && (
             <>
-              <div className="ml-4 space-y-3 border-l-2 border-gray-200 pl-4">
+              <div className="ml-4 space-y-3 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm text-gray-600">Tọa độ chuột</label>
+                  <label className="text-sm text-gray-600 dark:text-gray-400">
+                    {t('display.mouseCoordinates')}
+                  </label>
                   <input
                     type="checkbox"
                     checked={display.showMouseCoords}
@@ -67,12 +71,14 @@ export const DisplaySettings: React.FC = () => {
                         showMouseCoords: e.target.checked,
                       })
                     }
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <label className="text-sm text-gray-600">Tọa độ canvas</label>
+                  <label className="text-sm text-gray-600 dark:text-gray-400">
+                    {t('display.canvasCoordinates')}
+                  </label>
                   <input
                     type="checkbox"
                     checked={display.showCanvasCoords}
@@ -81,15 +87,15 @@ export const DisplaySettings: React.FC = () => {
                         showCanvasCoords: e.target.checked,
                       })
                     }
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                   />
                 </div>
               </div>
 
               {/* Coordinate Format */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Định dạng tọa độ
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t('display.coordinateFormat')}
                 </label>
                 <select
                   value={display.coordinateFormat}
@@ -98,7 +104,7 @@ export const DisplaySettings: React.FC = () => {
                       coordinateFormat: e.target.value as CoordinateFormat,
                     })
                   }
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   {coordinateFormatOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -110,8 +116,8 @@ export const DisplaySettings: React.FC = () => {
 
               {/* Coordinate Position */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Vị trí hiển thị
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t('display.coordinatePosition')}
                 </label>
                 <select
                   value={display.coordinatePosition}
@@ -120,7 +126,7 @@ export const DisplaySettings: React.FC = () => {
                       coordinatePosition: e.target.value as CoordinatePosition,
                     })
                   }
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   {coordinatePositionOptions.map(option => (
                     <option key={option.value} value={option.value}>

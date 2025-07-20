@@ -3,10 +3,13 @@ import { persist } from 'zustand/middleware';
 
 // Types for settings configuration
 export type CanvasBackgroundType = 'none' | 'grid' | 'dots' | 'lines';
-export type ThemeType = 'light' | 'dark';
 export type LanguageType = 'vi' | 'en';
 export type CoordinateFormat = 'decimal' | 'integer';
-export type CoordinatePosition = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+export type CoordinatePosition =
+  | 'top-left'
+  | 'top-right'
+  | 'bottom-left'
+  | 'bottom-right';
 
 export interface DisplaySettings {
   showCoordinates: boolean;
@@ -20,7 +23,6 @@ export interface CanvasSettings {
   backgroundType: CanvasBackgroundType;
   backgroundSize: number;
   backgroundOpacity: number;
-  theme: ThemeType;
 }
 
 export interface CollaborationSettings {
@@ -31,19 +33,21 @@ export interface SettingsState {
   // Modal state
   isModalOpen: boolean;
   activeCategory: string;
-  
+
   // Settings categories
   display: DisplaySettings;
   canvas: CanvasSettings;
   collaboration: CollaborationSettings;
-  
+
   // Actions
   openModal: () => void;
   closeModal: () => void;
   setActiveCategory: (category: string) => void;
   updateDisplaySettings: (settings: Partial<DisplaySettings>) => void;
   updateCanvasSettings: (settings: Partial<CanvasSettings>) => void;
-  updateCollaborationSettings: (settings: Partial<CollaborationSettings>) => void;
+  updateCollaborationSettings: (
+    settings: Partial<CollaborationSettings>
+  ) => void;
   resetToDefaults: () => void;
 }
 
@@ -60,7 +64,6 @@ const defaultCanvasSettings: CanvasSettings = {
   backgroundType: 'grid',
   backgroundSize: 20,
   backgroundOpacity: 0.3,
-  theme: 'light',
 };
 
 const defaultCollaborationSettings: CollaborationSettings = {
@@ -84,21 +87,22 @@ export const useSettingsStore = create<SettingsState>()(
       // Modal actions
       openModal: () => set({ isModalOpen: true }),
       closeModal: () => set({ isModalOpen: false }),
-      setActiveCategory: (category: string) => set({ activeCategory: category }),
+      setActiveCategory: (category: string) =>
+        set({ activeCategory: category }),
 
       // Settings update actions
       updateDisplaySettings: (settings: Partial<DisplaySettings>) =>
-        set((state) => ({
+        set(state => ({
           display: { ...state.display, ...settings },
         })),
 
       updateCanvasSettings: (settings: Partial<CanvasSettings>) =>
-        set((state) => ({
+        set(state => ({
           canvas: { ...state.canvas, ...settings },
         })),
 
       updateCollaborationSettings: (settings: Partial<CollaborationSettings>) =>
-        set((state) => ({
+        set(state => ({
           collaboration: { ...state.collaboration, ...settings },
         })),
 
@@ -112,7 +116,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: 'floro-settings',
-      partialize: (state) => ({
+      partialize: state => ({
         display: state.display,
         canvas: state.canvas,
         collaboration: state.collaboration,

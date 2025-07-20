@@ -1,0 +1,10 @@
+{
+  "coordinates": {
+    "mouse": "Mouse",
+    "canvas": "Canvas"
+  },
+  "loading": "Loading Canvas...",
+  "background": {
+    "loading": "Loading background..."
+  }
+}
