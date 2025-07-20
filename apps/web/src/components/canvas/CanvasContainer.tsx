@@ -3,10 +3,14 @@
 import dynamic from 'next/dynamic';
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 
+// eslint-disable-next-line import/order
 import { useCanvasViewport } from '../../hooks/canvas/useCanvasViewport';
-import { CanvasDragDropHandler } from './CanvasDragDropHandler';
+// eslint-disable-next-line import/order
 import { useFileUpload } from '../../hooks/nodes/useFileUpload';
+// eslint-disable-next-line import/order
 import { FileUploadProgress } from '../nodes/FileUploadProgress';
+// eslint-disable-next-line import/order
+import { CanvasDragDropHandler } from './CanvasDragDropHandler';
 
 // Dynamically import Konva wrapper to avoid SSR issues
 const KonvaCanvas = dynamic(() => import('./KonvaCanvas'), {
@@ -66,10 +70,11 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
   const handleFileDrop = async (
     files: File[],
     position: { x: number; y: number }
-  ) => {
+  ): Promise<void> => {
     try {
       await uploadMultipleFiles(files, position);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to upload files:', error);
     }
   };

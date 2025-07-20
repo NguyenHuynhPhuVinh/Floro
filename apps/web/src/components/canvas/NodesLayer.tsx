@@ -1,5 +1,6 @@
 import React from 'react';
 import { Layer } from 'react-konva';
+
 import { FileNode } from '../../components/nodes/FileNode';
 import { useNodes } from '../../hooks/nodes/useNodes';
 import { useCanvasStore } from '../../store/canvas.store';
@@ -18,15 +19,18 @@ export const NodesLayer: React.FC<NodesLayerProps> = ({
   const { viewport } = useCanvasStore();
 
   if (isLoading) {
+    // eslint-disable-next-line no-console
     console.log('Loading nodes...');
     return null;
   }
 
   if (error) {
+    // eslint-disable-next-line no-console
     console.error('Error loading nodes:', error);
     return null;
   }
 
+  // eslint-disable-next-line no-console
   console.log('Rendering nodes:', nodes.length);
 
   return (

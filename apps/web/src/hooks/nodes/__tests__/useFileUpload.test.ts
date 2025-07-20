@@ -1,7 +1,8 @@
 import { renderHook, act } from '@testing-library/react';
-import { useFileUpload } from '../useFileUpload';
-import { StorageService } from '../../../services/core/storage.service';
+
 import { NodeService } from '../../../services/core/node.service';
+import { StorageService } from '../../../services/core/storage.service';
+import { useFileUpload } from '../useFileUpload';
 
 // Mock services
 jest.mock('../../../services/core/storage.service');
@@ -268,7 +269,7 @@ describe('useFileUpload', () => {
     expect(result.current.isUploading).toBe(false);
 
     // Start upload
-    let fileUploadPromise: Promise<any>;
+    let fileUploadPromise: Promise<unknown>;
     await act(async () => {
       fileUploadPromise = result.current.uploadFile(file, { x: 100, y: 200 });
     });

@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
-import { StorageService } from '../../services/core/storage.service';
+
 import { NodeService } from '../../services/core/node.service';
+import { StorageService } from '../../services/core/storage.service';
 import { useNodesStore } from '../../store/nodes.store';
 import {
   FileNode,
   FileUploadProgress,
   FileValidationResult,
-  FILE_ERROR_MESSAGES,
 } from '../../types';
 
 export interface UseFileUploadReturn {
@@ -167,7 +167,7 @@ export function useFileUpload(): UseFileUploadReturn {
         });
       }
     },
-    [generateFileId, updateProgress, cancelledUploads]
+    [generateFileId, updateProgress, cancelledUploads, addNode]
   );
 
   const uploadMultipleFiles = useCallback(
@@ -206,6 +206,7 @@ export function useFileUpload(): UseFileUploadReturn {
           const errorMessage = `Uploading ${files.length} files. ${successCount} completed, ${failCount} failed.`;
 
           // You might want to show this error to the user
+          // eslint-disable-next-line no-console
           console.warn(errorMessage, errors);
         }
 

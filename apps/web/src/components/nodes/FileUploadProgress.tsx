@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+
 import { FileUploadProgress as FileUploadProgressType } from '../../types';
 
 interface FileUploadProgressProps {
@@ -63,7 +64,7 @@ function FileUploadItem({
   upload,
   onCancel,
 }: FileUploadItemProps): React.JSX.Element {
-  const getStatusIcon = () => {
+  const getStatusIcon = (): React.JSX.Element | null => {
     switch (upload.status) {
       case 'uploading':
         return (
@@ -122,7 +123,7 @@ function FileUploadItem({
     }
   };
 
-  const getStatusColor = () => {
+  const getStatusColor = (): string => {
     switch (upload.status) {
       case 'uploading':
         return 'bg-blue-500';

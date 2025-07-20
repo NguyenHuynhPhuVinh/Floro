@@ -2,7 +2,7 @@
 export interface FileNode {
   id: string;
   sessionId: string; // e.g., "public"
-  type: "file";
+  type: 'file';
   fileName: string;
   fileType: string;
   fileURL: string;
@@ -15,7 +15,7 @@ export interface FileNode {
   updatedAt: string; // ISO timestamp
   zIndex: number; // For layering
   isLocked?: boolean; // Prevent accidental moves
-  metadata?: Record<string, any>; // JSONB column for extensible metadata
+  metadata?: Record<string, unknown>; // JSONB column for extensible metadata
 }
 
 // File Upload Types
@@ -25,7 +25,7 @@ export interface FileUploadProgress {
   loaded: number;
   total: number;
   progress: number;
-  status: "uploading" | "completed" | "error" | "cancelled";
+  status: 'uploading' | 'completed' | 'error' | 'cancelled';
   error?: string;
 }
 
@@ -44,19 +44,19 @@ export interface DragDropEvent {
 
 // File Categories
 export type FileCategory =
-  | "document"
-  | "image"
-  | "archive"
-  | "spreadsheet"
-  | "presentation"
-  | "web-code"
-  | "backend-code"
-  | "mobile-code"
-  | "system-code"
-  | "script-code"
-  | "config-code"
-  | "data-file"
-  | "text-file";
+  | 'document'
+  | 'image'
+  | 'archive'
+  | 'spreadsheet'
+  | 'presentation'
+  | 'web-code'
+  | 'backend-code'
+  | 'mobile-code'
+  | 'system-code'
+  | 'script-code'
+  | 'config-code'
+  | 'data-file'
+  | 'text-file';
 
 export interface FileTypeMapping {
   [extension: string]: {
@@ -78,42 +78,46 @@ export interface FileNodeCreateData {
 
 // Supported file extensions
 export const SUPPORTED_EXTENSIONS = {
-  DOCUMENTS: ["pdf", "doc", "docx", "txt", "rtf", "odt"],
-  IMAGES: ["jpg", "jpeg", "png", "gif", "webp", "svg"],
-  ARCHIVES: ["zip", "rar", "7z", "tar", "gz"],
+  DOCUMENTS: ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'],
+  IMAGES: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
+  ARCHIVES: ['zip', 'rar', '7z', 'tar', 'gz'],
   WEB_CODE: [
-    "js",
-    "ts",
-    "jsx",
-    "tsx",
-    "html",
-    "css",
-    "scss",
-    "sass",
-    "less",
-    "styl",
+    'js',
+    'ts',
+    'jsx',
+    'tsx',
+    'html',
+    'css',
+    'scss',
+    'sass',
+    'less',
+    'styl',
   ],
   BACKEND_CODE: [
-    "php",
-    "py",
-    "rb",
-    "go",
-    "rs",
-    "java",
-    "kt",
-    "scala",
-    "cs",
-    "vb",
+    'php',
+    'py',
+    'rb',
+    'go',
+    'rs',
+    'java',
+    'kt',
+    'scala',
+    'cs',
+    'vb',
   ],
-  MOBILE_CODE: ["swift", "m", "dart", "xaml"],
-  SYSTEM_CODE: ["c", "cpp", "h", "hpp", "cc", "cxx"],
-  SCRIPT_CODE: ["sh", "bat", "ps1", "cmd", "zsh", "fish"],
-  CONFIG_CODE: ["ini", "conf", "cfg", "toml", "properties", "env"],
-  DATA_FILES: ["json", "xml", "yaml", "yml", "csv", "sql"],
-  TEXT_FILES: ["md", "txt", "rtf", "log"],
-  SPREADSHEETS: ["xls", "xlsx", "ods"],
-  PRESENTATIONS: ["ppt", "pptx", "odp"],
+  MOBILE_CODE: ['swift', 'm', 'dart', 'xaml'],
+  SYSTEM_CODE: ['c', 'cpp', 'h', 'hpp', 'cc', 'cxx'],
+  SCRIPT_CODE: ['sh', 'bat', 'ps1', 'cmd', 'zsh', 'fish'],
+  CONFIG_CODE: ['ini', 'conf', 'cfg', 'toml', 'properties', 'env'],
+  DATA_FILES: ['json', 'xml', 'yaml', 'yml', 'csv', 'sql'],
+  TEXT_FILES: ['md', 'txt', 'rtf', 'log'],
+  SPREADSHEETS: ['xls', 'xlsx', 'ods'],
+  PRESENTATIONS: ['ppt', 'pptx', 'odp'],
 } as const;
+
+// Type helper for supported extensions
+export type SupportedExtension =
+  (typeof SUPPORTED_EXTENSIONS)[keyof typeof SUPPORTED_EXTENSIONS][number];
 
 // File validation constants
 export const FILE_CONSTRAINTS = {
@@ -124,9 +128,12 @@ export const FILE_CONSTRAINTS = {
 
 // Error messages
 export const FILE_ERROR_MESSAGES = {
-  FILE_TOO_LARGE: "File size exceeds 50MB limit. Please choose a smaller file.",
-  UNSUPPORTED_TYPE: "File type not supported. Supported types: Documents, Images, Archives, Code, Data, Text, Spreadsheets, Presentations.",
-  MEDIA_FILES_BLOCKED: "Media files (video/audio) are not supported. Please upload documents, images, or other supported file types.",
-  UPLOAD_FAILED: "Upload failed. Please check your connection and try again.",
-  NETWORK_ERROR: "Network connection lost. Upload will resume automatically when connection is restored.",
+  FILE_TOO_LARGE: 'File size exceeds 50MB limit. Please choose a smaller file.',
+  UNSUPPORTED_TYPE:
+    'File type not supported. Supported types: Documents, Images, Archives, Code, Data, Text, Spreadsheets, Presentations.',
+  MEDIA_FILES_BLOCKED:
+    'Media files (video/audio) are not supported. Please upload documents, images, or other supported file types.',
+  UPLOAD_FAILED: 'Upload failed. Please check your connection and try again.',
+  NETWORK_ERROR:
+    'Network connection lost. Upload will resume automatically when connection is restored.',
 } as const;

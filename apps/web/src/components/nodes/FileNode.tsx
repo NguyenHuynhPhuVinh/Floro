@@ -1,22 +1,19 @@
 'use client';
 
+import { KonvaEventObject } from 'konva/lib/Node';
 import React, { useState, useCallback } from 'react';
 import { Group, Rect, Text, Circle, Path } from 'react-konva';
-import { FileNode as FileNodeType } from '../../types';
-import { FileNodeIcon } from './FileNodeIcon';
-import { useNodeDrag } from '../../hooks/nodes/useNodeDrag';
+
 import { useFileDownload } from '../../hooks/nodes/useFileDownload';
+import { FileNode as FileNodeType } from '../../types';
+
+import { FileNodeIcon } from './FileNodeIcon';
 
 interface FileNodeProps {
   node: FileNodeType;
   isSelected?: boolean;
   onSelect?: (nodeId: string) => void;
   onDownload?: (node: FileNodeType) => void;
-  onDelete?: (nodeId: string) => void;
-  onPositionUpdate?: (
-    nodeId: string,
-    position: { x: number; y: number }
-  ) => void;
   scale: number; // Canvas zoom level
 }
 
@@ -25,63 +22,12 @@ export function FileNode({
   isSelected = false,
   onSelect,
   onDownload,
-  onDelete,
-  onPositionUpdate,
   scale,
 }: FileNodeProps): React.JSX.Element {
   const [isHovered, setIsHovered] = useState(false);
 
-  // Drag functionality
-  const { isDragging, handleDragStart } = useNodeDrag(onPositionUpdate);
-
   // Download functionality
-  const { downloadFile, isDownloading, downloadProgress } = useFileDownload();
-
-  const handleClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (onSelect) {
-        onSelect(node.id);
-      }
-    },
-    [node.id, onSelect]
-  );
-
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (!node.isLocked && e.button === 0) {
-        // Left mouse button only
-        handleDragStart(e, node.id);
-      }
-    },
-    [node.isLocked, node.id, handleDragStart]
-  );
-
-  const handleDownload = useCallback(
-    async (e: React.MouseEvent) => {
-      e.stopPropagation();
-      try {
-        await downloadFile(node);
-        if (onDownload) {
-          onDownload(node);
-        }
-      } catch (error) {
-        console.error('Download failed:', error);
-        // You might want to show a toast notification here
-      }
-    },
-    [node, onDownload, downloadFile]
-  );
-
-  const handleDelete = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      if (onDelete) {
-        onDelete(node.id);
-      }
-    },
-    [node.id, onDelete]
-  );
+  const { downloadFile } = useFileDownload();
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -112,7 +58,7 @@ export function FileNode({
   const iconSize = scale > 0.8 ? 'medium' : 'small';
 
   const handleKonvaClick = useCallback(
-    async (e: any) => {
+    async (e: KonvaEventObject<MouseEvent>): Promise<void> => {
       // Stop event propagation to prevent canvas interactions
       e.cancelBubble = true;
 
@@ -124,6 +70,7 @@ export function FileNode({
             onDownload(node);
           }
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Download failed:', error);
         }
       } else {
@@ -169,7 +116,6 @@ export function FileNode({
       {/* File icon */}
       <FileNodeIcon
         fileType={node.fileType}
-        mimeType={node.mimeType}
         size={iconSize}
         x={12}
         y={scaledHeight / 2 - 12}

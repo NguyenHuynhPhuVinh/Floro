@@ -1,30 +1,50 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { FileNode } from '../FileNode';
+import React from 'react';
+
 import { FileNode as FileNodeType } from '../../../types';
+import { FileNode } from '../FileNode';
 
 // Mock react-konva components
 
 jest.mock('react-konva', () => {
   // Filter out Konva-specific props that shouldn't be passed to DOM elements
-  const filterKonvaProps = (props: any) => {
+  const filterKonvaProps = (
+    props: Record<string, unknown>
+  ): Record<string, unknown> => {
     const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       scaleX,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       scaleY,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       ellipsis,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       strokeWidth,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       strokeLinecap,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       strokeLinejoin,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       cornerRadius,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       shadowColor,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       shadowBlur,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       shadowOpacity,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       fontFamily,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       fontStyle,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       fontSize,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       fill,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       stroke,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       data,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       radius,
       ...domProps
     } = props;
@@ -75,14 +95,18 @@ const mockHandleDragStart = jest.fn();
 const mockDownloadFile = jest.fn();
 
 jest.mock('../../../hooks/nodes/useNodeDrag', () => ({
-  useNodeDrag: () => ({
+  useNodeDrag: (): { isDragging: boolean; handleDragStart: jest.Mock } => ({
     isDragging: false,
     handleDragStart: mockHandleDragStart,
   }),
 }));
 
 jest.mock('../../../hooks/nodes/useFileDownload', () => ({
-  useFileDownload: () => ({
+  useFileDownload: (): {
+    downloadFile: jest.Mock;
+    isDownloading: boolean;
+    downloadProgress: number;
+  } => ({
     downloadFile: mockDownloadFile,
     isDownloading: false,
     downloadProgress: 0,
@@ -191,11 +215,8 @@ describe.skip('FileNode', () => {
 
   it('should show hover elements when hovered', async () => {
     const onDownload = jest.fn();
-    const onDelete = jest.fn();
 
-    render(
-      <FileNode {...defaultProps} onDownload={onDownload} onDelete={onDelete} />
-    );
+    render(<FileNode {...defaultProps} onDownload={onDownload} />);
 
     const nodeElement = screen.getByTestId('konva-group');
 
@@ -338,7 +359,7 @@ describe.skip('FileNode', () => {
 
     // Should not render file type badge (scale >= 0.6)
     const pdfCalls = mockText.mock.calls.filter(
-      (call: any) => call[0].text === 'PDF'
+      (call: unknown[]) => (call[0] as { text: string }).text === 'PDF'
     );
     expect(pdfCalls).toHaveLength(0);
   });

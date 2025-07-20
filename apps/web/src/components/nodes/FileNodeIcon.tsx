@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { Group, Circle, Path } from 'react-konva';
+
 import { FileCategory } from '../../types';
 
 interface FileNodeIconProps {
   fileType: string;
-  mimeType: string;
   size?: 'small' | 'medium' | 'large';
   x?: number;
   y?: number;
@@ -14,7 +14,6 @@ interface FileNodeIconProps {
 
 export function FileNodeIcon({
   fileType,
-  mimeType,
   size = 'medium',
   x = 0,
   y = 0,

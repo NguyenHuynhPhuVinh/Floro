@@ -1,5 +1,5 @@
-import { StorageService } from '../storage.service';
 import { FILE_ERROR_MESSAGES } from '../../../types';
+import { StorageService } from '../storage.service';
 
 // Mock Supabase
 jest.mock('../../../lib/supabase', () => ({

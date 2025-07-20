@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { FileNode } from '../types';
+
 import { NodeService } from '../services/core/node.service';
+import { FileNode, FileNodeCreateData } from '../types';
 
 interface NodesState {
   // State
@@ -24,7 +25,7 @@ interface NodesState {
   // Async actions
   loadNodes: (sessionId: string) => Promise<void>;
   createNode: (
-    nodeData: any,
+    nodeData: FileNodeCreateData,
     position: { x: number; y: number },
     sessionId?: string
   ) => Promise<FileNode | null>;
@@ -32,7 +33,7 @@ interface NodesState {
 
 export const useNodesStore = create<NodesState>()(
   devtools(
-    (set, get) => ({
+    set => ({
       // Initial state
       nodes: [],
       selectedNodeIds: new Set(),
@@ -40,19 +41,19 @@ export const useNodesStore = create<NodesState>()(
       error: null,
 
       // Sync actions
-      addNode: node =>
+      addNode: (node: FileNode): void =>
         set(state => ({
           nodes: [...state.nodes, node],
         })),
 
-      updateNode: (id, updates) =>
+      updateNode: (id: string, updates: Partial<FileNode>): void =>
         set(state => ({
           nodes: state.nodes.map(node =>
             node.id === id ? { ...node, ...updates } : node
           ),
         })),
 
-      removeNode: id =>
+      removeNode: (id: string): void =>
         set(state => ({
           nodes: state.nodes.filter(node => node.id !== id),
           selectedNodeIds: new Set(
@@ -60,45 +61,46 @@ export const useNodesStore = create<NodesState>()(
           ),
         })),
 
-      selectNode: id =>
+      selectNode: (id: string): void =>
         set(state => ({
           selectedNodeIds: new Set([...state.selectedNodeIds, id]),
         })),
 
-      deselectNode: id =>
+      deselectNode: (id: string): void =>
         set(state => {
           const newSelection = new Set(state.selectedNodeIds);
           newSelection.delete(id);
           return { selectedNodeIds: newSelection };
         }),
 
-      clearSelection: () =>
+      clearSelection: (): void =>
         set(() => ({
           selectedNodeIds: new Set(),
         })),
 
-      setNodes: nodes =>
+      setNodes: (nodes: FileNode[]): void =>
         set(() => ({
           nodes,
         })),
 
-      setLoading: loading =>
+      setLoading: (loading: boolean): void =>
         set(() => ({
           isLoading: loading,
         })),
 
-      setError: error =>
+      setError: (error: string | null): void =>
         set(() => ({
           error,
         })),
 
       // Async actions
-      loadNodes: async sessionId => {
+      loadNodes: async (sessionId: string): Promise<void> => {
         set({ isLoading: true, error: null });
         try {
           const nodes = await NodeService.getNodesBySession(sessionId);
           set({ nodes, isLoading: false });
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Failed to load nodes:', error);
           set({
             error:
@@ -108,7 +110,11 @@ export const useNodesStore = create<NodesState>()(
         }
       },
 
-      createNode: async (nodeData, position, sessionId = 'public') => {
+      createNode: async (
+        nodeData: FileNodeCreateData,
+        position: { x: number; y: number },
+        sessionId = 'public'
+      ): Promise<FileNode | null> => {
         set({ isLoading: true, error: null });
         try {
           const node = await NodeService.createFileNode(
@@ -122,6 +128,7 @@ export const useNodesStore = create<NodesState>()(
           }));
           return node;
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Failed to create node:', error);
           set({
             error:

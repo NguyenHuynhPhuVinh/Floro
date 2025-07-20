@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useState, useRef } from 'react';
-import { DragDropEvent } from '../../types';
 
 interface CanvasDragDropHandlerProps {
   onFileDrop: (files: File[], position: { x: number; y: number }) => void;

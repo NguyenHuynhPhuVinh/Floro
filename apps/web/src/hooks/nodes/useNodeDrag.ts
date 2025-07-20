@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+
 import { NodeService } from '../../services/core/node.service';
 
 export interface UseNodeDragReturn {
@@ -25,32 +26,36 @@ export function useNodeDrag(
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const dragStateRef = useRef<DragState | null>(null);
 
-  const handleDragStart = useCallback((e: React.MouseEvent, nodeId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDragStart = useCallback(
+    (e: React.MouseEvent, nodeId: string) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const offset = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const offset = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
 
-    dragStateRef.current = {
-      nodeId,
-      startPosition: { x: e.clientX, y: e.clientY },
-      offset,
-    };
+      dragStateRef.current = {
+        nodeId,
+        startPosition: { x: e.clientX, y: e.clientY },
+        offset,
+      };
 
-    setIsDragging(true);
-    setDragOffset(offset);
+      setIsDragging(true);
+      setDragOffset(offset);
 
-    // Add global mouse event listeners
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+      // Add global mouse event listeners
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
 
-    // Prevent text selection during drag
-    document.body.style.userSelect = 'none';
-  }, []);
+      // Prevent text selection during drag
+      document.body.style.userSelect = 'none';
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
@@ -93,6 +98,7 @@ export function useNodeDrag(
         });
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to update node position:', error);
       // You might want to show an error message to the user
     }

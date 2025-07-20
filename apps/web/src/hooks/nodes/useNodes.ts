@@ -1,10 +1,31 @@
 import { useEffect } from 'react';
+
 import { useNodesStore } from '../../store/nodes.store';
+import { FileNode, FileNodeCreateData } from '../../types';
 
 /**
  * Hook to manage nodes loading and state
  */
-export const useNodes = (sessionId: string = 'public') => {
+export const useNodes = (
+  sessionId: string = 'public'
+): {
+  nodes: FileNode[];
+  selectedNodeIds: Set<string>;
+  isLoading: boolean;
+  error: string | null;
+  selectNode: (nodeId: string) => void;
+  deselectNode: (nodeId: string) => void;
+  clearSelection: () => void;
+  addNode: (node: FileNode) => void;
+  updateNode: (id: string, updates: Partial<FileNode>) => void;
+  removeNode: (id: string) => void;
+  createNode: (
+    nodeData: FileNodeCreateData,
+    position: { x: number; y: number },
+    sessionId?: string
+  ) => Promise<FileNode | null>;
+  refreshNodes: () => Promise<void>;
+} => {
   const {
     nodes,
     selectedNodeIds,
@@ -40,6 +61,6 @@ export const useNodes = (sessionId: string = 'public') => {
     deselectNode,
     clearSelection,
     createNode,
-    refreshNodes: () => loadNodes(sessionId),
+    refreshNodes: (): Promise<void> => loadNodes(sessionId),
   };
 };

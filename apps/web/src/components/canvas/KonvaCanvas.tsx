@@ -1,7 +1,9 @@
 'use client';
+
 import type Konva from 'konva';
 import React from 'react';
 import { Stage } from 'react-konva';
+
 import { NodesLayer } from './NodesLayer';
 
 interface StageProps {

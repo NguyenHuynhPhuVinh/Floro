@@ -282,6 +282,7 @@ export class NodeService {
       const { data, error } = await query;
 
       if (error) {
+        // eslint-disable-next-line no-console
         console.error('Failed to fetch nodes:', error);
         return [];
       }
@@ -312,6 +313,7 @@ export class NodeService {
 
       return nodes;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to get nodes by session:', error);
       return [];
     }
@@ -322,6 +324,7 @@ export class NodeService {
    */
   private static async ensureCanvasExists(canvasId: string): Promise<void> {
     try {
+      // eslint-disable-next-line no-console
       console.log('Checking if canvas exists:', canvasId);
 
       // Check if canvas exists
@@ -331,9 +334,11 @@ export class NodeService {
         .eq('id', canvasId)
         .single();
 
+      // eslint-disable-next-line no-console
       console.log('Canvas check result:', { existingCanvas, selectError });
 
       if (!existingCanvas) {
+        // eslint-disable-next-line no-console
         console.log('Creating new canvas:', canvasId);
 
         // Create canvas if it doesn't exist
@@ -349,9 +354,11 @@ export class NodeService {
           .select()
           .single();
 
+        // eslint-disable-next-line no-console
         console.log('Canvas creation result:', { newCanvas, insertError });
 
         if (insertError) {
+          // eslint-disable-next-line no-console
           console.warn(
             'Failed to create canvas, continuing anyway:',
             insertError
@@ -359,6 +366,7 @@ export class NodeService {
         }
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn('Canvas check/creation failed, continuing anyway:', error);
     }
   }
@@ -410,6 +418,7 @@ export class NodeService {
         },
       };
 
+      // eslint-disable-next-line no-console
       console.log('Inserting node data:', JSON.stringify(insertData, null, 2));
 
       const { data, error } = await supabase
@@ -418,6 +427,7 @@ export class NodeService {
         .select()
         .single();
 
+      // eslint-disable-next-line no-console
       console.log('Insert result:', { data, error });
 
       if (error) {
@@ -446,6 +456,7 @@ export class NodeService {
 
       return fileNode;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to create file node:', error);
       throw new Error(
         `Failed to create file node: ${error instanceof Error ? error.message : 'Unknown error'}`

@@ -5,7 +5,6 @@ import {
   SUPPORTED_EXTENSIONS,
   FILE_CONSTRAINTS,
   FILE_ERROR_MESSAGES,
-  FileUploadProgress,
 } from '../../types';
 
 export interface UploadProgress {
@@ -274,6 +273,7 @@ export class StorageService {
 
     // Check if file type is supported
     const allSupportedExtensions = Object.values(SUPPORTED_EXTENSIONS).flat();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (!allSupportedExtensions.includes(extension as any)) {
       return {
         isValid: false,
@@ -307,31 +307,23 @@ export class StorageService {
     const extension = fileName.split('.').pop()?.toLowerCase();
     if (!extension) return 'text-file';
 
-    if (SUPPORTED_EXTENSIONS.DOCUMENTS.includes(extension as any))
-      return 'document';
-    if (SUPPORTED_EXTENSIONS.IMAGES.includes(extension as any)) return 'image';
-    if (SUPPORTED_EXTENSIONS.ARCHIVES.includes(extension as any))
-      return 'archive';
-    if (SUPPORTED_EXTENSIONS.WEB_CODE.includes(extension as any))
-      return 'web-code';
-    if (SUPPORTED_EXTENSIONS.BACKEND_CODE.includes(extension as any))
-      return 'backend-code';
-    if (SUPPORTED_EXTENSIONS.MOBILE_CODE.includes(extension as any))
-      return 'mobile-code';
-    if (SUPPORTED_EXTENSIONS.SYSTEM_CODE.includes(extension as any))
-      return 'system-code';
-    if (SUPPORTED_EXTENSIONS.SCRIPT_CODE.includes(extension as any))
-      return 'script-code';
-    if (SUPPORTED_EXTENSIONS.CONFIG_CODE.includes(extension as any))
-      return 'config-code';
-    if (SUPPORTED_EXTENSIONS.DATA_FILES.includes(extension as any))
-      return 'data-file';
-    if (SUPPORTED_EXTENSIONS.SPREADSHEETS.includes(extension as any))
-      return 'spreadsheet';
-    if (SUPPORTED_EXTENSIONS.PRESENTATIONS.includes(extension as any))
-      return 'presentation';
-    if (SUPPORTED_EXTENSIONS.TEXT_FILES.includes(extension as any))
-      return 'text-file';
+    // Use type assertion to bypass strict type checking
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const ext = extension as any;
+
+    if (SUPPORTED_EXTENSIONS.DOCUMENTS.includes(ext)) return 'document';
+    if (SUPPORTED_EXTENSIONS.IMAGES.includes(ext)) return 'image';
+    if (SUPPORTED_EXTENSIONS.ARCHIVES.includes(ext)) return 'archive';
+    if (SUPPORTED_EXTENSIONS.WEB_CODE.includes(ext)) return 'web-code';
+    if (SUPPORTED_EXTENSIONS.BACKEND_CODE.includes(ext)) return 'backend-code';
+    if (SUPPORTED_EXTENSIONS.MOBILE_CODE.includes(ext)) return 'mobile-code';
+    if (SUPPORTED_EXTENSIONS.SYSTEM_CODE.includes(ext)) return 'system-code';
+    if (SUPPORTED_EXTENSIONS.SCRIPT_CODE.includes(ext)) return 'script-code';
+    if (SUPPORTED_EXTENSIONS.CONFIG_CODE.includes(ext)) return 'config-code';
+    if (SUPPORTED_EXTENSIONS.DATA_FILES.includes(ext)) return 'data-file';
+    if (SUPPORTED_EXTENSIONS.SPREADSHEETS.includes(ext)) return 'spreadsheet';
+    if (SUPPORTED_EXTENSIONS.PRESENTATIONS.includes(ext)) return 'presentation';
+    if (SUPPORTED_EXTENSIONS.TEXT_FILES.includes(ext)) return 'text-file';
 
     return 'text-file';
   }
@@ -442,6 +434,7 @@ export class StorageService {
       const actualChecksum = await this.calculateChecksum(originalFile);
       return actualChecksum === expectedChecksum;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error verifying file integrity:', error);
       return false;
     }

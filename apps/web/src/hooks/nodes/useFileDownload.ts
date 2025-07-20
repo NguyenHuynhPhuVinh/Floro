@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+
 import { FileNode } from '../../types';
 
 export interface UseFileDownloadReturn {
@@ -90,6 +91,7 @@ export function useFileDownload(): UseFileDownloadReturn {
         const errorMessage =
           error instanceof Error ? error.message : 'Unknown download error';
         setDownloadError(errorMessage);
+        // eslint-disable-next-line no-console
         console.error('Download failed:', error);
 
         // Fallback: try direct download via window.open
@@ -106,6 +108,7 @@ export function useFileDownload(): UseFileDownloadReturn {
 
           setDownloadError(null); // Clear error if fallback works
         } catch (fallbackError) {
+          // eslint-disable-next-line no-console
           console.error('Fallback download also failed:', fallbackError);
         }
       } finally {
