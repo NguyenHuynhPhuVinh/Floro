@@ -27,15 +27,10 @@ export function FileNode({
   isLoading = false,
   onSelect,
   onDownload,
-  onDelete,
+  onDelete: _onDelete, // eslint-disable-line @typescript-eslint/no-unused-vars
   onContextMenu,
   scale,
 }: FileNodeProps): React.JSX.Element {
-  // Early return if node is null/undefined (during deletion)
-  if (!node) {
-    return <></>;
-  }
-
   const [isHovered, setIsHovered] = useState(false);
 
   // Download functionality
@@ -48,38 +43,10 @@ export function FileNode({
     isLoading: isDragLoading,
   } = useNodeDrag();
 
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  const truncateFileName = (
-    fileName: string,
-    maxLength: number = 25
-  ): string => {
-    if (!fileName || typeof fileName !== 'string') return '';
-    if (fileName.length <= maxLength) return fileName;
-
-    const extension = fileName.split('.').pop();
-    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
-    const truncatedName =
-      nameWithoutExt.substring(0, maxLength - (extension?.length || 0) - 4) +
-      '...';
-
-    return `${truncatedName}.${extension || ''}`;
-  };
-
-  // Calculate responsive sizing based on scale
-  const scaledWidth = Math.max(180, node.size.width * scale);
-  const scaledHeight = Math.max(60, node.size.height * scale);
-  const fontSize = Math.max(12, 14 * scale);
-  const iconSize = scale > 0.8 ? 'medium' : 'small';
-
   const handleKonvaClick = useCallback(
     async (e: KonvaEventObject<MouseEvent>): Promise<void> => {
+      if (!node) return;
+
       // Stop event propagation to prevent canvas interactions
       e.cancelBubble = true;
 
@@ -120,10 +87,45 @@ export function FileNode({
   );
 
   const handleKonvaMouseDown = useCallback(() => {
-    if (!node.isLocked) {
+    if (!node?.isLocked) {
       // Konva drag will be handled by the Group's draggable prop
     }
-  }, [node.isLocked]);
+  }, [node?.isLocked]);
+
+  // Early return if node is null/undefined (during deletion)
+  if (!node) {
+    return <></>;
+  }
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const truncateFileName = (
+    fileName: string,
+    maxLength: number = 25
+  ): string => {
+    if (!fileName || typeof fileName !== 'string') return '';
+    if (fileName.length <= maxLength) return fileName;
+
+    const extension = fileName.split('.').pop();
+    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+    const truncatedName =
+      nameWithoutExt.substring(0, maxLength - (extension?.length || 0) - 4) +
+      '...';
+
+    return `${truncatedName}.${extension || ''}`;
+  };
+
+  // Calculate responsive sizing based on scale
+  const scaledWidth = Math.max(180, node.size.width * scale);
+  const scaledHeight = Math.max(60, node.size.height * scale);
+  const fontSize = Math.max(12, 14 * scale);
+  const iconSize = scale > 0.8 ? 'medium' : 'small';
 
   return (
     <Group

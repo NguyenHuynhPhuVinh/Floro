@@ -1,5 +1,9 @@
 import { renderHook } from '@testing-library/react';
-import { useKeyboardShortcuts, PLATFORM_SHORTCUTS } from '../useKeyboardShortcuts';
+
+import {
+  useKeyboardShortcuts,
+  PLATFORM_SHORTCUTS,
+} from '../useKeyboardShortcuts';
 
 // Mock navigator
 const mockNavigator = {
@@ -53,7 +57,7 @@ describe('useKeyboardShortcuts', () => {
     it('should format shortcuts correctly', () => {
       mockNavigator.platform = 'MacIntel';
       expect(PLATFORM_SHORTCUTS.formatShortcut('Ctrl+A')).toBe('⌘+A');
-      
+
       mockNavigator.platform = 'Win32';
       expect(PLATFORM_SHORTCUTS.formatShortcut('Cmd+A')).toBe('Ctrl+A');
     });
@@ -131,12 +135,15 @@ describe('useKeyboardShortcuts', () => {
 
     it('should handle Copy on Mac (Cmd+C)', () => {
       mockNavigator.platform = 'MacIntel';
-      
+
       // Mock window.getSelection to return no selection
       Object.defineProperty(window, 'getSelection', {
-        value: jest.fn(() => ({
-          toString: () => '',
-        })),
+        value: jest.fn(
+          (): Selection =>
+            ({
+              toString: (): string => '',
+            }) as Selection
+        ),
         writable: true,
       });
 
@@ -173,9 +180,12 @@ describe('useKeyboardShortcuts', () => {
     it('should not handle Copy when text is selected', () => {
       // Mock window.getSelection to return selected text
       Object.defineProperty(window, 'getSelection', {
-        value: jest.fn(() => ({
-          toString: () => 'selected text',
-        })),
+        value: jest.fn(
+          (): Selection =>
+            ({
+              toString: (): string => 'selected text',
+            }) as Selection
+        ),
         writable: true,
       });
 

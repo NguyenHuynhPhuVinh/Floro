@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
 import { AlertTriangle, X } from 'lucide-react';
+import React from 'react';
 
 /**
  * Props for the ConfirmDialog component

@@ -1,9 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { renderHook, act } from '@testing-library/react';
-import { useNodeDrag } from '../useNodeDrag';
-import { useNodesStore } from '../../../store/nodes.store';
-import { useNodeSelection } from '../useNodeSelection';
+import { KonvaEventObject } from 'konva/lib/Node';
+
 import { NodeService } from '../../../services/core/node.service';
+import { useNodesStore } from '../../../store/nodes.store';
 import { FileNode } from '../../../types';
+import { useNodeDrag } from '../useNodeDrag';
+import { useNodeSelection } from '../useNodeSelection';
+
+// Type alias for test mocks
+type MockKonvaEvent = KonvaEventObject<DragEvent>;
 
 // Mock dependencies
 jest.mock('../../../store/nodes.store');
@@ -22,19 +28,20 @@ const mockNodeService = NodeService as jest.Mocked<typeof NodeService>;
 const createMockKonvaEvent = (
   nodeId: string,
   position = { x: 100, y: 100 }
-) => ({
-  target: {
-    getAttr: jest.fn((attr: string) =>
-      attr === 'nodeId' ? nodeId : undefined
-    ),
-    position: jest.fn(() => position),
-    parent: {
+): MockKonvaEvent =>
+  ({
+    target: {
       getAttr: jest.fn((attr: string) =>
         attr === 'nodeId' ? nodeId : undefined
       ),
-    },
-  },
-});
+      position: jest.fn(() => position),
+      parent: {
+        getAttr: jest.fn((attr: string) =>
+          attr === 'nodeId' ? nodeId : undefined
+        ),
+      },
+    } as unknown,
+  }) as MockKonvaEvent;
 
 // Mock nodes data
 const mockNodes: FileNode[] = [
@@ -118,7 +125,7 @@ describe('useNodeDrag', () => {
     });
 
     // Mock NodeService methods
-    mockNodeService.updateNode.mockResolvedValue({} as any);
+    mockNodeService.updateNode.mockResolvedValue(mockNodes[0] as any);
     mockNodeService.updateMultipleNodes.mockResolvedValue([]);
   });
 
@@ -144,7 +151,7 @@ describe('useNodeDrag', () => {
       const mockEvent = createMockKonvaEvent('node-1');
 
       act(() => {
-        result.current.handleDragStart(mockEvent as any);
+        result.current.handleDragStart(mockEvent as unknown as MockKonvaEvent);
       });
 
       expect(result.current.isDragging).toBe(true);
@@ -162,7 +169,7 @@ describe('useNodeDrag', () => {
       const mockEvent = createMockKonvaEvent('node-1');
 
       act(() => {
-        result.current.handleDragStart(mockEvent as any);
+        result.current.handleDragStart(mockEvent as unknown as MockKonvaEvent);
       });
 
       expect(result.current.isDragging).toBe(true);
@@ -182,7 +189,7 @@ describe('useNodeDrag', () => {
       const { result } = renderHook(() => useNodeDrag());
 
       act(() => {
-        result.current.handleDragStart(mockEvent as any);
+        result.current.handleDragStart(mockEvent as unknown as MockKonvaEvent);
       });
 
       expect(result.current.isDragging).toBe(false);
@@ -198,14 +205,16 @@ describe('useNodeDrag', () => {
       // Start drag
       const startEvent = createMockKonvaEvent('node-1', { x: 100, y: 100 });
       act(() => {
-        result.current.handleDragStart(startEvent as any);
+        result.current.handleDragStart(startEvent as unknown as MockKonvaEvent);
       });
 
       // End drag at new position
       const endEvent = createMockKonvaEvent('node-1', { x: 150, y: 150 });
 
       await act(async () => {
-        await result.current.handleDragEnd(endEvent as any);
+        await result.current.handleDragEnd(
+          endEvent as unknown as MockKonvaEvent
+        );
       });
 
       expect(mockNodeService.updateNode).toHaveBeenCalledWith('node-1', {
@@ -230,14 +239,16 @@ describe('useNodeDrag', () => {
       // Start drag
       const startEvent = createMockKonvaEvent('node-1', { x: 100, y: 100 });
       act(() => {
-        result.current.handleDragStart(startEvent as any);
+        result.current.handleDragStart(startEvent as unknown as MockKonvaEvent);
       });
 
       // End drag at new position (moved 50px right, 50px down)
       const endEvent = createMockKonvaEvent('node-1', { x: 150, y: 150 });
 
       await act(async () => {
-        await result.current.handleDragEnd(endEvent as any);
+        await result.current.handleDragEnd(
+          endEvent as unknown as MockKonvaEvent
+        );
       });
 
       expect(mockNodeService.updateMultipleNodes).toHaveBeenCalledWith([
@@ -266,14 +277,16 @@ describe('useNodeDrag', () => {
       // Start drag
       const startEvent = createMockKonvaEvent('node-1', { x: 100, y: 100 });
       act(() => {
-        result.current.handleDragStart(startEvent as any);
+        result.current.handleDragStart(startEvent as unknown as MockKonvaEvent);
       });
 
       // End drag
       const endEvent = createMockKonvaEvent('node-1', { x: 150, y: 150 });
 
       await act(async () => {
-        await result.current.handleDragEnd(endEvent as any);
+        await result.current.handleDragEnd(
+          endEvent as unknown as MockKonvaEvent
+        );
       });
 
       expect(mockStoreActions.updateNode).toHaveBeenCalledWith('node-1', {
@@ -290,7 +303,9 @@ describe('useNodeDrag', () => {
       const mockEvent = createMockKonvaEvent('node-1');
 
       await act(async () => {
-        await result.current.handleDragEnd(mockEvent as any);
+        await result.current.handleDragEnd(
+          mockEvent as unknown as MockKonvaEvent
+        );
       });
 
       expect(mockNodeService.updateNode).not.toHaveBeenCalled();
@@ -304,8 +319,8 @@ describe('useNodeDrag', () => {
 
       // Make updateNode take some time
       let resolveUpdate: () => void;
-      const updatePromise = new Promise<any>(resolve => {
-        resolveUpdate = () => resolve({});
+      const updatePromise = new Promise<any>((resolve): void => {
+        resolveUpdate = (): void => resolve({} as any);
       });
       mockNodeService.updateNode.mockReturnValue(updatePromise);
 
@@ -314,7 +329,7 @@ describe('useNodeDrag', () => {
       // Start drag
       const startEvent = createMockKonvaEvent('node-1', { x: 100, y: 100 });
       act(() => {
-        result.current.handleDragStart(startEvent as any);
+        result.current.handleDragStart(startEvent as unknown as MockKonvaEvent);
       });
 
       // End drag - start the async operation but don't await it yet
@@ -322,7 +337,9 @@ describe('useNodeDrag', () => {
 
       let dragEndPromise: Promise<void>;
       act(() => {
-        dragEndPromise = result.current.handleDragEnd(endEvent as any);
+        dragEndPromise = result.current.handleDragEnd(
+          endEvent as unknown as MockKonvaEvent
+        ) as unknown as Promise<void>;
       });
 
       // Should be loading

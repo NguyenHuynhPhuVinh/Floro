@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 /**
  * Toast notification types
@@ -34,6 +34,13 @@ export const Toast: React.FC<ToastProps> = ({
   const [isVisible, setIsVisible] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
 
+  const handleClose = useCallback((): void => {
+    setIsExiting(true);
+    setTimeout(() => {
+      onClose(id);
+    }, 300); // Match exit animation duration
+  }, [id, onClose]);
+
   useEffect(() => {
     // Trigger enter animation
     const enterTimer = setTimeout(() => setIsVisible(true), 10);
@@ -43,18 +50,11 @@ export const Toast: React.FC<ToastProps> = ({
       handleClose();
     }, duration);
 
-    return () => {
+    return (): void => {
       clearTimeout(enterTimer);
       clearTimeout(closeTimer);
     };
-  }, [duration]);
-
-  const handleClose = (): void => {
-    setIsExiting(true);
-    setTimeout(() => {
-      onClose(id);
-    }, 300); // Match exit animation duration
-  };
+  }, [duration, handleClose]);
 
   const getIcon = (): React.ReactNode => {
     switch (type) {
@@ -106,9 +106,7 @@ export const Toast: React.FC<ToastProps> = ({
           <div className="flex-shrink-0">{getIcon()}</div>
           <div className="ml-3 w-0 flex-1">
             <p className="text-sm font-medium text-gray-900">{title}</p>
-            {message && (
-              <p className="mt-1 text-sm text-gray-600">{message}</p>
-            )}
+            {message && <p className="mt-1 text-sm text-gray-600">{message}</p>}
           </div>
           <div className="ml-4 flex-shrink-0 flex">
             <button

@@ -172,7 +172,7 @@ export const useKeyboardShortcuts = (
     document.addEventListener('keydown', handleGlobalKeyDown);
 
     // Cleanup
-    return () => {
+    return (): void => {
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
   }, [handleKeyDown]);

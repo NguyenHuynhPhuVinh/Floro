@@ -1,10 +1,11 @@
 import { renderHook, act } from '@testing-library/react';
-import { useNodeDelete } from '../useNodeDelete';
-import { useNodesStore } from '../../../store/nodes.store';
-import { useNodeSelection } from '../useNodeSelection';
+
 import { NodeService } from '../../../services/core/node.service';
-import { useToast } from '../../ui/useToast';
+import { useNodesStore } from '../../../store/nodes.store';
 import { FileNode } from '../../../types';
+import { useToast } from '../../ui/useToast';
+import { useNodeDelete } from '../useNodeDelete';
+import { useNodeSelection } from '../useNodeSelection';
 
 // Mock dependencies
 jest.mock('../../../store/nodes.store');
@@ -277,10 +278,9 @@ describe('useNodeDelete', () => {
         await result.current.deleteNode('node-1');
       });
 
-      // Start confirm deletion but don't await it yet
-      let confirmPromise: Promise<void>;
+      // Start confirm deletion
       act(() => {
-        confirmPromise = result.current.confirmDelete();
+        result.current.confirmDelete();
       });
 
       // Should be deleting
@@ -290,7 +290,8 @@ describe('useNodeDelete', () => {
       // Resolve the deletion
       resolveDelete!();
       await act(async () => {
-        await confirmPromise!;
+        // Wait for deletion to complete
+        await new Promise(resolve => setTimeout(resolve, 0));
       });
 
       // Should not be deleting anymore

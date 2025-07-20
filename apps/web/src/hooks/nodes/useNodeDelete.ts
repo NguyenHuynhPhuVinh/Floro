@@ -1,8 +1,13 @@
+// eslint-disable-next-line import/order
 import { useState, useCallback } from 'react';
+// eslint-disable-next-line import/order
 import { NodeService } from '../../services/core/node.service';
+// eslint-disable-next-line import/order
 import { useNodesStore } from '../../store/nodes.store';
-import { useNodeSelection } from './useNodeSelection';
+// eslint-disable-next-line import/order
 import { useToast } from '../ui/useToast';
+// eslint-disable-next-line import/order
+import { useNodeSelection } from './useNodeSelection';
 
 /**
  * Hook return interface for node deletion operations
@@ -118,7 +123,14 @@ export const useNodeDelete = (): UseNodeDeleteReturn => {
       setIsDeleting(false);
       setPendingDeletion(null);
     }
-  }, [pendingDeletion, removeNode, clearSelection]);
+  }, [
+    pendingDeletion,
+    removeNode,
+    clearSelection,
+    clearLastDeletedAt,
+    showError,
+    showSuccess,
+  ]);
 
   /**
    * Cancel the pending deletion

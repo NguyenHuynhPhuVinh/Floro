@@ -1,12 +1,15 @@
 import { renderHook, act } from '@testing-library/react';
-import { useNodeSelection } from '../useNodeSelection';
+
 import { useNodesStore } from '../../../store/nodes.store';
 import { FileNode } from '../../../types';
+import { useNodeSelection } from '../useNodeSelection';
 
 // Mock the nodes store
 jest.mock('../../../store/nodes.store');
 
-const mockUseNodesStore = useNodesStore as jest.MockedFunction<typeof useNodesStore>;
+const mockUseNodesStore = useNodesStore as jest.MockedFunction<
+  typeof useNodesStore
+>;
 
 // Mock nodes data
 const mockNodes: FileNode[] = [
@@ -97,7 +100,7 @@ describe('useNodeSelection', () => {
   describe('isSelected', () => {
     it('should return false for unselected node', () => {
       const { result } = renderHook(() => useNodeSelection());
-      
+
       expect(result.current.isSelected('node-1')).toBe(false);
     });
 
@@ -108,7 +111,7 @@ describe('useNodeSelection', () => {
       });
 
       const { result } = renderHook(() => useNodeSelection());
-      
+
       expect(result.current.isSelected('node-1')).toBe(true);
       expect(result.current.isSelected('node-2')).toBe(false);
     });
@@ -196,7 +199,7 @@ describe('useNodeSelection', () => {
   describe('getSelectedNodes', () => {
     it('should return empty array when no nodes selected', () => {
       const { result } = renderHook(() => useNodeSelection());
-      
+
       expect(result.current.getSelectedNodes()).toEqual([]);
     });
 
@@ -207,7 +210,7 @@ describe('useNodeSelection', () => {
       });
 
       const { result } = renderHook(() => useNodeSelection());
-      
+
       const selectedNodes = result.current.getSelectedNodes();
       expect(selectedNodes).toHaveLength(2);
       expect(selectedNodes[0].id).toBe('node-1');

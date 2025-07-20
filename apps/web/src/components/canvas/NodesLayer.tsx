@@ -2,9 +2,9 @@ import React from 'react';
 import { Layer } from 'react-konva';
 
 import { FileNode } from '../../components/nodes/FileNode';
+import { useKeyboardShortcuts } from '../../hooks/nodes/useKeyboardShortcuts';
 import { useNodes } from '../../hooks/nodes/useNodes';
 import { useNodeSelection } from '../../hooks/nodes/useNodeSelection';
-import { useKeyboardShortcuts } from '../../hooks/nodes/useKeyboardShortcuts';
 import { useCanvasStore } from '../../store/canvas.store';
 
 interface NodesLayerProps {
@@ -69,7 +69,6 @@ export const NodesLayer: React.FC<NodesLayerProps> = ({
     return null;
   }
 
-  // eslint-disable-next-line no-console
   return (
     <Layer>
       {nodes
