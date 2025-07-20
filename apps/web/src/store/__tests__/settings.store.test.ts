@@ -29,7 +29,6 @@ describe('useSettingsStore', () => {
         backgroundType: 'grid',
         backgroundSize: 20,
         backgroundOpacity: 0.3,
-        theme: 'light',
       },
       collaboration: {
         language: 'vi',
@@ -41,39 +40,39 @@ describe('useSettingsStore', () => {
   describe('modal state management', () => {
     it('should have correct initial state', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       expect(result.current.isModalOpen).toBe(false);
       expect(result.current.activeCategory).toBe('display');
     });
 
     it('should open modal', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       act(() => {
         result.current.openModal();
       });
-      
+
       expect(result.current.isModalOpen).toBe(true);
     });
 
     it('should close modal', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       act(() => {
         result.current.openModal();
         result.current.closeModal();
       });
-      
+
       expect(result.current.isModalOpen).toBe(false);
     });
 
     it('should set active category', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       act(() => {
         result.current.setActiveCategory('canvas');
       });
-      
+
       expect(result.current.activeCategory).toBe('canvas');
     });
   });
@@ -81,14 +80,14 @@ describe('useSettingsStore', () => {
   describe('display settings management', () => {
     it('should update display settings', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       act(() => {
         result.current.updateDisplaySettings({
           showCoordinates: false,
           coordinateFormat: 'decimal',
         });
       });
-      
+
       expect(result.current.display.showCoordinates).toBe(false);
       expect(result.current.display.coordinateFormat).toBe('decimal');
       // Other properties should remain unchanged
@@ -97,7 +96,7 @@ describe('useSettingsStore', () => {
 
     it('should have correct default display settings', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       expect(result.current.display).toEqual({
         showCoordinates: true,
         showMouseCoords: true,
@@ -111,30 +110,27 @@ describe('useSettingsStore', () => {
   describe('canvas settings management', () => {
     it('should update canvas settings', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       act(() => {
         result.current.updateCanvasSettings({
           backgroundType: 'dots',
           backgroundSize: 30,
-          theme: 'dark',
         });
       });
-      
+
       expect(result.current.canvas.backgroundType).toBe('dots');
       expect(result.current.canvas.backgroundSize).toBe(30);
-      expect(result.current.canvas.theme).toBe('dark');
       // Other properties should remain unchanged
       expect(result.current.canvas.backgroundOpacity).toBe(0.3);
     });
 
     it('should have correct default canvas settings', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       expect(result.current.canvas).toEqual({
         backgroundType: 'grid',
         backgroundSize: 20,
         backgroundOpacity: 0.3,
-        theme: 'light',
       });
     });
   });
@@ -142,19 +138,19 @@ describe('useSettingsStore', () => {
   describe('collaboration settings management', () => {
     it('should update collaboration settings', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       act(() => {
         result.current.updateCollaborationSettings({
           language: 'en',
         });
       });
-      
+
       expect(result.current.collaboration.language).toBe('en');
     });
 
     it('should have correct default collaboration settings', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       expect(result.current.collaboration).toEqual({
         language: 'vi',
       });
@@ -164,22 +160,22 @@ describe('useSettingsStore', () => {
   describe('reset functionality', () => {
     it('should reset all settings to defaults', () => {
       const { result } = renderHook(() => useSettingsStore());
-      
+
       // Modify settings
       act(() => {
         result.current.updateDisplaySettings({ showCoordinates: false });
-        result.current.updateCanvasSettings({ theme: 'dark' });
+        result.current.updateCanvasSettings({ backgroundType: 'dots' });
         result.current.updateCollaborationSettings({ language: 'en' });
       });
-      
+
       // Reset to defaults
       act(() => {
         result.current.resetToDefaults();
       });
-      
+
       // Check all settings are back to defaults
       expect(result.current.display.showCoordinates).toBe(true);
-      expect(result.current.canvas.theme).toBe('light');
+      expect(result.current.canvas.backgroundType).toBe('grid');
       expect(result.current.collaboration.language).toBe('vi');
     });
   });
