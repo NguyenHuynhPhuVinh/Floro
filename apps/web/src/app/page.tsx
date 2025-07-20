@@ -1,9 +1,10 @@
 import { CanvasContainer } from '@/components/canvas/CanvasContainer';
+import { AppLayout } from '@/components/layout/AppLayout';
 
 export default function Home(): React.JSX.Element {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <CanvasContainer className="h-screen" />
-    </div>
+    <AppLayout>
+      <CanvasContainer className="h-full" />
+    </AppLayout>
   );
 }

@@ -15,6 +15,8 @@ import { CanvasDragDropHandler } from './CanvasDragDropHandler';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 // eslint-disable-next-line import/order
 import { useNodeDelete } from '../../hooks/nodes/useNodeDelete';
+// eslint-disable-next-line import/order
+import { CanvasBackground } from './CanvasBackground';
 
 // Dynamically import Konva wrapper to avoid SSR issues
 const KonvaCanvas = dynamic(() => import('./KonvaCanvas'), {
@@ -100,9 +102,13 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
       >
         <div
           ref={containerRef}
-          className="w-full h-full"
+          className="w-full h-full relative"
           style={{ minHeight: '400px' }}
         >
+          {/* Canvas Background */}
+          <CanvasBackground />
+
+          {/* Main Canvas */}
           <KonvaCanvas
             width={stageDimensions.width}
             height={stageDimensions.height}
