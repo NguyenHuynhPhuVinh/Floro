@@ -11,7 +11,7 @@ import { FileNode as FileNodeType } from '../../types';
 import { FileNodeIcon } from './FileNodeIcon';
 
 interface FileNodeProps {
-  node: FileNodeType;
+  node: FileNodeType | null | undefined;
   isSelected?: boolean;
   isLoading?: boolean; // NEW: For operation feedback
   onSelect?: (nodeId: string, multiSelect?: boolean) => void;
@@ -31,6 +31,11 @@ export function FileNode({
   onContextMenu,
   scale,
 }: FileNodeProps): React.JSX.Element {
+  // Early return if node is null/undefined (during deletion)
+  if (!node) {
+    return <></>;
+  }
+
   const [isHovered, setIsHovered] = useState(false);
 
   // Download functionality
@@ -55,14 +60,16 @@ export function FileNode({
     fileName: string,
     maxLength: number = 25
   ): string => {
+    if (!fileName || typeof fileName !== 'string') return '';
     if (fileName.length <= maxLength) return fileName;
 
     const extension = fileName.split('.').pop();
     const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
     const truncatedName =
-      nameWithoutExt.substring(0, maxLength - extension!.length - 4) + '...';
+      nameWithoutExt.substring(0, maxLength - (extension?.length || 0) - 4) +
+      '...';
 
-    return `${truncatedName}.${extension}`;
+    return `${truncatedName}.${extension || ''}`;
   };
 
   // Calculate responsive sizing based on scale

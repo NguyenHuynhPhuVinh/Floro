@@ -25,6 +25,7 @@ interface KonvaCanvasProps {
   height: number;
   stageProps: StageProps;
   sessionId?: string;
+  onDeleteNode?: (nodeId: string) => void;
 }
 
 export const KonvaCanvas: React.FC<KonvaCanvasProps> = ({
@@ -32,10 +33,11 @@ export const KonvaCanvas: React.FC<KonvaCanvasProps> = ({
   height,
   stageProps,
   sessionId = 'public',
+  onDeleteNode,
 }) => {
   return (
     <Stage width={width} height={height} {...stageProps}>
-      <NodesLayer sessionId={sessionId} />
+      <NodesLayer sessionId={sessionId} onDeleteNode={onDeleteNode} />
     </Stage>
   );
 };

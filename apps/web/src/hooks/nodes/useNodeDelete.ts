@@ -14,6 +14,7 @@ export interface UseNodeDeleteReturn {
   showConfirmDialog: boolean;
   confirmDelete: () => void;
   cancelDelete: () => void;
+  pendingDeletionCount: number;
 }
 
 /**
@@ -29,16 +30,22 @@ export const useNodeDelete = (): UseNodeDeleteReturn => {
     nodeIds: string[];
   } | null>(null);
 
-  const { removeNode } = useNodesStore();
+  const { removeNode, clearLastDeletedAt } = useNodesStore();
   const { getSelectedNodes, clearSelection } = useNodeSelection();
   const { showSuccess, showError } = useToast();
 
   /**
-   * Delete a single node with confirmation
-   * @param nodeId - ID of the node to delete
+   * Delete a single node or batch of nodes with confirmation
+   * @param nodeId - ID of the node to delete, or "BATCH:id1,id2,id3" for multiple nodes
    */
   const deleteNode = useCallback(async (nodeId: string): Promise<void> => {
-    setPendingDeletion({ type: 'single', nodeIds: [nodeId] });
+    // Check if this is a batch deletion
+    if (nodeId.startsWith('BATCH:')) {
+      const nodeIds = nodeId.substring(6).split(','); // Remove "BATCH:" prefix
+      setPendingDeletion({ type: 'multiple', nodeIds });
+    } else {
+      setPendingDeletion({ type: 'single', nodeIds: [nodeId] });
+    }
     setShowConfirmDialog(true);
   }, []);
 
@@ -66,15 +73,17 @@ export const useNodeDelete = (): UseNodeDeleteReturn => {
     try {
       const { nodeIds } = pendingDeletion;
 
+      // First delete from database
       if (nodeIds.length === 1) {
         // Single node deletion
         await NodeService.deleteFileNode(nodeIds[0]);
-        removeNode(nodeIds[0]);
       } else {
         // Multiple nodes deletion
         await NodeService.deleteMultipleNodes(nodeIds);
-        nodeIds.forEach(nodeId => removeNode(nodeId));
       }
+
+      // Only remove from UI after successful database deletion
+      nodeIds.forEach(nodeId => removeNode(nodeId));
 
       // Clear selection if we deleted selected nodes
       if (pendingDeletion.type === 'multiple') {
@@ -89,6 +98,11 @@ export const useNodeDelete = (): UseNodeDeleteReturn => {
           ? 'Node and associated file removed successfully'
           : 'Nodes and associated files removed successfully'
       );
+
+      // Clear the deletion flag after a delay to allow normal loading again
+      setTimeout(() => {
+        clearLastDeletedAt();
+      }, 3000);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to delete nodes:', error);
@@ -121,5 +135,6 @@ export const useNodeDelete = (): UseNodeDeleteReturn => {
     showConfirmDialog,
     confirmDelete,
     cancelDelete,
+    pendingDeletionCount: pendingDeletion?.nodeIds.length || 0,
   };
 };

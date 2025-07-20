@@ -5,12 +5,11 @@ import { FileNode } from '../../components/nodes/FileNode';
 import { useNodes } from '../../hooks/nodes/useNodes';
 import { useNodeSelection } from '../../hooks/nodes/useNodeSelection';
 import { useKeyboardShortcuts } from '../../hooks/nodes/useKeyboardShortcuts';
-import { useNodeDelete } from '../../hooks/nodes/useNodeDelete';
 import { useCanvasStore } from '../../store/canvas.store';
-import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 interface NodesLayerProps {
   sessionId?: string;
+  onDeleteNode?: (nodeId: string) => void;
 }
 
 /**
@@ -18,28 +17,44 @@ interface NodesLayerProps {
  */
 export const NodesLayer: React.FC<NodesLayerProps> = ({
   sessionId = 'public',
+  onDeleteNode,
 }) => {
   const { nodes, isLoading, error } = useNodes(sessionId);
   const { viewport } = useCanvasStore();
 
   // Node selection functionality
-  const { isSelected, selectNode, selectAll, clearSelection } =
-    useNodeSelection();
-
-  // Node deletion functionality
   const {
-    deleteNode,
-    deleteSelectedNodes,
-    showConfirmDialog,
-    confirmDelete,
-    cancelDelete,
-  } = useNodeDelete();
+    isSelected,
+    selectNode,
+    selectAll,
+    clearSelection,
+    getSelectedNodes,
+  } = useNodeSelection();
+
+  // Handle delete selected nodes
+  const handleDeleteSelectedNodes = (): void => {
+    const selectedNodes = getSelectedNodes();
+    if (selectedNodes.length === 0) return;
+
+    // Delete all selected nodes
+    if (onDeleteNode) {
+      // For multiple nodes, we need to trigger batch deletion
+      // We'll pass a special indicator to distinguish between single and batch deletion
+      if (selectedNodes.length === 1) {
+        onDeleteNode(selectedNodes[0].id);
+      } else {
+        // For multiple nodes, we'll use a special format to indicate batch deletion
+        const nodeIds = selectedNodes.map(node => node.id);
+        onDeleteNode(`BATCH:${nodeIds.join(',')}`);
+      }
+    }
+  };
 
   // Keyboard shortcuts for selection and deletion
   useKeyboardShortcuts({
     onSelectAll: selectAll,
     onClearSelection: clearSelection,
-    onDeleteSelected: deleteSelectedNodes,
+    onDeleteSelected: handleDeleteSelectedNodes,
   });
 
   if (isLoading) {
@@ -55,34 +70,20 @@ export const NodesLayer: React.FC<NodesLayerProps> = ({
   }
 
   // eslint-disable-next-line no-console
-  console.log('Rendering nodes:', nodes.length);
-
   return (
-    <>
-      <Layer>
-        {nodes.map(node => (
+    <Layer>
+      {nodes
+        .filter(node => node && node.id) // Filter out null/undefined nodes
+        .map(node => (
           <FileNode
             key={node.id}
             node={node}
             isSelected={isSelected(node.id)}
             onSelect={(nodeId, multiSelect) => selectNode(nodeId, multiSelect)}
-            onDelete={deleteNode}
+            onDelete={onDeleteNode}
             scale={viewport.scale}
           />
         ))}
-      </Layer>
-
-      {/* Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showConfirmDialog}
-        title="Delete Node(s)"
-        message="Are you sure you want to delete the selected node(s)? This action cannot be undone and will also remove associated files from storage."
-        confirmText="Delete"
-        cancelText="Cancel"
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
-        destructive={true}
-      />
-    </>
+    </Layer>
   );
 };

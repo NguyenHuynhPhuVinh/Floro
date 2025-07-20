@@ -11,6 +11,10 @@ import { useFileUpload } from '../../hooks/nodes/useFileUpload';
 import { FileUploadProgress } from '../nodes/FileUploadProgress';
 // eslint-disable-next-line import/order
 import { CanvasDragDropHandler } from './CanvasDragDropHandler';
+// eslint-disable-next-line import/order
+import { ConfirmDialog } from '../ui/ConfirmDialog';
+// eslint-disable-next-line import/order
+import { useNodeDelete } from '../../hooks/nodes/useNodeDelete';
 
 // Dynamically import Konva wrapper to avoid SSR issues
 const KonvaCanvas = dynamic(() => import('./KonvaCanvas'), {
@@ -33,6 +37,15 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const { stageProps, updateStageDimensions } = useCanvasViewport();
   const { uploadMultipleFiles, uploadProgress, cancelUpload } = useFileUpload();
+
+  // Node deletion functionality
+  const {
+    deleteNode,
+    showConfirmDialog,
+    confirmDelete,
+    cancelDelete,
+    pendingDeletionCount,
+  } = useNodeDelete();
 
   // Memoize stage dimensions to prevent unnecessary re-renders
   const stageDimensions = useMemo(
@@ -95,6 +108,7 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
             height={stageDimensions.height}
             stageProps={stageProps}
             sessionId="public"
+            onDeleteNode={deleteNode}
           />
         </div>
       </CanvasDragDropHandler>
@@ -104,6 +118,18 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
         uploads={uploadProgress}
         onCancel={cancelUpload}
         position="top-right"
+      />
+
+      {/* Confirmation Dialog - Outside Konva context */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title={`Delete ${pendingDeletionCount} Node${pendingDeletionCount > 1 ? 's' : ''}`}
+        message={`Are you sure you want to delete ${pendingDeletionCount} node${pendingDeletionCount > 1 ? 's' : ''}? This action cannot be undone and will also remove associated files from storage.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+        destructive={true}
       />
     </>
   );

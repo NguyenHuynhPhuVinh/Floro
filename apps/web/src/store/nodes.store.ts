@@ -10,6 +10,7 @@ interface NodesState {
   selectedNodeIds: Set<string>;
   isLoading: boolean;
   error: string | null;
+  lastDeletedAt: number | null; // Track when last deletion occurred
 
   // Actions
   addNode: (node: FileNode) => void;
@@ -19,6 +20,7 @@ interface NodesState {
   deselectNode: (id: string) => void;
   clearSelection: () => void;
   setSelectedNodeIds: (nodeIds: Set<string>) => void;
+  clearLastDeletedAt: () => void;
   setNodes: (nodes: FileNode[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -34,12 +36,13 @@ interface NodesState {
 
 export const useNodesStore = create<NodesState>()(
   devtools(
-    set => ({
+    (set, get) => ({
       // Initial state
       nodes: [],
       selectedNodeIds: new Set(),
       isLoading: false,
       error: null,
+      lastDeletedAt: null,
 
       // Sync actions
       addNode: (node: FileNode): void =>
@@ -60,6 +63,7 @@ export const useNodesStore = create<NodesState>()(
           selectedNodeIds: new Set(
             Array.from(state.selectedNodeIds).filter(nodeId => nodeId !== id)
           ),
+          lastDeletedAt: Date.now(), // Mark when deletion occurred
         })),
 
       selectNode: (id: string): void =>
@@ -84,6 +88,11 @@ export const useNodesStore = create<NodesState>()(
           selectedNodeIds: nodeIds,
         })),
 
+      clearLastDeletedAt: (): void =>
+        set(() => ({
+          lastDeletedAt: null,
+        })),
+
       setNodes: (nodes: FileNode[]): void =>
         set(() => ({
           nodes,
@@ -101,6 +110,15 @@ export const useNodesStore = create<NodesState>()(
 
       // Async actions
       loadNodes: async (sessionId: string): Promise<void> => {
+        // Check if we should skip loading due to recent deletion
+        const currentState = get();
+        if (
+          currentState.lastDeletedAt &&
+          Date.now() - currentState.lastDeletedAt < 2000
+        ) {
+          return;
+        }
+
         set({ isLoading: true, error: null });
         try {
           const nodes = await NodeService.getNodesBySession(sessionId);

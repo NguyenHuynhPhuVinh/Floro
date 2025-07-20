@@ -6,7 +6,7 @@ import { Group, Circle, Path } from 'react-konva';
 import { FileCategory } from '../../types';
 
 interface FileNodeIconProps {
-  fileType: string;
+  fileType: string | undefined | null;
   size?: 'small' | 'medium' | 'large';
   x?: number;
   y?: number;
@@ -26,7 +26,12 @@ export function FileNodeIcon({
 
   const iconSize = sizeMap[size];
 
-  const getFileCategory = (fileType: string): FileCategory => {
+  const getFileCategory = (
+    fileType: string | undefined | null
+  ): FileCategory => {
+    if (!fileType || typeof fileType !== 'string') {
+      return 'text-file';
+    }
     const extension = fileType.toLowerCase();
 
     // Documents
