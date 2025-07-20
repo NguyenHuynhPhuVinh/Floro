@@ -1,6 +1,6 @@
 # 6.2. Application Shell Architecture
 
-### 6.2.1 Layout System (Epic 2.4)
+### 6.2.1 Layout System (Epic 2.3)
 
 The application uses a layered layout approach with clear separation between UI shell and canvas content.
 

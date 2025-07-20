@@ -14,7 +14,7 @@ This table lists the technologies chosen for the Floro project. Development will
 | **UI Library**         | Tailwind CSS                   | Styling                             | Xây dựng giao diện nhanh chóng và nhất quán.               |
 | **UI Components**      | Shadcn/ui                      | Thư viện component                  | Cung cấp component đẹp, dễ tùy chỉnh, tái sử dụng.         |
 | **State Management**   | Zustand                        | Quản lý trạng thái client           | Nhẹ, đơn giản, hiệu quả cho nhu cầu dự án.                 |
-| **2D Canvas Library**  | Konva.js                       | Xử lý không gian 2D                 | Thư viện canvas hiệu suất cao, hỗ trợ tốt.                 |
+| **2D Canvas Library**  | HTML5 Canvas + React           | Xử lý không gian 2D                 | Canvas API native, tích hợp tốt với React ecosystem.       |
 | **Spatial Indexing**   | Custom Quadtree                | Tối ưu truy vấn không gian          | Hiệu suất cao cho viewport queries và collision detection. |
 | **Error Handling**     | React Error Boundary           | Xử lý lỗi graceful                  | Ngăn crash toàn bộ app, user experience tốt hơn.           |
 | **Performance**        | React.memo, useMemo            | Tối ưu re-rendering                 | Giảm unnecessary renders, cải thiện performance.           |

@@ -12,8 +12,8 @@ floro/
 │       │   │   ├── ui/                 # Shadcn/ui components
 │       │   │   ├── canvas/             # Canvas-specific components
 │       │   │   │   ├── CanvasContainer.tsx
-│       │   │   │   ├── KonvaCanvas.tsx
-│       │   │   │   ├── NodesLayer.tsx
+│       │   │   │   ├── Canvas2D.tsx
+│       │   │   │   ├── NodesRenderer.tsx
 │       │   │   │   ├── CanvasDragDropHandler.tsx
 │       │   │   │   └── CanvasBackground.tsx
 │       │   │   ├── nodes/              # Node type components

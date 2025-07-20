@@ -15,8 +15,9 @@ This document outlines the complete fullstack architecture for **Floro**, includ
 | Date             | Version | Description                                                                                                                           | Author              |
 | :--------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------ | :------------------ |
 | {{current_date}} | 1.0     | Initial Architecture Draft                                                                                                            | Winston (Architect) |
-| {{current_date}} | 1.1     | Epic 2 Updates: UI Components, State Management, Application Shell                                                                    | Winston (Architect) |
+| {{current_date}} | 1.1     | Epic 2 Updates: Core Node Management, State Management, Application Shell                                                             | Winston (Architect) |
 | {{current_date}} | 1.2     | Architecture-Implementation Alignment: Updated data models, database schema, and service interfaces to match Story 2.1 implementation | Winston (Architect) |
+| {{current_date}} | 1.3     | PRD Alignment Update: Removed advanced UI components architecture following Story 2.3 removal                                         | Winston (Architect) |
 
 ## 2. High-Level Architecture
 
@@ -104,7 +105,7 @@ This table lists the technologies chosen for the Floro project. Development will
 | **UI Library**         | Tailwind CSS                   | Styling                             | Xây dựng giao diện nhanh chóng và nhất quán.               |
 | **UI Components**      | Shadcn/ui                      | Thư viện component                  | Cung cấp component đẹp, dễ tùy chỉnh, tái sử dụng.         |
 | **State Management**   | Zustand                        | Quản lý trạng thái client           | Nhẹ, đơn giản, hiệu quả cho nhu cầu dự án.                 |
-| **2D Canvas Library**  | Konva.js                       | Xử lý không gian 2D                 | Thư viện canvas hiệu suất cao, hỗ trợ tốt.                 |
+| **2D Canvas Library**  | HTML5 Canvas + React           | Xử lý không gian 2D                 | Canvas API native, tích hợp tốt với React ecosystem.       |
 | **Spatial Indexing**   | Custom Quadtree                | Tối ưu truy vấn không gian          | Hiệu suất cao cho viewport queries và collision detection. |
 | **Error Handling**     | React Error Boundary           | Xử lý lỗi graceful                  | Ngăn crash toàn bộ app, user experience tốt hơn.           |
 | **Performance**        | React.memo, useMemo            | Tối ưu re-rendering                 | Giảm unnecessary renders, cải thiện performance.           |
@@ -115,27 +116,28 @@ This table lists the technologies chosen for the Floro project. Development will
 
 ## 3.1. UI Components Architecture
 
-### 3.1.1 Konva-Based Component System
+### 3.1.1 Canvas-Based Component System
 
-The application uses a hybrid approach combining HTML components for UI shell and Konva components for canvas elements.
+The application uses a simplified approach focusing on core functionality with HTML5 Canvas for 2D rendering and React components for UI shell.
 
-| Component Type          | Technology                         | Purpose                      | Implementation               |
-| :---------------------- | :--------------------------------- | :--------------------------- | :--------------------------- |
-| **Canvas Components**   | Konva.js + react-konva             | Node rendering, interactions | High-performance 2D graphics |
-| **UI Shell Components** | React + Tailwind CSS               | Application layout, modals   | Traditional HTML/CSS         |
-| **Icon System**         | Lucide React                       | Professional icons           | SVG-based, tree-shakeable    |
-| **Animation System**    | Konva animations + CSS transitions | Smooth UX                    | Hardware-accelerated         |
+| Component Type          | Technology                          | Purpose                      | Implementation            |
+| :---------------------- | :---------------------------------- | :--------------------------- | :------------------------ |
+| **Canvas Components**   | HTML5 Canvas + React                | Node rendering, interactions | Native Canvas API         |
+| **UI Shell Components** | React + Tailwind CSS                | Application layout, modals   | Traditional HTML/CSS      |
+| **Icon System**         | Lucide React                        | Professional icons           | SVG-based, tree-shakeable |
+| **Animation System**    | CSS transitions + Canvas animations | Smooth UX                    | Hardware-accelerated      |
 
 ### 3.1.2 Component Architecture Patterns
 
 ```typescript
 // Canvas Component Pattern
-interface KonvaComponentProps {
+interface CanvasComponentProps {
   x: number;
   y: number;
   scale: number;
   isSelected?: boolean;
   onSelect?: (id: string) => void;
+  context: CanvasRenderingContext2D;
 }
 
 // UI Shell Component Pattern
@@ -150,8 +152,8 @@ interface UIComponentProps {
 
 - **File Type Icons**: Lucide icons with category-based mapping
 - **Color Coding**: Semantic colors for different file categories
-- **Scalable Rendering**: Vector-based icons that scale with canvas zoom
-- **Performance**: Optimized icon caching and reuse
+- **Canvas Rendering**: Icons rendered directly on canvas for performance
+- **Caching**: Optimized icon caching and reuse strategies
 
 ### 3.1.4 Theme and Localization System
 
@@ -327,7 +329,7 @@ export interface SettingsConfig {
   };
 }
 
-// Clipboard Integration (Epic 2.5)
+// Clipboard Integration (Epic 2.4)
 export interface ClipboardContent {
   type: "text" | "url" | "image" | "file";
   data: string | File | Blob;
@@ -341,20 +343,18 @@ export interface ClipboardOperation {
   timestamp: string;
 }
 
-// Animation and Interaction States
+// Basic Interaction States
 export interface NodeInteractionState {
   isHovered: boolean;
   isDragging: boolean;
   isSelected: boolean;
   isLoading: boolean;
   dragOffset?: { x: number; y: number };
-  hoverStartTime?: number;
 }
 
-export interface AnimationConfig {
+export interface BasicAnimationConfig {
   duration: number;
   easing: "linear" | "ease-in" | "ease-out" | "ease-in-out";
-  delay?: number;
 }
 
 // Database schema types for Supabase (actual table names and structure)
@@ -505,8 +505,8 @@ floro/
 │       │   │   ├── ui/                 # Shadcn/ui components
 │       │   │   ├── canvas/             # Canvas-specific components
 │       │   │   │   ├── CanvasContainer.tsx
-│       │   │   │   ├── KonvaCanvas.tsx
-│       │   │   │   ├── NodesLayer.tsx
+│       │   │   │   ├── Canvas2D.tsx
+│       │   │   │   ├── NodesRenderer.tsx
 │       │   │   │   ├── CanvasDragDropHandler.tsx
 │       │   │   │   └── CanvasBackground.tsx
 │       │   │   ├── nodes/              # Node type components
@@ -587,7 +587,7 @@ floro/
 The application uses Zustand for client-side state management with a modular store approach.
 
 ```typescript
-// Enhanced Canvas Store (Epic 2.2, 2.3)
+// Canvas Store (Epic 2.2, 2.3)
 interface CanvasState {
   // Viewport state
   viewport: {
@@ -616,7 +616,7 @@ interface CanvasState {
   resetCanvas: () => void;
 }
 
-// Enhanced Nodes Store (Epic 2.2)
+// Nodes Store (Epic 2.2)
 interface NodesState {
   // Node data
   nodes: FloroNode[];
@@ -642,7 +642,7 @@ interface NodesState {
   redo: () => void;
 }
 
-// Settings Store (Epic 2.4)
+// Settings Store (Epic 2.3)
 interface SettingsState {
   config: SettingsConfig;
   isModalOpen: boolean;
@@ -691,7 +691,7 @@ class MoveNodeCommand implements Command {
 
 ## 6.2. Application Shell Architecture
 
-### 6.2.1 Layout System (Epic 2.4)
+### 6.2.1 Layout System (Epic 2.3)
 
 The application uses a layered layout approach with clear separation between UI shell and canvas content.
 

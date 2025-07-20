@@ -5,7 +5,7 @@
 The application uses Zustand for client-side state management with a modular store approach.
 
 ```typescript
-// Enhanced Canvas Store (Epic 2.2, 2.3)
+// Canvas Store (Epic 2.2, 2.3)
 interface CanvasState {
   // Viewport state
   viewport: {
@@ -34,7 +34,7 @@ interface CanvasState {
   resetCanvas: () => void;
 }
 
-// Enhanced Nodes Store (Epic 2.2)
+// Nodes Store (Epic 2.2)
 interface NodesState {
   // Node data
   nodes: FloroNode[];
@@ -60,7 +60,7 @@ interface NodesState {
   redo: () => void;
 }
 
-// Settings Store (Epic 2.4)
+// Settings Store (Epic 2.3)
 interface SettingsState {
   config: SettingsConfig;
   isModalOpen: boolean;

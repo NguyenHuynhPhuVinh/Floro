@@ -1,26 +1,27 @@
 # 3.1. UI Components Architecture
 
-### 3.1.1 Konva-Based Component System
+### 3.1.1 Canvas-Based Component System
 
-The application uses a hybrid approach combining HTML components for UI shell and Konva components for canvas elements.
+The application uses a simplified approach focusing on core functionality with HTML5 Canvas for 2D rendering and React components for UI shell.
 
-| Component Type          | Technology                         | Purpose                      | Implementation               |
-| :---------------------- | :--------------------------------- | :--------------------------- | :--------------------------- |
-| **Canvas Components**   | Konva.js + react-konva             | Node rendering, interactions | High-performance 2D graphics |
-| **UI Shell Components** | React + Tailwind CSS               | Application layout, modals   | Traditional HTML/CSS         |
-| **Icon System**         | Lucide React                       | Professional icons           | SVG-based, tree-shakeable    |
-| **Animation System**    | Konva animations + CSS transitions | Smooth UX                    | Hardware-accelerated         |
+| Component Type          | Technology                          | Purpose                      | Implementation            |
+| :---------------------- | :---------------------------------- | :--------------------------- | :------------------------ |
+| **Canvas Components**   | HTML5 Canvas + React                | Node rendering, interactions | Native Canvas API         |
+| **UI Shell Components** | React + Tailwind CSS                | Application layout, modals   | Traditional HTML/CSS      |
+| **Icon System**         | Lucide React                        | Professional icons           | SVG-based, tree-shakeable |
+| **Animation System**    | CSS transitions + Canvas animations | Smooth UX                    | Hardware-accelerated      |
 
 ### 3.1.2 Component Architecture Patterns
 
 ```typescript
 // Canvas Component Pattern
-interface KonvaComponentProps {
+interface CanvasComponentProps {
   x: number;
   y: number;
   scale: number;
   isSelected?: boolean;
   onSelect?: (id: string) => void;
+  context: CanvasRenderingContext2D;
 }
 
 // UI Shell Component Pattern
@@ -35,8 +36,8 @@ interface UIComponentProps {
 
 - **File Type Icons**: Lucide icons with category-based mapping
 - **Color Coding**: Semantic colors for different file categories
-- **Scalable Rendering**: Vector-based icons that scale with canvas zoom
-- **Performance**: Optimized icon caching and reuse
+- **Canvas Rendering**: Icons rendered directly on canvas for performance
+- **Caching**: Optimized icon caching and reuse strategies
 
 ### 3.1.4 Theme and Localization System
 

@@ -147,7 +147,7 @@ export interface SettingsConfig {
   };
 }
 
-// Clipboard Integration (Epic 2.5)
+// Clipboard Integration (Epic 2.4)
 export interface ClipboardContent {
   type: "text" | "url" | "image" | "file";
   data: string | File | Blob;
@@ -161,20 +161,18 @@ export interface ClipboardOperation {
   timestamp: string;
 }
 
-// Animation and Interaction States
+// Basic Interaction States
 export interface NodeInteractionState {
   isHovered: boolean;
   isDragging: boolean;
   isSelected: boolean;
   isLoading: boolean;
   dragOffset?: { x: number; y: number };
-  hoverStartTime?: number;
 }
 
-export interface AnimationConfig {
+export interface BasicAnimationConfig {
   duration: number;
   easing: "linear" | "ease-in" | "ease-out" | "ease-in-out";
-  delay?: number;
 }
 
 // Database schema types for Supabase (actual table names and structure)
