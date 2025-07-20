@@ -16,4 +16,5 @@ This document outlines the complete fullstack architecture for **Floro**, includ
 | {{current_date}} | 1.1     | Epic 2 Updates: Core Node Management, State Management, Application Shell                                                             | Winston (Architect) |
 | {{current_date}} | 1.2     | Architecture-Implementation Alignment: Updated data models, database schema, and service interfaces to match Story 2.1 implementation | Winston (Architect) |
 | {{current_date}} | 1.3     | PRD Alignment Update: Removed advanced UI components architecture following Story 2.3 removal                                         | Winston (Architect) |
+| {{current_date}} | 1.4     | Story 2.3 Integration: Updated theme and localization architecture with next-themes and react-i18next implementation                  | Winston (Architect) |
 

@@ -41,26 +41,75 @@ interface UIComponentProps {
 
 ### 3.1.4 Theme and Localization System
 
+**Theme Management với next-themes:**
+
 ```typescript
-interface ThemeConfig {
-  colors: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    background: string;
-  };
-  typography: {
-    fontFamily: string;
-    fontSize: Record<string, number>;
-  };
-  spacing: Record<string, number>;
+// Theme Provider Configuration
+interface ThemeProviderProps {
+  attribute?: string;
+  defaultTheme?: string;
+  enableSystem?: boolean;
+  disableTransitionOnChange?: boolean;
 }
 
-interface LocalizationConfig {
-  language: "vi" | "en";
-  messages: Record<string, string>;
-  dateFormat: string;
-  numberFormat: Intl.NumberFormatOptions;
+// Theme Hook Usage
+const { theme, setTheme, systemTheme } = useTheme();
+
+// Tailwind Dark Mode Classes
+const themeClasses = {
+  light: "bg-white text-gray-900",
+  dark: "dark:bg-gray-900 dark:text-white",
+  system: "bg-white dark:bg-gray-900 text-gray-900 dark:text-white",
+};
+```
+
+**Internationalization với react-i18next:**
+
+```typescript
+// i18n Configuration
+interface I18nConfig {
+  lng: "vi" | "en";
+  fallbackLng: "vi";
+  defaultNS: "common";
+  resources: {
+    vi: {
+      common: Record<string, string>;
+      settings: Record<string, string>;
+      canvas: Record<string, string>;
+    };
+    en: {
+      common: Record<string, string>;
+      settings: Record<string, string>;
+      canvas: Record<string, string>;
+    };
+  };
+}
+
+// Translation Hook Usage
+const { t, i18n } = useTranslation("settings");
+const changeLanguage = (lng: string) => i18n.changeLanguage(lng);
+```
+
+**JSON-based Translation Structure:**
+
+```typescript
+// locales/vi/settings.json
+{
+  "title": "Cài đặt",
+  "display": "Hiển thị",
+  "canvas": "Canvas",
+  "collaboration": "Cộng tác",
+  "theme": {
+    "label": "Giao diện",
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Hệ thống"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "vietnamese": "Tiếng Việt",
+    "english": "Tiếng Anh"
+  }
 }
 ```
 

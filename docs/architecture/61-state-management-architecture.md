@@ -16,13 +16,18 @@ interface CanvasState {
     height: number;
   };
 
-  // UI state
+  // UI state (theme now managed by next-themes)
   ui: {
     showGrid: boolean;
     showCoordinates: boolean;
     gridSize: number;
-    theme: "light" | "dark";
     language: "vi" | "en";
+    coordinatePosition:
+      | "top-left"
+      | "top-right"
+      | "bottom-left"
+      | "bottom-right";
+    coordinateFormat: "decimal" | "integer";
   };
 
   // Performance tracking
@@ -60,7 +65,7 @@ interface NodesState {
   redo: () => void;
 }
 
-// Settings Store (Epic 2.3)
+// Settings Store (Epic 2.3) - Updated for next-themes integration
 interface SettingsState {
   config: SettingsConfig;
   isModalOpen: boolean;
@@ -70,6 +75,9 @@ interface SettingsState {
   resetSettings: () => void;
   openModal: () => void;
   closeModal: () => void;
+
+  // Note: Theme management is now handled by next-themes provider
+  // Language management is handled by react-i18next
 }
 ```
 

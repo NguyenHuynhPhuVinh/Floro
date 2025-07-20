@@ -38,4 +38,9 @@
   - **Object Pooling:** Reuse canvas objects to reduce GC pressure
   - **Cleanup Strategies:** Automatic cleanup of off-screen resources
   - **Memory Monitoring:** Track and alert on memory usage patterns
+- **Background Rendering Optimization (Story 2.3):**
+  - **SVG Pattern Optimization:** DotsBackground uses SVG patterns instead of DOM manipulation
+  - **Hardware Acceleration:** CSS transforms and transitions for smooth theme switching
+  - **Reduced Paint Operations:** Optimized background rendering to eliminate lag
+  - **Theme Transition Performance:** next-themes provides CSS-only theme switching
 

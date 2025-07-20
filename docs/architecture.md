@@ -18,6 +18,7 @@ This document outlines the complete fullstack architecture for **Floro**, includ
 | {{current_date}} | 1.1     | Epic 2 Updates: Core Node Management, State Management, Application Shell                                                             | Winston (Architect) |
 | {{current_date}} | 1.2     | Architecture-Implementation Alignment: Updated data models, database schema, and service interfaces to match Story 2.1 implementation | Winston (Architect) |
 | {{current_date}} | 1.3     | PRD Alignment Update: Removed advanced UI components architecture following Story 2.3 removal                                         | Winston (Architect) |
+| {{current_date}} | 1.4     | Story 2.3 Integration: Updated theme and localization architecture with next-themes and react-i18next implementation                  | Winston (Architect) |
 
 ## 2. High-Level Architecture
 
@@ -93,26 +94,28 @@ graph TD
 
 This table lists the technologies chosen for the Floro project. Development will adhere to the latest stable versions of these technologies.
 
-| Category               | Technology                     | Purpose                             | Rationale                                                  |
-| :--------------------- | :----------------------------- | :---------------------------------- | :--------------------------------------------------------- |
-| **Language**           | TypeScript                     | Ngôn ngữ phát triển chính           | An toàn kiểu dữ liệu, dễ dàng chia sẻ types.               |
-| **Frontend Framework** | Next.js 14+                    | Xây dựng giao diện người dùng       | Framework React mạnh mẽ, App Router, tích hợp Vercel.      |
-| **Backend Service**    | Supabase                       | Backend-as-a-Service                | Open source, PostgreSQL, real-time, tích hợp đầy đủ.       |
-| **Database**           | Supabase Database (PostgreSQL) | Lưu trữ metadata và trạng thái node | SQL database mạnh mẽ, ACID compliance, complex queries.    |
-| **Real-time Engine**   | Supabase Realtime              | Đồng bộ dữ liệu real-time           | WebSocket-based, low latency, built-in subscriptions.      |
-| **File Storage**       | Supabase Storage               | Lưu trữ file                        | S3-compatible, CDN tích hợp, policy-based access control.  |
-| **Authentication**     | Supabase Auth                  | Xác thực người dùng (future)        | Multiple providers, JWT tokens, row-level security.        |
-| **UI Library**         | Tailwind CSS                   | Styling                             | Xây dựng giao diện nhanh chóng và nhất quán.               |
-| **UI Components**      | Shadcn/ui                      | Thư viện component                  | Cung cấp component đẹp, dễ tùy chỉnh, tái sử dụng.         |
-| **State Management**   | Zustand                        | Quản lý trạng thái client           | Nhẹ, đơn giản, hiệu quả cho nhu cầu dự án.                 |
-| **2D Canvas Library**  | HTML5 Canvas + React           | Xử lý không gian 2D                 | Canvas API native, tích hợp tốt với React ecosystem.       |
-| **Spatial Indexing**   | Custom Quadtree                | Tối ưu truy vấn không gian          | Hiệu suất cao cho viewport queries và collision detection. |
-| **Error Handling**     | React Error Boundary           | Xử lý lỗi graceful                  | Ngăn crash toàn bộ app, user experience tốt hơn.           |
-| **Performance**        | React.memo, useMemo            | Tối ưu re-rendering                 | Giảm unnecessary renders, cải thiện performance.           |
-| **Testing**            | Jest & React Testing Library   | Unit & Integration tests            | Bộ công cụ tiêu chuẩn trong hệ sinh thái React.            |
-| **E2E Testing**        | Playwright                     | End-to-end testing                  | Modern, reliable, cross-browser testing.                   |
-| **Monitoring**         | Vercel Analytics               | Performance monitoring              | Built-in analytics, Core Web Vitals tracking.              |
-| **Deployment**         | Vercel                         | Nền tảng hosting                    | Tích hợp CI/CD tự động, mạng lưới toàn cầu.                |
+| Category                 | Technology                     | Purpose                             | Rationale                                                           |
+| :----------------------- | :----------------------------- | :---------------------------------- | :------------------------------------------------------------------ |
+| **Language**             | TypeScript                     | Ngôn ngữ phát triển chính           | An toàn kiểu dữ liệu, dễ dàng chia sẻ types.                        |
+| **Frontend Framework**   | Next.js 14+                    | Xây dựng giao diện người dùng       | Framework React mạnh mẽ, App Router, tích hợp Vercel.               |
+| **Backend Service**      | Supabase                       | Backend-as-a-Service                | Open source, PostgreSQL, real-time, tích hợp đầy đủ.                |
+| **Database**             | Supabase Database (PostgreSQL) | Lưu trữ metadata và trạng thái node | SQL database mạnh mẽ, ACID compliance, complex queries.             |
+| **Real-time Engine**     | Supabase Realtime              | Đồng bộ dữ liệu real-time           | WebSocket-based, low latency, built-in subscriptions.               |
+| **File Storage**         | Supabase Storage               | Lưu trữ file                        | S3-compatible, CDN tích hợp, policy-based access control.           |
+| **Authentication**       | Supabase Auth                  | Xác thực người dùng (future)        | Multiple providers, JWT tokens, row-level security.                 |
+| **UI Library**           | Tailwind CSS                   | Styling                             | Xây dựng giao diện nhanh chóng và nhất quán.                        |
+| **UI Components**        | Shadcn/ui                      | Thư viện component                  | Cung cấp component đẹp, dễ tùy chỉnh, tái sử dụng.                  |
+| **State Management**     | Zustand                        | Quản lý trạng thái client           | Nhẹ, đơn giản, hiệu quả cho nhu cầu dự án.                          |
+| **Theme Management**     | next-themes                    | Quản lý theme và dark mode          | Professional theme switching, SSR-safe, Tailwind integration.       |
+| **Internationalization** | react-i18next                  | Hệ thống đa ngôn ngữ                | Industry-standard i18n, JSON-based translations, namespace support. |
+| **2D Canvas Library**    | HTML5 Canvas + React           | Xử lý không gian 2D                 | Canvas API native, tích hợp tốt với React ecosystem.                |
+| **Spatial Indexing**     | Custom Quadtree                | Tối ưu truy vấn không gian          | Hiệu suất cao cho viewport queries và collision detection.          |
+| **Error Handling**       | React Error Boundary           | Xử lý lỗi graceful                  | Ngăn crash toàn bộ app, user experience tốt hơn.                    |
+| **Performance**          | React.memo, useMemo            | Tối ưu re-rendering                 | Giảm unnecessary renders, cải thiện performance.                    |
+| **Testing**              | Jest & React Testing Library   | Unit & Integration tests            | Bộ công cụ tiêu chuẩn trong hệ sinh thái React.                     |
+| **E2E Testing**          | Playwright                     | End-to-end testing                  | Modern, reliable, cross-browser testing.                            |
+| **Monitoring**           | Vercel Analytics               | Performance monitoring              | Built-in analytics, Core Web Vitals tracking.                       |
+| **Deployment**           | Vercel                         | Nền tảng hosting                    | Tích hợp CI/CD tự động, mạng lưới toàn cầu.                         |
 
 ## 3.1. UI Components Architecture
 
@@ -157,26 +160,75 @@ interface UIComponentProps {
 
 ### 3.1.4 Theme and Localization System
 
+**Theme Management với next-themes:**
+
 ```typescript
-interface ThemeConfig {
-  colors: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    background: string;
-  };
-  typography: {
-    fontFamily: string;
-    fontSize: Record<string, number>;
-  };
-  spacing: Record<string, number>;
+// Theme Provider Configuration
+interface ThemeProviderProps {
+  attribute?: string;
+  defaultTheme?: string;
+  enableSystem?: boolean;
+  disableTransitionOnChange?: boolean;
 }
 
-interface LocalizationConfig {
-  language: "vi" | "en";
-  messages: Record<string, string>;
-  dateFormat: string;
-  numberFormat: Intl.NumberFormatOptions;
+// Theme Hook Usage
+const { theme, setTheme, systemTheme } = useTheme();
+
+// Tailwind Dark Mode Classes
+const themeClasses = {
+  light: "bg-white text-gray-900",
+  dark: "dark:bg-gray-900 dark:text-white",
+  system: "bg-white dark:bg-gray-900 text-gray-900 dark:text-white",
+};
+```
+
+**Internationalization với react-i18next:**
+
+```typescript
+// i18n Configuration
+interface I18nConfig {
+  lng: "vi" | "en";
+  fallbackLng: "vi";
+  defaultNS: "common";
+  resources: {
+    vi: {
+      common: Record<string, string>;
+      settings: Record<string, string>;
+      canvas: Record<string, string>;
+    };
+    en: {
+      common: Record<string, string>;
+      settings: Record<string, string>;
+      canvas: Record<string, string>;
+    };
+  };
+}
+
+// Translation Hook Usage
+const { t, i18n } = useTranslation("settings");
+const changeLanguage = (lng: string) => i18n.changeLanguage(lng);
+```
+
+**JSON-based Translation Structure:**
+
+```typescript
+// locales/vi/settings.json
+{
+  "title": "Cài đặt",
+  "display": "Hiển thị",
+  "canvas": "Canvas",
+  "collaboration": "Cộng tác",
+  "theme": {
+    "label": "Giao diện",
+    "light": "Sáng",
+    "dark": "Tối",
+    "system": "Hệ thống"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "vietnamese": "Tiếng Việt",
+    "english": "Tiếng Anh"
+  }
 }
 ```
 
@@ -303,14 +355,16 @@ export interface NodeOperation {
   previousData?: Partial<FloroNode>;
 }
 
-// UI State Management (Epic 2.3, 2.4)
+// UI State Management (Epic 2.3, 2.4) - Updated for next-themes integration
 export interface UIState {
-  theme: "light" | "dark" | "auto";
+  // Theme is now managed by next-themes, not in settings store
   language: "vi" | "en";
   showCoordinates: boolean;
   showGrid: boolean;
   gridSize: number;
   canvasBackground: "none" | "grid" | "dots";
+  coordinatePosition: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  coordinateFormat: "decimal" | "integer";
 }
 
 export interface SettingsConfig {
@@ -321,6 +375,9 @@ export interface SettingsConfig {
     maxZoom: number;
     panSensitivity: number;
     zoomSensitivity: number;
+    backgroundType: "none" | "grid" | "dots";
+    backgroundSize: number;
+    backgroundOpacity: number;
   };
   collaboration: {
     showCursors: boolean;
@@ -521,7 +578,16 @@ floro/
 │       │   │   │   ├── AppHeader.tsx
 │       │   │   │   ├── SettingsModal.tsx
 │       │   │   │   ├── SettingsButton.tsx
-│       │   │   │   └── CoordinateDisplay.tsx
+│       │   │   │   ├── CoordinateDisplay.tsx
+│       │   │   │   ├── ThemeToggle.tsx
+│       │   │   │   └── settings/
+│       │   │   │       ├── DisplaySettings.tsx
+│       │   │   │       ├── CanvasSettings.tsx
+│       │   │   │       └── CollaborationSettings.tsx
+│       │   │   ├── providers/          # Context providers
+│       │   │   │   ├── ThemeProvider.tsx
+│       │   │   │   ├── I18nProvider.tsx
+│       │   │   │   └── ClientProviders.tsx
 │       │   │   └── common/             # Shared components
 │       │   ├── services/               # Supabase service layer
 │       │   │   ├── core/               # Core services (supabase, node, storage)
@@ -542,8 +608,7 @@ floro/
 │       │   │   │   └── useClipboard.ts
 │       │   │   ├── ui/                 # UI-related hooks
 │       │   │   │   ├── useSettings.ts
-│       │   │   │   ├── useTheme.ts
-│       │   │   │   └── useLocalization.ts
+│       │   │   │   └── useMousePosition.ts
 │       │   │   └── realtime/           # Real-time data hooks
 │       │   ├── store/                  # Zustand stores
 │       │   │   ├── canvas.store.ts     # Canvas state (zoom, pan, viewport, UI)
@@ -553,7 +618,17 @@ floro/
 │       │   ├── lib/                    # Utility libraries
 │       │   │   ├── spatial/            # Quadtree and spatial indexing
 │       │   │   ├── performance/        # Performance monitoring
-│       │   │   └── security/           # Input sanitization, validation
+│       │   │   ├── security/           # Input sanitization, validation
+│       │   │   └── i18n.ts             # i18next configuration
+│       │   ├── locales/                # Translation files
+│       │   │   ├── vi/                 # Vietnamese translations
+│       │   │   │   ├── common.json
+│       │   │   │   ├── settings.json
+│       │   │   │   └── canvas.json
+│       │   │   └── en/                 # English translations
+│       │   │       ├── common.json
+│       │   │       ├── settings.json
+│       │   │       └── canvas.json
 │       │   └── types/                  # App-specific types
 │       ├── package.json                # Web app dependencies
 │       ├── next.config.js              # Next.js configuration
@@ -598,13 +673,18 @@ interface CanvasState {
     height: number;
   };
 
-  // UI state
+  // UI state (theme now managed by next-themes)
   ui: {
     showGrid: boolean;
     showCoordinates: boolean;
     gridSize: number;
-    theme: "light" | "dark";
     language: "vi" | "en";
+    coordinatePosition:
+      | "top-left"
+      | "top-right"
+      | "bottom-left"
+      | "bottom-right";
+    coordinateFormat: "decimal" | "integer";
   };
 
   // Performance tracking
@@ -642,7 +722,7 @@ interface NodesState {
   redo: () => void;
 }
 
-// Settings Store (Epic 2.3)
+// Settings Store (Epic 2.3) - Updated for next-themes integration
 interface SettingsState {
   config: SettingsConfig;
   isModalOpen: boolean;
@@ -652,6 +732,9 @@ interface SettingsState {
   resetSettings: () => void;
   openModal: () => void;
   closeModal: () => void;
+
+  // Note: Theme management is now handled by next-themes provider
+  // Language management is handled by react-i18next
 }
 ```
 
@@ -702,7 +785,7 @@ interface AppLayoutProps {
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => (
-  <div className="h-screen w-screen flex flex-col">
+  <div className="h-screen w-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
     {/* Header with Logo and Settings */}
     <AppHeader />
 
@@ -723,24 +806,33 @@ interface AppHeaderProps {
   className?: string;
 }
 
-const AppHeader: React.FC<AppHeaderProps> = ({ className }) => (
-  <header className={`bg-white border-b border-gray-200 ${className}`}>
-    <div className="flex items-center justify-between px-6 py-3">
-      {/* Left: Navigation or breadcrumbs (future) */}
-      <div className="flex-1" />
+const AppHeader: React.FC<AppHeaderProps> = ({ className }) => {
+  const { t } = useTranslation("common");
 
-      {/* Center: Logo */}
-      <div className="flex items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Floro</h1>
-      </div>
+  return (
+    <header
+      className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 ${className}`}
+    >
+      <div className="flex items-center justify-between px-6 py-3">
+        {/* Left: Navigation or breadcrumbs (future) */}
+        <div className="flex-1" />
 
-      {/* Right: Settings and actions */}
-      <div className="flex-1 flex justify-end">
-        <SettingsButton />
+        {/* Center: Logo */}
+        <div className="flex items-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {t("appTitle", "Floro")}
+          </h1>
+        </div>
+
+        {/* Right: Settings and actions */}
+        <div className="flex-1 flex justify-end space-x-2">
+          <ThemeToggle />
+          <SettingsButton />
+        </div>
       </div>
-    </div>
-  </header>
-);
+    </header>
+  );
+};
 ```
 
 ### 6.2.3 Settings System Architecture
@@ -760,26 +852,31 @@ interface SettingsCategory {
   component: React.ComponentType<SettingsCategoryProps>;
 }
 
-const settingsCategories: SettingsCategory[] = [
-  {
-    id: "display",
-    title: "Hiển thị",
-    icon: Monitor,
-    component: DisplaySettings,
-  },
-  {
-    id: "canvas",
-    title: "Canvas",
-    icon: Grid,
-    component: CanvasSettings,
-  },
-  {
-    id: "collaboration",
-    title: "Cộng tác",
-    icon: Users,
-    component: CollaborationSettings,
-  },
-];
+// Settings categories with i18n support
+const useSettingsCategories = () => {
+  const { t } = useTranslation("settings");
+
+  return [
+    {
+      id: "display",
+      title: t("display"),
+      icon: Monitor,
+      component: DisplaySettings,
+    },
+    {
+      id: "canvas",
+      title: t("canvas"),
+      icon: Grid,
+      component: CanvasSettings,
+    },
+    {
+      id: "collaboration",
+      title: t("collaboration"),
+      icon: Users,
+      component: CollaborationSettings,
+    },
+  ];
+};
 ```
 
 ### 6.2.4 Canvas Background System
@@ -823,24 +920,109 @@ const CoordinateDisplay: React.FC<CoordinateDisplayProps> = ({
 }) => {
   const { viewport } = useCanvasStore();
   const mousePosition = useMousePosition();
+  const { t } = useTranslation("canvas");
 
   return (
     <div
-      className={`fixed ${positionClasses[position]} bg-black/75 text-white px-2 py-1 rounded text-xs font-mono`}
+      className={`fixed ${positionClasses[position]} bg-black/75 dark:bg-gray-800/90 text-white px-2 py-1 rounded text-xs font-mono`}
     >
       {showCanvasCoords && (
         <div>
-          Canvas: {formatCoordinate(viewport.x, format)},{" "}
+          {t("coordinates.canvas")}: {formatCoordinate(viewport.x, format)},{" "}
           {formatCoordinate(viewport.y, format)}
         </div>
       )}
       {showMouseCoords && (
         <div>
-          Mouse: {formatCoordinate(mousePosition.x, format)},{" "}
+          {t("coordinates.mouse")}: {formatCoordinate(mousePosition.x, format)},{" "}
           {formatCoordinate(mousePosition.y, format)}
         </div>
       )}
     </div>
+  );
+};
+```
+
+### 6.2.6 Provider Architecture
+
+**Theme Provider Setup:**
+
+```typescript
+// components/providers/ThemeProvider.tsx
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+
+interface ThemeProviderProps {
+  children: React.ReactNode;
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => (
+  <NextThemesProvider
+    attribute="class"
+    defaultTheme="system"
+    enableSystem
+    disableTransitionOnChange={false}
+  >
+    {children}
+  </NextThemesProvider>
+);
+```
+
+**I18n Provider Setup:**
+
+```typescript
+// components/providers/I18nProvider.tsx
+import { I18nextProvider } from "react-i18next";
+import i18n from "@/lib/i18n";
+
+interface I18nProviderProps {
+  children: React.ReactNode;
+}
+
+export const I18nProvider: React.FC<I18nProviderProps> = ({ children }) => (
+  <I18nextProvider i18n={i18n}>{children}</I18nextProvider>
+);
+```
+
+**Client Providers Wrapper:**
+
+```typescript
+// components/providers/ClientProviders.tsx
+"use client";
+
+interface ClientProvidersProps {
+  children: React.ReactNode;
+}
+
+export const ClientProviders: React.FC<ClientProvidersProps> = ({
+  children,
+}) => (
+  <ThemeProvider>
+    <I18nProvider>{children}</I18nProvider>
+  </ThemeProvider>
+);
+```
+
+**Theme Toggle Component:**
+
+```typescript
+// components/layout/ThemeToggle.tsx
+import { useTheme } from "next-themes";
+import { useTranslation } from "react-i18next";
+
+export const ThemeToggle: React.FC = () => {
+  const { theme, setTheme } = useTheme();
+  const { t } = useTranslation("settings");
+
+  return (
+    <select
+      value={theme}
+      onChange={(e) => setTheme(e.target.value)}
+      className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded px-2 py-1"
+    >
+      <option value="light">{t("theme.light")}</option>
+      <option value="dark">{t("theme.dark")}</option>
+      <option value="system">{t("theme.system")}</option>
+    </select>
   );
 };
 ```
@@ -860,6 +1042,9 @@ pnpm install
 # Configure environment
 cp apps/web/.env.example apps/web/.env.local
 # Edit .env.local with Supabase credentials
+
+# Setup i18n and theme providers
+# Ensure next-themes and react-i18next are properly configured
 ```
 
 ### 7.2 Development Commands
@@ -944,6 +1129,11 @@ pnpm --filter shared-types build
   - **Object Pooling:** Reuse canvas objects to reduce GC pressure
   - **Cleanup Strategies:** Automatic cleanup of off-screen resources
   - **Memory Monitoring:** Track and alert on memory usage patterns
+- **Background Rendering Optimization (Story 2.3):**
+  - **SVG Pattern Optimization:** DotsBackground uses SVG patterns instead of DOM manipulation
+  - **Hardware Acceleration:** CSS transforms and transitions for smooth theme switching
+  - **Reduced Paint Operations:** Optimized background rendering to eliminate lag
+  - **Theme Transition Performance:** next-themes provides CSS-only theme switching
 
 ## 10. Testing Strategy
 

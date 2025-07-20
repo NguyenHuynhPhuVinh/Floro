@@ -121,14 +121,16 @@ export interface NodeOperation {
   previousData?: Partial<FloroNode>;
 }
 
-// UI State Management (Epic 2.3, 2.4)
+// UI State Management (Epic 2.3, 2.4) - Updated for next-themes integration
 export interface UIState {
-  theme: "light" | "dark" | "auto";
+  // Theme is now managed by next-themes, not in settings store
   language: "vi" | "en";
   showCoordinates: boolean;
   showGrid: boolean;
   gridSize: number;
   canvasBackground: "none" | "grid" | "dots";
+  coordinatePosition: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  coordinateFormat: "decimal" | "integer";
 }
 
 export interface SettingsConfig {
@@ -139,6 +141,9 @@ export interface SettingsConfig {
     maxZoom: number;
     panSensitivity: number;
     zoomSensitivity: number;
+    backgroundType: "none" | "grid" | "dots";
+    backgroundSize: number;
+    backgroundOpacity: number;
   };
   collaboration: {
     showCursors: boolean;

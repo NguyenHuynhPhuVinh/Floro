@@ -28,7 +28,16 @@ floro/
 │       │   │   │   ├── AppHeader.tsx
 │       │   │   │   ├── SettingsModal.tsx
 │       │   │   │   ├── SettingsButton.tsx
-│       │   │   │   └── CoordinateDisplay.tsx
+│       │   │   │   ├── CoordinateDisplay.tsx
+│       │   │   │   ├── ThemeToggle.tsx
+│       │   │   │   └── settings/
+│       │   │   │       ├── DisplaySettings.tsx
+│       │   │   │       ├── CanvasSettings.tsx
+│       │   │   │       └── CollaborationSettings.tsx
+│       │   │   ├── providers/          # Context providers
+│       │   │   │   ├── ThemeProvider.tsx
+│       │   │   │   ├── I18nProvider.tsx
+│       │   │   │   └── ClientProviders.tsx
 │       │   │   └── common/             # Shared components
 │       │   ├── services/               # Supabase service layer
 │       │   │   ├── core/               # Core services (supabase, node, storage)
@@ -49,8 +58,7 @@ floro/
 │       │   │   │   └── useClipboard.ts
 │       │   │   ├── ui/                 # UI-related hooks
 │       │   │   │   ├── useSettings.ts
-│       │   │   │   ├── useTheme.ts
-│       │   │   │   └── useLocalization.ts
+│       │   │   │   └── useMousePosition.ts
 │       │   │   └── realtime/           # Real-time data hooks
 │       │   ├── store/                  # Zustand stores
 │       │   │   ├── canvas.store.ts     # Canvas state (zoom, pan, viewport, UI)
@@ -60,7 +68,17 @@ floro/
 │       │   ├── lib/                    # Utility libraries
 │       │   │   ├── spatial/            # Quadtree and spatial indexing
 │       │   │   ├── performance/        # Performance monitoring
-│       │   │   └── security/           # Input sanitization, validation
+│       │   │   ├── security/           # Input sanitization, validation
+│       │   │   └── i18n.ts             # i18next configuration
+│       │   ├── locales/                # Translation files
+│       │   │   ├── vi/                 # Vietnamese translations
+│       │   │   │   ├── common.json
+│       │   │   │   ├── settings.json
+│       │   │   │   └── canvas.json
+│       │   │   └── en/                 # English translations
+│       │   │       ├── common.json
+│       │   │       ├── settings.json
+│       │   │       └── canvas.json
 │       │   └── types/                  # App-specific types
 │       ├── package.json                # Web app dependencies
 │       ├── next.config.js              # Next.js configuration
