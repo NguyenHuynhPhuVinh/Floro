@@ -20,32 +20,91 @@ All Supabase interactions from the Next.js app will be managed through a dedicat
 ### 5.3 Service Layer Architecture
 
 ```typescript
-// Example service interface using Supabase
+// Actual NodeService implementation using Supabase
 interface NodeService {
   // CRUD operations
-  createNode(
-    node: Omit<FloroNode, "id" | "createdAt" | "updatedAt">
-  ): Promise<FloroNode>;
-  updateNode(id: string, updates: Partial<FloroNode>): Promise<void>;
-  deleteNode(id: string): Promise<void>;
+  createNode(input: {
+    type: string;
+    position: { x: number; y: number };
+    data: Record<string, unknown>;
+    canvas_id: string;
+  }): Promise<FloroNode>;
 
-  // Spatial queries using PostGIS
-  getNodesInViewport(bounds: SpatialBounds): Promise<FloroNode[]>;
+  updateNode(
+    nodeId: string,
+    updates: {
+      type?: string;
+      position?: { x: number; y: number };
+      data?: Record<string, unknown>;
+    }
+  ): Promise<FloroNode>;
+
+  deleteNode(nodeId: string): Promise<void>;
+  getNode(nodeId: string): Promise<FloroNode | null>;
+
+  // Canvas-based queries
+  getNodesByCanvas(canvasId: string): Promise<FloroNode[]>;
+  getNodesBySession(sessionId: string): Promise<FloroNode[]>; // Handles "public" session
+
+  // Spatial queries using JSONB operators
+  getNodesInViewport(
+    canvasId: string,
+    bounds: { minX: number; minY: number; maxX: number; maxY: number }
+  ): Promise<FloroNode[]>;
 
   // Real-time subscriptions using Supabase Realtime
   subscribeToNodes(
-    sessionId: string,
-    callback: (nodes: FloroNode[]) => void
-  ): RealtimeChannel;
-
-  // Batch operations using PostgreSQL transactions
-  batchUpdateNodes(
-    updates: Array<{ id: string; updates: Partial<FloroNode> }>
-  ): Promise<void>;
-
-  // Advanced PostgreSQL features
-  searchNodes(query: string, sessionId: string): Promise<FloroNode[]>;
-  getNodeHistory(nodeId: string): Promise<FloroNode[]>;
+    canvasId: string,
+    callbacks: {
+      onInsert?: (node: FloroNode) => void;
+      onUpdate?: (node: FloroNode) => void;
+      onDelete?: (nodeId: string) => void;
+    }
+  ): () => void; // Returns unsubscribe function
 }
 ```
+
+### 5.4 Session Management Implementation
+
+The application uses a hybrid approach for session management to support both public collaboration and future private workspaces:
+
+```typescript
+// Session Management Strategy
+interface SessionConfig {
+  sessionId: string; // User-facing session identifier ("public", UUID, etc.)
+  canvasId: string; // Database canvas_id (always UUID)
+  isPublic: boolean; // Whether this is a public collaboration session
+}
+
+// Public Session Handling
+class SessionManager {
+  static async resolveCanvasId(sessionId: string): Promise<string> {
+    if (sessionId === "public") {
+      // For public sessions, generate or reuse a UUID
+      // Current implementation: generate new UUID for each upload
+      return crypto.randomUUID();
+    }
+
+    // For private sessions, use sessionId as canvasId
+    return sessionId;
+  }
+
+  static async getSessionNodes(sessionId: string): Promise<FloroNode[]> {
+    if (sessionId === "public") {
+      // Get all nodes for public collaboration
+      return NodeService.getNodesByCanvas(""); // Empty filter = all nodes
+    }
+
+    // Get nodes for specific canvas
+    return NodeService.getNodesByCanvas(sessionId);
+  }
+}
+```
+
+**Current Implementation Notes:**
+
+- Public sessions generate new UUIDs for each file upload
+- This creates isolated nodes rather than shared public workspace
+- Future Epic will implement proper public session management
+- Private sessions will use UUID-based canvas identification
 

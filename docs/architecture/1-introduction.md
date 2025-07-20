@@ -10,8 +10,9 @@ This document outlines the complete fullstack architecture for **Floro**, includ
 
 ### 1.3 Change Log
 
-| Date             | Version | Description                                                        | Author              |
-| :--------------- | :------ | :----------------------------------------------------------------- | :------------------ |
-| {{current_date}} | 1.0     | Initial Architecture Draft                                         | Winston (Architect) |
-| {{current_date}} | 1.1     | Epic 2 Updates: UI Components, State Management, Application Shell | Winston (Architect) |
+| Date             | Version | Description                                                                                                                           | Author              |
+| :--------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------ | :------------------ |
+| {{current_date}} | 1.0     | Initial Architecture Draft                                                                                                            | Winston (Architect) |
+| {{current_date}} | 1.1     | Epic 2 Updates: UI Components, State Management, Application Shell                                                                    | Winston (Architect) |
+| {{current_date}} | 1.2     | Architecture-Implementation Alignment: Updated data models, database schema, and service interfaces to match Story 2.1 implementation | Winston (Architect) |
 

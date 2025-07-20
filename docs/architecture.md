@@ -12,10 +12,11 @@ This document outlines the complete fullstack architecture for **Floro**, includ
 
 ### 1.3 Change Log
 
-| Date             | Version | Description                                                        | Author              |
-| :--------------- | :------ | :----------------------------------------------------------------- | :------------------ |
-| {{current_date}} | 1.0     | Initial Architecture Draft                                         | Winston (Architect) |
-| {{current_date}} | 1.1     | Epic 2 Updates: UI Components, State Management, Application Shell | Winston (Architect) |
+| Date             | Version | Description                                                                                                                           | Author              |
+| :--------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------ | :------------------ |
+| {{current_date}} | 1.0     | Initial Architecture Draft                                                                                                            | Winston (Architect) |
+| {{current_date}} | 1.1     | Epic 2 Updates: UI Components, State Management, Application Shell                                                                    | Winston (Architect) |
+| {{current_date}} | 1.2     | Architecture-Implementation Alignment: Updated data models, database schema, and service interfaces to match Story 2.1 implementation | Winston (Architect) |
 
 ## 2. High-Level Architecture
 
@@ -184,55 +185,64 @@ These TypeScript interfaces, located in `packages/shared-types`, define the core
 ```typescript
 // packages/shared-types/src/index.ts
 
-// The base for all node types, stored in Supabase PostgreSQL
+// The base for all node types, stored in Supabase PostgreSQL table "floro_nodes"
 interface BaseNode {
   id: string;
-  sessionId: string; // e.g., "public"
-  type: "file" | "text" | "link" | "image";
+  canvas_id: string; // Canvas/session identifier (UUID for private, generated UUID for "public")
+  type: string; // "file" | "text" | "link" | "image"
   position: { x: number; y: number };
-  size: { width: number; height: number };
-  createdAt: string; // ISO timestamp
-  updatedAt: string; // ISO timestamp
-  zIndex: number; // For layering
-  isLocked?: boolean; // Prevent accidental moves
-  metadata?: Record<string, any>; // JSONB column for extensible metadata
+  data: Record<string, unknown>; // Node-specific data (fileName, fileURL, etc.)
+  metadata: {
+    created_at: string; // ISO timestamp
+    updated_at: string; // ISO timestamp
+    created_by: string; // Anonymous user identifier
+    version: number; // Version for optimistic locking
+  };
 }
 
 export interface FileNode extends BaseNode {
   type: "file";
-  fileName: string;
-  fileType: string;
-  fileURL: string;
-  fileSize: number;
-  mimeType: string;
-  checksum?: string; // For integrity verification
+  data: {
+    fileName: string;
+    fileType: string;
+    fileURL: string;
+    fileSize: number;
+    mimeType: string;
+    checksum?: string; // For integrity verification
+  };
 }
 
 export interface TextNode extends BaseNode {
   type: "text";
-  content: string;
-  fontSize?: number;
-  fontFamily?: string;
-  color?: string;
-  backgroundColor?: string;
+  data: {
+    content: string;
+    fontSize?: number;
+    fontFamily?: string;
+    color?: string;
+    backgroundColor?: string;
+  };
 }
 
 export interface LinkNode extends BaseNode {
   type: "link";
-  url: string;
-  title?: string;
-  description?: string;
-  favicon?: string;
-  previewImage?: string;
+  data: {
+    url: string;
+    title?: string;
+    description?: string;
+    favicon?: string;
+    previewImage?: string;
+  };
 }
 
 export interface ImageNode extends BaseNode {
   type: "image";
-  imageURL: string;
-  thumbnailURL?: string;
-  alt?: string;
-  originalWidth?: number;
-  originalHeight?: number;
+  data: {
+    imageURL: string;
+    thumbnailURL?: string;
+    alt?: string;
+    originalWidth?: number;
+    originalHeight?: number;
+  };
 }
 
 export type FloroNode = FileNode | TextNode | LinkNode | ImageNode;
@@ -240,9 +250,9 @@ export type FloroNode = FileNode | TextNode | LinkNode | ImageNode;
 // Real-time cursor data, managed via Supabase Realtime
 export interface Cursor {
   id: string; // Anonymous user session ID
-  sessionId: string; // Workspace session
+  canvas_id: string; // Canvas/workspace identifier
   position: { x: number; y: number };
-  lastUpdate: string; // ISO timestamp
+  last_update: string; // ISO timestamp (snake_case for database consistency)
   color?: string; // User-specific cursor color
   name?: string; // Optional display name
 }
@@ -347,21 +357,21 @@ export interface AnimationConfig {
   delay?: number;
 }
 
-// Database schema types for Supabase
+// Database schema types for Supabase (actual table names and structure)
 export interface Database {
   public: {
     Tables: {
-      nodes: {
+      floro_nodes: {
         Row: FloroNode;
-        Insert: Omit<FloroNode, "id" | "createdAt" | "updatedAt">;
+        Insert: Omit<FloroNode, "id" | "metadata">;
         Update: Partial<Omit<FloroNode, "id">>;
       };
-      cursors: {
+      floro_cursors: {
         Row: Cursor;
-        Insert: Omit<Cursor, "lastUpdate">;
+        Insert: Omit<Cursor, "last_update">;
         Update: Partial<Omit<Cursor, "id">>;
       };
-      error_logs: {
+      floro_error_logs: {
         Row: ErrorLog;
         Insert: Omit<ErrorLog, "id" | "timestamp">;
         Update: Partial<Omit<ErrorLog, "id">>;
@@ -393,34 +403,93 @@ All Supabase interactions from the Next.js app will be managed through a dedicat
 ### 5.3 Service Layer Architecture
 
 ```typescript
-// Example service interface using Supabase
+// Actual NodeService implementation using Supabase
 interface NodeService {
   // CRUD operations
-  createNode(
-    node: Omit<FloroNode, "id" | "createdAt" | "updatedAt">
-  ): Promise<FloroNode>;
-  updateNode(id: string, updates: Partial<FloroNode>): Promise<void>;
-  deleteNode(id: string): Promise<void>;
+  createNode(input: {
+    type: string;
+    position: { x: number; y: number };
+    data: Record<string, unknown>;
+    canvas_id: string;
+  }): Promise<FloroNode>;
 
-  // Spatial queries using PostGIS
-  getNodesInViewport(bounds: SpatialBounds): Promise<FloroNode[]>;
+  updateNode(
+    nodeId: string,
+    updates: {
+      type?: string;
+      position?: { x: number; y: number };
+      data?: Record<string, unknown>;
+    }
+  ): Promise<FloroNode>;
+
+  deleteNode(nodeId: string): Promise<void>;
+  getNode(nodeId: string): Promise<FloroNode | null>;
+
+  // Canvas-based queries
+  getNodesByCanvas(canvasId: string): Promise<FloroNode[]>;
+  getNodesBySession(sessionId: string): Promise<FloroNode[]>; // Handles "public" session
+
+  // Spatial queries using JSONB operators
+  getNodesInViewport(
+    canvasId: string,
+    bounds: { minX: number; minY: number; maxX: number; maxY: number }
+  ): Promise<FloroNode[]>;
 
   // Real-time subscriptions using Supabase Realtime
   subscribeToNodes(
-    sessionId: string,
-    callback: (nodes: FloroNode[]) => void
-  ): RealtimeChannel;
-
-  // Batch operations using PostgreSQL transactions
-  batchUpdateNodes(
-    updates: Array<{ id: string; updates: Partial<FloroNode> }>
-  ): Promise<void>;
-
-  // Advanced PostgreSQL features
-  searchNodes(query: string, sessionId: string): Promise<FloroNode[]>;
-  getNodeHistory(nodeId: string): Promise<FloroNode[]>;
+    canvasId: string,
+    callbacks: {
+      onInsert?: (node: FloroNode) => void;
+      onUpdate?: (node: FloroNode) => void;
+      onDelete?: (nodeId: string) => void;
+    }
+  ): () => void; // Returns unsubscribe function
 }
 ```
+
+### 5.4 Session Management Implementation
+
+The application uses a hybrid approach for session management to support both public collaboration and future private workspaces:
+
+```typescript
+// Session Management Strategy
+interface SessionConfig {
+  sessionId: string; // User-facing session identifier ("public", UUID, etc.)
+  canvasId: string; // Database canvas_id (always UUID)
+  isPublic: boolean; // Whether this is a public collaboration session
+}
+
+// Public Session Handling
+class SessionManager {
+  static async resolveCanvasId(sessionId: string): Promise<string> {
+    if (sessionId === "public") {
+      // For public sessions, generate or reuse a UUID
+      // Current implementation: generate new UUID for each upload
+      return crypto.randomUUID();
+    }
+
+    // For private sessions, use sessionId as canvasId
+    return sessionId;
+  }
+
+  static async getSessionNodes(sessionId: string): Promise<FloroNode[]> {
+    if (sessionId === "public") {
+      // Get all nodes for public collaboration
+      return NodeService.getNodesByCanvas(""); // Empty filter = all nodes
+    }
+
+    // Get nodes for specific canvas
+    return NodeService.getNodesByCanvas(sessionId);
+  }
+}
+```
+
+**Current Implementation Notes:**
+
+- Public sessions generate new UUIDs for each file upload
+- This creates isolated nodes rather than shared public workspace
+- Future Epic will implement proper public session management
+- Private sessions will use UUID-based canvas identification
 
 ## 6. Unified Project Structure
 

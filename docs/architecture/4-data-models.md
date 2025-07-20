@@ -5,55 +5,64 @@ These TypeScript interfaces, located in `packages/shared-types`, define the core
 ```typescript
 // packages/shared-types/src/index.ts
 
-// The base for all node types, stored in Supabase PostgreSQL
+// The base for all node types, stored in Supabase PostgreSQL table "floro_nodes"
 interface BaseNode {
   id: string;
-  sessionId: string; // e.g., "public"
-  type: "file" | "text" | "link" | "image";
+  canvas_id: string; // Canvas/session identifier (UUID for private, generated UUID for "public")
+  type: string; // "file" | "text" | "link" | "image"
   position: { x: number; y: number };
-  size: { width: number; height: number };
-  createdAt: string; // ISO timestamp
-  updatedAt: string; // ISO timestamp
-  zIndex: number; // For layering
-  isLocked?: boolean; // Prevent accidental moves
-  metadata?: Record<string, any>; // JSONB column for extensible metadata
+  data: Record<string, unknown>; // Node-specific data (fileName, fileURL, etc.)
+  metadata: {
+    created_at: string; // ISO timestamp
+    updated_at: string; // ISO timestamp
+    created_by: string; // Anonymous user identifier
+    version: number; // Version for optimistic locking
+  };
 }
 
 export interface FileNode extends BaseNode {
   type: "file";
-  fileName: string;
-  fileType: string;
-  fileURL: string;
-  fileSize: number;
-  mimeType: string;
-  checksum?: string; // For integrity verification
+  data: {
+    fileName: string;
+    fileType: string;
+    fileURL: string;
+    fileSize: number;
+    mimeType: string;
+    checksum?: string; // For integrity verification
+  };
 }
 
 export interface TextNode extends BaseNode {
   type: "text";
-  content: string;
-  fontSize?: number;
-  fontFamily?: string;
-  color?: string;
-  backgroundColor?: string;
+  data: {
+    content: string;
+    fontSize?: number;
+    fontFamily?: string;
+    color?: string;
+    backgroundColor?: string;
+  };
 }
 
 export interface LinkNode extends BaseNode {
   type: "link";
-  url: string;
-  title?: string;
-  description?: string;
-  favicon?: string;
-  previewImage?: string;
+  data: {
+    url: string;
+    title?: string;
+    description?: string;
+    favicon?: string;
+    previewImage?: string;
+  };
 }
 
 export interface ImageNode extends BaseNode {
   type: "image";
-  imageURL: string;
-  thumbnailURL?: string;
-  alt?: string;
-  originalWidth?: number;
-  originalHeight?: number;
+  data: {
+    imageURL: string;
+    thumbnailURL?: string;
+    alt?: string;
+    originalWidth?: number;
+    originalHeight?: number;
+  };
 }
 
 export type FloroNode = FileNode | TextNode | LinkNode | ImageNode;
@@ -61,9 +70,9 @@ export type FloroNode = FileNode | TextNode | LinkNode | ImageNode;
 // Real-time cursor data, managed via Supabase Realtime
 export interface Cursor {
   id: string; // Anonymous user session ID
-  sessionId: string; // Workspace session
+  canvas_id: string; // Canvas/workspace identifier
   position: { x: number; y: number };
-  lastUpdate: string; // ISO timestamp
+  last_update: string; // ISO timestamp (snake_case for database consistency)
   color?: string; // User-specific cursor color
   name?: string; // Optional display name
 }
@@ -168,21 +177,21 @@ export interface AnimationConfig {
   delay?: number;
 }
 
-// Database schema types for Supabase
+// Database schema types for Supabase (actual table names and structure)
 export interface Database {
   public: {
     Tables: {
-      nodes: {
+      floro_nodes: {
         Row: FloroNode;
-        Insert: Omit<FloroNode, "id" | "createdAt" | "updatedAt">;
+        Insert: Omit<FloroNode, "id" | "metadata">;
         Update: Partial<Omit<FloroNode, "id">>;
       };
-      cursors: {
+      floro_cursors: {
         Row: Cursor;
-        Insert: Omit<Cursor, "lastUpdate">;
+        Insert: Omit<Cursor, "last_update">;
         Update: Partial<Omit<Cursor, "id">>;
       };
-      error_logs: {
+      floro_error_logs: {
         Row: ErrorLog;
         Insert: Omit<ErrorLog, "id" | "timestamp">;
         Update: Partial<Omit<ErrorLog, "id">>;
