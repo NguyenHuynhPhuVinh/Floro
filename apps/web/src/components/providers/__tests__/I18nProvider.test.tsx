@@ -38,11 +38,17 @@ jest.mock('react-i18next', () => ({
       {children}
     </div>
   ),
+  // Thêm mock cho initReactI18next
+  initReactI18next: {
+    type: 'i18nextModule'
+  }
 }));
 
 describe('I18nProvider', () => {
-  // Get the mocked i18n instance
-  const mockI18n = require('../../../lib/i18n').default;
+  // Get the mocked i18n instance from the jest mock
+  const mockI18n = jest.mocked(jest.fn()).mockImplementation(() => {
+    return jest.requireMock('../../../lib/i18n').default;
+  })();
 
   beforeEach(() => {
     jest.clearAllMocks();
