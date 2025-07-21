@@ -9,7 +9,15 @@ floro/
 │       ├── src/
 │       │   ├── app/                    # Next.js App Router
 │       │   ├── components/             # React components
-│       │   │   ├── ui/                 # Shadcn/ui components
+│       │   │   ├── ui/                 # shadcn/ui components (auto-generated)
+│       │   │   │   ├── button.tsx      # shadcn/ui Button component
+│       │   │   │   ├── dialog.tsx      # shadcn/ui Dialog component
+│       │   │   │   ├── select.tsx      # shadcn/ui Select component
+│       │   │   │   ├── switch.tsx      # shadcn/ui Switch component
+│       │   │   │   ├── tabs.tsx        # shadcn/ui Tabs component
+│       │   │   │   ├── tooltip.tsx     # shadcn/ui Tooltip component
+│       │   │   │   ├── dropdown-menu.tsx # shadcn/ui DropdownMenu component
+│       │   │   │   └── separator.tsx   # shadcn/ui Separator component
 │       │   │   ├── canvas/             # Canvas-specific components
 │       │   │   │   ├── CanvasContainer.tsx
 │       │   │   │   ├── Canvas2D.tsx

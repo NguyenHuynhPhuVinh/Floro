@@ -220,7 +220,23 @@ Giao diện của Floro phải mang lại cảm giác **tức thì, trực quan 
 5.  Canvas có background pattern hoặc grid để tạo cảm giác không gian làm việc.
 6.  Tất cả text trong UI sử dụng tiếng Việt.
 
-### Story 2.4: Tạo Node từ Clipboard (Văn bản, Link, Ảnh)
+### Story 2.4: Tích hợp shadcn/ui và Hoàn thiện Theme UI
+
+- **As a** user, **I want** to experience a consistent, polished Vietnamese interface built with modern UI components, **so that** the application feels professional and provides excellent user experience.
+  **Acceptance Criteria:**
+
+1.  Tích hợp shadcn/ui component library vào dự án Next.js.
+2.  Setup Tailwind CSS configuration tương thích với shadcn/ui.
+3.  Implement theme system với shadcn/ui theming (CSS variables, dark/light mode).
+4.  Migrate tất cả UI components hiện tại sang shadcn/ui components (Button, Modal, Dialog, etc.).
+5.  Tất cả components UI có text tiếng Việt nhất quán và professional.
+6.  Dark/Light mode toggle hoạt động cho toàn bộ ứng dụng (DOM và Canvas).
+7.  Responsive design hoàn thiện sử dụng shadcn/ui responsive utilities.
+8.  Loading states và error states sử dụng shadcn/ui components với messages tiếng Việt.
+9.  Accessibility features được inherit từ shadcn/ui và customize thêm cho tiếng Việt.
+10. **Task Dynamic:** Agent dev sẽ hỏi người dùng về các tinh chỉnh UI/UX cần thiết và thực hiện iterative improvements cho đến khi người dùng chấp nhận. Sau đó ghi nhận các tinh chỉnh đã thực hiện và đánh dấu hoàn thành.
+
+### Story 2.5: Tạo Node từ Clipboard (Văn bản, Link, Ảnh)
 
 - **As a** user, **I want** to paste content from my clipboard directly onto the canvas, **so that** a corresponding node is created instantly.
   **Acceptance Criteria:**

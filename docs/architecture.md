@@ -19,6 +19,7 @@ This document outlines the complete fullstack architecture for **Floro**, includ
 | {{current_date}} | 1.2     | Architecture-Implementation Alignment: Updated data models, database schema, and service interfaces to match Story 2.1 implementation | Winston (Architect) |
 | {{current_date}} | 1.3     | PRD Alignment Update: Removed advanced UI components architecture following Story 2.3 removal                                         | Winston (Architect) |
 | {{current_date}} | 1.4     | Story 2.3 Integration: Updated theme and localization architecture with next-themes and react-i18next implementation                  | Winston (Architect) |
+| {{current_date}} | 1.5     | Story 2.4 Integration: Added shadcn/ui component library architecture and updated UI system design                                    | Winston (Architect) |
 
 ## 2. High-Level Architecture
 
@@ -94,43 +95,139 @@ graph TD
 
 This table lists the technologies chosen for the Floro project. Development will adhere to the latest stable versions of these technologies.
 
-| Category                 | Technology                     | Purpose                             | Rationale                                                           |
-| :----------------------- | :----------------------------- | :---------------------------------- | :------------------------------------------------------------------ |
-| **Language**             | TypeScript                     | Ngôn ngữ phát triển chính           | An toàn kiểu dữ liệu, dễ dàng chia sẻ types.                        |
-| **Frontend Framework**   | Next.js 14+                    | Xây dựng giao diện người dùng       | Framework React mạnh mẽ, App Router, tích hợp Vercel.               |
-| **Backend Service**      | Supabase                       | Backend-as-a-Service                | Open source, PostgreSQL, real-time, tích hợp đầy đủ.                |
-| **Database**             | Supabase Database (PostgreSQL) | Lưu trữ metadata và trạng thái node | SQL database mạnh mẽ, ACID compliance, complex queries.             |
-| **Real-time Engine**     | Supabase Realtime              | Đồng bộ dữ liệu real-time           | WebSocket-based, low latency, built-in subscriptions.               |
-| **File Storage**         | Supabase Storage               | Lưu trữ file                        | S3-compatible, CDN tích hợp, policy-based access control.           |
-| **Authentication**       | Supabase Auth                  | Xác thực người dùng (future)        | Multiple providers, JWT tokens, row-level security.                 |
-| **UI Library**           | Tailwind CSS                   | Styling                             | Xây dựng giao diện nhanh chóng và nhất quán.                        |
-| **UI Components**        | Shadcn/ui                      | Thư viện component                  | Cung cấp component đẹp, dễ tùy chỉnh, tái sử dụng.                  |
-| **State Management**     | Zustand                        | Quản lý trạng thái client           | Nhẹ, đơn giản, hiệu quả cho nhu cầu dự án.                          |
-| **Theme Management**     | next-themes                    | Quản lý theme và dark mode          | Professional theme switching, SSR-safe, Tailwind integration.       |
-| **Internationalization** | react-i18next                  | Hệ thống đa ngôn ngữ                | Industry-standard i18n, JSON-based translations, namespace support. |
-| **2D Canvas Library**    | HTML5 Canvas + React           | Xử lý không gian 2D                 | Canvas API native, tích hợp tốt với React ecosystem.                |
-| **Spatial Indexing**     | Custom Quadtree                | Tối ưu truy vấn không gian          | Hiệu suất cao cho viewport queries và collision detection.          |
-| **Error Handling**       | React Error Boundary           | Xử lý lỗi graceful                  | Ngăn crash toàn bộ app, user experience tốt hơn.                    |
-| **Performance**          | React.memo, useMemo            | Tối ưu re-rendering                 | Giảm unnecessary renders, cải thiện performance.                    |
-| **Testing**              | Jest & React Testing Library   | Unit & Integration tests            | Bộ công cụ tiêu chuẩn trong hệ sinh thái React.                     |
-| **E2E Testing**          | Playwright                     | End-to-end testing                  | Modern, reliable, cross-browser testing.                            |
-| **Monitoring**           | Vercel Analytics               | Performance monitoring              | Built-in analytics, Core Web Vitals tracking.                       |
-| **Deployment**           | Vercel                         | Nền tảng hosting                    | Tích hợp CI/CD tự động, mạng lưới toàn cầu.                         |
+| Category                 | Technology                     | Purpose                             | Rationale                                                                |
+| :----------------------- | :----------------------------- | :---------------------------------- | :----------------------------------------------------------------------- |
+| **Language**             | TypeScript                     | Ngôn ngữ phát triển chính           | An toàn kiểu dữ liệu, dễ dàng chia sẻ types.                             |
+| **Frontend Framework**   | Next.js 14+                    | Xây dựng giao diện người dùng       | Framework React mạnh mẽ, App Router, tích hợp Vercel.                    |
+| **Backend Service**      | Supabase                       | Backend-as-a-Service                | Open source, PostgreSQL, real-time, tích hợp đầy đủ.                     |
+| **Database**             | Supabase Database (PostgreSQL) | Lưu trữ metadata và trạng thái node | SQL database mạnh mẽ, ACID compliance, complex queries.                  |
+| **Real-time Engine**     | Supabase Realtime              | Đồng bộ dữ liệu real-time           | WebSocket-based, low latency, built-in subscriptions.                    |
+| **File Storage**         | Supabase Storage               | Lưu trữ file                        | S3-compatible, CDN tích hợp, policy-based access control.                |
+| **Authentication**       | Supabase Auth                  | Xác thực người dùng (future)        | Multiple providers, JWT tokens, row-level security.                      |
+| **UI Library**           | Tailwind CSS v4                | Styling framework                   | CSS-based config, @theme directive, OKLCH colors, class-based dark mode. |
+| **UI Components**        | shadcn/ui                      | Component library                   | Modern, accessible, customizable components built on Radix UI.           |
+| **Component Base**       | Radix UI                       | Headless UI primitives              | Accessible, unstyled components with full keyboard navigation.           |
+| **State Management**     | Zustand                        | Quản lý trạng thái client           | Nhẹ, đơn giản, hiệu quả cho nhu cầu dự án.                               |
+| **Theme Management**     | next-themes                    | Quản lý theme và dark mode          | Professional theme switching, SSR-safe, Tailwind integration.            |
+| **Internationalization** | react-i18next                  | Hệ thống đa ngôn ngữ                | Industry-standard i18n, JSON-based translations, namespace support.      |
+| **2D Canvas Library**    | HTML5 Canvas + React           | Xử lý không gian 2D                 | Canvas API native, tích hợp tốt với React ecosystem.                     |
+| **Spatial Indexing**     | Custom Quadtree                | Tối ưu truy vấn không gian          | Hiệu suất cao cho viewport queries và collision detection.               |
+| **Error Handling**       | React Error Boundary           | Xử lý lỗi graceful                  | Ngăn crash toàn bộ app, user experience tốt hơn.                         |
+| **Performance**          | React.memo, useMemo            | Tối ưu re-rendering                 | Giảm unnecessary renders, cải thiện performance.                         |
+| **Testing**              | Jest & React Testing Library   | Unit & Integration tests            | Bộ công cụ tiêu chuẩn trong hệ sinh thái React.                          |
+| **E2E Testing**          | Playwright                     | End-to-end testing                  | Modern, reliable, cross-browser testing.                                 |
+| **Monitoring**           | Vercel Analytics               | Performance monitoring              | Built-in analytics, Core Web Vitals tracking.                            |
+| **Deployment**           | Vercel                         | Nền tảng hosting                    | Tích hợp CI/CD tự động, mạng lưới toàn cầu.                              |
 
 ## 3.1. UI Components Architecture
 
-### 3.1.1 Canvas-Based Component System
+### 3.1.1 shadcn/ui Component System
 
-The application uses a simplified approach focusing on core functionality with HTML5 Canvas for 2D rendering and React components for UI shell.
+The application uses shadcn/ui as the primary component library, providing a modern, accessible, and customizable foundation built on Radix UI primitives.
 
-| Component Type          | Technology                          | Purpose                      | Implementation            |
-| :---------------------- | :---------------------------------- | :--------------------------- | :------------------------ |
-| **Canvas Components**   | HTML5 Canvas + React                | Node rendering, interactions | Native Canvas API         |
-| **UI Shell Components** | React + Tailwind CSS                | Application layout, modals   | Traditional HTML/CSS      |
-| **Icon System**         | Lucide React                        | Professional icons           | SVG-based, tree-shakeable |
-| **Animation System**    | CSS transitions + Canvas animations | Smooth UX                    | Hardware-accelerated      |
+| Component Type          | Technology                         | Purpose                      | Implementation            |
+| :---------------------- | :--------------------------------- | :--------------------------- | :------------------------ |
+| **Canvas Components**   | HTML5 Canvas + React               | Node rendering, interactions | Native Canvas API         |
+| **UI Shell Components** | shadcn/ui + Tailwind CSS           | Application layout, modals   | Radix UI + custom styling |
+| **Form Components**     | shadcn/ui (Button, Input, Select)  | User interactions            | Accessible, keyboard nav  |
+| **Layout Components**   | shadcn/ui (Dialog, Sheet, Popover) | Overlays and containers      | Portal-based, focus mgmt  |
+| **Icon System**         | Lucide React                       | Professional icons           | SVG-based, tree-shakeable |
+| **Animation System**    | CSS transitions + Framer Motion    | Smooth UX                    | Hardware-accelerated      |
 
-### 3.1.2 Component Architecture Patterns
+### 3.1.2 shadcn/ui Integration Architecture
+
+**Component Installation Strategy for Tailwind v4:**
+
+```bash
+# Initialize shadcn/ui with Tailwind v4 support
+npx shadcn@latest init --tailwind-v4
+
+# Core components for Story 2.4
+npx shadcn@latest add button
+npx shadcn@latest add dialog
+npx shadcn@latest add select
+npx shadcn@latest add switch
+npx shadcn@latest add tabs
+npx shadcn@latest add tooltip
+npx shadcn@latest add dropdown-menu
+npx shadcn@latest add separator
+```
+
+**Tailwind CSS v4 Configuration for shadcn/ui:**
+
+```css
+/* app/globals.css - Tailwind v4 with @theme directive */
+@import "tailwindcss";
+
+@theme {
+  --color-border: oklch(0.2 0 0);
+  --color-input: oklch(0.2 0 0);
+  --color-ring: oklch(0.2 0 0);
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.09 0 0);
+  --color-primary: oklch(0.09 0 0);
+  --color-primary-foreground: oklch(0.98 0 0);
+  --color-secondary: oklch(0.96 0 0);
+  --color-secondary-foreground: oklch(0.09 0 0);
+  /* ... other shadcn/ui color variables in OKLCH */
+}
+
+/* Dark mode using class-based approach */
+.dark {
+  --color-border: oklch(0.27 0 0);
+  --color-input: oklch(0.27 0 0);
+  --color-ring: oklch(0.83 0 0);
+  --color-background: oklch(0.09 0 0);
+  --color-foreground: oklch(0.98 0 0);
+  --color-primary: oklch(0.98 0 0);
+  --color-primary-foreground: oklch(0.09 0 0);
+  --color-secondary: oklch(0.15 0 0);
+  --color-secondary-foreground: oklch(0.98 0 0);
+  /* ... other dark mode colors in OKLCH */
+}
+```
+
+**No tailwind.config.js needed** - Tailwind v4 uses CSS-based configuration with the `@theme` directive.
+
+### 3.1.3 Component Architecture Patterns
+
+**shadcn/ui Component Patterns:**
+
+```typescript
+// shadcn/ui Button Component Usage
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+// Settings Button with shadcn/ui
+const SettingsButton: React.FC = () => {
+  return (
+    <Button variant="outline" size="icon">
+      <Settings className="h-4 w-4" />
+    </Button>
+  );
+};
+
+// Settings Modal with shadcn/ui Dialog
+const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>{t("settings.title")}</DialogTitle>
+        </DialogHeader>
+        {/* Settings content */}
+      </DialogContent>
+    </Dialog>
+  );
+};
+```
+
+**Canvas Component Pattern (unchanged):**
 
 ```typescript
 // Canvas Component Pattern
@@ -142,43 +239,95 @@ interface CanvasComponentProps {
   onSelect?: (id: string) => void;
   context: CanvasRenderingContext2D;
 }
+```
 
-// UI Shell Component Pattern
-interface UIComponentProps {
-  className?: string;
-  children?: React.ReactNode;
-  variant?: "primary" | "secondary";
+**Tailwind v4 + shadcn/ui Integration:**
+
+```css
+/* Tailwind v4 @theme directive replaces traditional CSS variables */
+@theme {
+  /* Light mode colors in OKLCH format */
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.09 0 0);
+  --color-primary: oklch(0.09 0 0);
+  --color-primary-foreground: oklch(0.98 0 0);
+  /* ... other colors */
+}
+
+/* Dark mode using class-based approach */
+.dark {
+  --color-background: oklch(0.09 0 0);
+  --color-foreground: oklch(0.98 0 0);
+  --color-primary: oklch(0.98 0 0);
+  --color-primary-foreground: oklch(0.09 0 0);
+  /* ... other dark mode colors */
+}
+
+/* Usage in components - same as before */
+.bg-background {
+  background-color: var(--color-background);
+}
+.text-foreground {
+  color: var(--color-foreground);
 }
 ```
 
-### 3.1.3 Icon System Architecture
+### 3.1.4 Icon System Architecture
 
 - **File Type Icons**: Lucide icons with category-based mapping
 - **Color Coding**: Semantic colors for different file categories
 - **Canvas Rendering**: Icons rendered directly on canvas for performance
 - **Caching**: Optimized icon caching and reuse strategies
+- **shadcn/ui Integration**: Consistent icon sizing and styling with shadcn/ui components
 
-### 3.1.4 Theme and Localization System
+### 3.1.5 Theme and Localization System
 
-**Theme Management với next-themes:**
+**Theme Management với next-themes + Tailwind v4:**
 
 ```typescript
-// Theme Provider Configuration
+// Theme Provider Configuration for Tailwind v4 class-based theming
 interface ThemeProviderProps {
-  attribute?: string;
+  attribute: "class"; // Always use class for Tailwind v4
   defaultTheme?: string;
   enableSystem?: boolean;
   disableTransitionOnChange?: boolean;
 }
 
-// Theme Hook Usage
+// Theme Hook Usage with class-based approach
 const { theme, setTheme, systemTheme } = useTheme();
 
-// Tailwind Dark Mode Classes
+// Tailwind v4 Theme Classes (class-based, no CSS variables needed)
 const themeClasses = {
-  light: "bg-white text-gray-900",
-  dark: "dark:bg-gray-900 dark:text-white",
-  system: "bg-white dark:bg-gray-900 text-gray-900 dark:text-white",
+  light: "bg-background text-foreground",
+  dark: "bg-background text-foreground", // .dark class handles the styling
+  system: "bg-background text-foreground",
+};
+
+// shadcn/ui Theme Toggle Component for Tailwind v4
+const ThemeToggle: React.FC = () => {
+  const { setTheme } = useTheme();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme("light")}>
+          {t("theme.light")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("dark")}>
+          {t("theme.dark")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme("system")}>
+          {t("theme.system")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 };
 ```
 
@@ -559,7 +708,15 @@ floro/
 │       ├── src/
 │       │   ├── app/                    # Next.js App Router
 │       │   ├── components/             # React components
-│       │   │   ├── ui/                 # Shadcn/ui components
+│       │   │   ├── ui/                 # shadcn/ui components (auto-generated)
+│       │   │   │   ├── button.tsx      # shadcn/ui Button component
+│       │   │   │   ├── dialog.tsx      # shadcn/ui Dialog component
+│       │   │   │   ├── select.tsx      # shadcn/ui Select component
+│       │   │   │   ├── switch.tsx      # shadcn/ui Switch component
+│       │   │   │   ├── tabs.tsx        # shadcn/ui Tabs component
+│       │   │   │   ├── tooltip.tsx     # shadcn/ui Tooltip component
+│       │   │   │   ├── dropdown-menu.tsx # shadcn/ui DropdownMenu component
+│       │   │   │   └── separator.tsx   # shadcn/ui Separator component
 │       │   │   ├── canvas/             # Canvas-specific components
 │       │   │   │   ├── CanvasContainer.tsx
 │       │   │   │   ├── Canvas2D.tsx
@@ -945,7 +1102,7 @@ const CoordinateDisplay: React.FC<CoordinateDisplayProps> = ({
 
 ### 6.2.6 Provider Architecture
 
-**Theme Provider Setup:**
+**Theme Provider Setup for Tailwind v4:**
 
 ```typescript
 // components/providers/ThemeProvider.tsx
@@ -957,7 +1114,7 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => (
   <NextThemesProvider
-    attribute="class"
+    attribute="class" // Required for Tailwind v4 class-based theming
     defaultTheme="system"
     enableSystem
     disableTransitionOnChange={false}

@@ -171,7 +171,7 @@ const CoordinateDisplay: React.FC<CoordinateDisplayProps> = ({
 
 ### 6.2.6 Provider Architecture
 
-**Theme Provider Setup:**
+**Theme Provider Setup for Tailwind v4:**
 
 ```typescript
 // components/providers/ThemeProvider.tsx
@@ -183,7 +183,7 @@ interface ThemeProviderProps {
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => (
   <NextThemesProvider
-    attribute="class"
+    attribute="class" // Required for Tailwind v4 class-based theming
     defaultTheme="system"
     enableSystem
     disableTransitionOnChange={false}
