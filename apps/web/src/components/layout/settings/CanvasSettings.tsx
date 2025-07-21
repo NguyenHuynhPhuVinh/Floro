@@ -3,6 +3,15 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
 import { useSettingsStore } from '../../../store/settings.store';
 import type { CanvasBackgroundType } from '../../../store/settings.store';
 
@@ -29,78 +38,80 @@ export const CanvasSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+        <h3 className="text-lg font-medium text-foreground mb-4">
           {t('canvas.title')}
         </h3>
 
         <div className="space-y-4">
           {/* Background Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <Label className="text-sm font-medium mb-2">
               {t('canvas.backgroundType')}
-            </label>
-            <select
+            </Label>
+            <Select
               value={canvas.backgroundType}
-              onChange={e =>
+              onValueChange={value =>
                 updateCanvasSettings({
-                  backgroundType: e.target.value as CanvasBackgroundType,
+                  backgroundType: value as CanvasBackgroundType,
                 })
               }
-              className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
-              {backgroundTypeOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {backgroundTypeOptions.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Background Size - only show if background is not 'none' */}
           {canvas.backgroundType !== 'none' && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <Label className="text-sm font-medium mb-2">
                   {t('canvas.backgroundSize')}: {canvas.backgroundSize}px
-                </label>
-                <input
-                  type="range"
-                  min="10"
-                  max="100"
-                  step="5"
-                  value={canvas.backgroundSize}
-                  onChange={e =>
+                </Label>
+                <Slider
+                  value={[canvas.backgroundSize]}
+                  onValueChange={([value]) =>
                     updateCanvasSettings({
-                      backgroundSize: parseInt(e.target.value),
+                      backgroundSize: value,
                     })
                   }
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                  min={10}
+                  max={100}
+                  step={5}
+                  className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>10px</span>
                   <span>100px</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <Label className="text-sm font-medium mb-2">
                   {t('canvas.backgroundOpacity')}:{' '}
                   {Math.round(canvas.backgroundOpacity * 100)}%
-                </label>
-                <input
-                  type="range"
-                  min="0.1"
-                  max="1"
-                  step="0.1"
-                  value={canvas.backgroundOpacity}
-                  onChange={e =>
+                </Label>
+                <Slider
+                  value={[canvas.backgroundOpacity]}
+                  onValueChange={([value]) =>
                     updateCanvasSettings({
-                      backgroundOpacity: parseFloat(e.target.value),
+                      backgroundOpacity: value,
                     })
                   }
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
+                  min={0.1}
+                  max={1}
+                  step={0.1}
+                  className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>10%</span>
                   <span>100%</span>
                 </div>

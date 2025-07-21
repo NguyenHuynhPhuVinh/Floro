@@ -29,20 +29,51 @@ jest.mock('react-i18next', () => ({
 
 // Mock Lucide React icons
 jest.mock('lucide-react', () => ({
-  Sun: ({ size }: { size?: number }) => (
-    <svg data-testid="sun-icon" data-size={size}>
+  Sun: ({ className }: { className?: string }) => (
+    <svg data-testid="sun-icon" className={className}>
       <title>Sun Icon</title>
     </svg>
   ),
-  Moon: ({ size }: { size?: number }) => (
-    <svg data-testid="moon-icon" data-size={size}>
+  Moon: ({ className }: { className?: string }) => (
+    <svg data-testid="moon-icon" className={className}>
       <title>Moon Icon</title>
     </svg>
   ),
-  Monitor: ({ size }: { size?: number }) => (
-    <svg data-testid="monitor-icon" data-size={size}>
+  Monitor: ({ className }: { className?: string }) => (
+    <svg data-testid="monitor-icon" className={className}>
       <title>Monitor Icon</title>
     </svg>
+  ),
+}));
+
+// Mock shadcn/ui components
+jest.mock('../../ui/button', () => ({
+  Button: ({ children, onClick, className, variant, size, ...props }: any) => (
+    <button
+      onClick={onClick}
+      className={className}
+      data-variant={variant}
+      data-size={size}
+      {...props}
+    >
+      {children}
+    </button>
+  ),
+}));
+
+jest.mock('../../ui/dropdown-menu', () => ({
+  DropdownMenu: ({ children }: any) => (
+    <div data-testid="dropdown-menu">{children}</div>
+  ),
+  DropdownMenuTrigger: ({ children, asChild }: any) =>
+    asChild ? children : <div data-testid="dropdown-trigger">{children}</div>,
+  DropdownMenuContent: ({ children }: any) => (
+    <div data-testid="dropdown-content">{children}</div>
+  ),
+  DropdownMenuItem: ({ children, onClick }: any) => (
+    <div data-testid="dropdown-item" onClick={onClick}>
+      {children}
+    </div>
   ),
 }));
 
@@ -51,61 +82,48 @@ describe('ThemeToggle', () => {
     jest.clearAllMocks();
   });
 
-  it('renders theme toggle with all options', () => {
+  it('renders dropdown menu structure', () => {
     render(<ThemeToggle />);
 
-    expect(screen.getByText('Giao diện:')).toBeInTheDocument();
+    expect(screen.getByTestId('dropdown-menu')).toBeInTheDocument();
+    expect(screen.getByTestId('dropdown-content')).toBeInTheDocument();
+    expect(screen.getAllByTestId('dropdown-item')).toHaveLength(3);
+  });
+
+  it('renders current theme icon in trigger', () => {
+    render(<ThemeToggle />);
+
+    // Should show sun icon for light theme (there are multiple, so use getAllBy)
+    const sunIcons = screen.getAllByTestId('sun-icon');
+    expect(sunIcons.length).toBeGreaterThan(0);
+    expect(sunIcons[0]).toBeInTheDocument();
+  });
+
+  it('renders all theme options in dropdown', () => {
+    render(<ThemeToggle />);
+
     expect(screen.getByText('Sáng')).toBeInTheDocument();
     expect(screen.getByText('Tối')).toBeInTheDocument();
     expect(screen.getByText('Theo hệ thống')).toBeInTheDocument();
   });
 
-  it('renders all theme icons', () => {
+  it('calls setTheme when dropdown item is clicked', () => {
     render(<ThemeToggle />);
 
-    expect(screen.getByTestId('sun-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('moon-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('monitor-icon')).toBeInTheDocument();
-  });
+    const dropdownItems = screen.getAllByTestId('dropdown-item');
 
-  it('highlights active theme', () => {
-    render(<ThemeToggle />);
-
-    const lightButton = screen.getByText('Sáng').closest('button');
-    expect(lightButton).toHaveClass('bg-blue-100', 'text-blue-700');
-  });
-
-  it('calls setTheme when theme button is clicked', () => {
-    render(<ThemeToggle />);
-
-    const darkButton = screen.getByText('Tối');
-    fireEvent.click(darkButton);
-
+    // Click dark theme (second item)
+    fireEvent.click(dropdownItems[1]);
     expect(mockSetTheme).toHaveBeenCalledWith('dark');
   });
 
-  it('calls setTheme for system theme', () => {
+  it('has proper trigger button', () => {
     render(<ThemeToggle />);
 
-    const systemButton = screen.getByText('Theo hệ thống');
-    fireEvent.click(systemButton);
-
-    expect(mockSetTheme).toHaveBeenCalledWith('system');
-  });
-
-  it('has proper button styling', () => {
-    render(<ThemeToggle />);
-
-    const buttons = screen.getAllByRole('button');
-    buttons.forEach(button => {
-      expect(button).toHaveClass(
-        'px-3',
-        'py-2',
-        'text-sm',
-        'font-medium',
-        'transition-colors'
-      );
-    });
+    const button = screen.getByRole('button');
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveAttribute('data-variant', 'outline');
+    expect(button).toHaveAttribute('data-size', 'icon');
   });
 
   it('applies custom className when provided', () => {
@@ -113,39 +131,37 @@ describe('ThemeToggle', () => {
 
     render(<ThemeToggle className={customClass} />);
 
-    const container = screen.getByText('Giao diện:').closest('div');
-    expect(container).toHaveClass(customClass);
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass(customClass);
   });
 
   it('has proper accessibility attributes', () => {
     render(<ThemeToggle />);
 
-    const lightButton = screen.getByText('Sáng').closest('button');
-    expect(lightButton).toHaveAttribute('title', 'Sáng');
+    const button = screen.getByRole('button');
+    expect(button).toBeInTheDocument();
+
+    // Check screen reader text
+    expect(screen.getByText('Giao diện')).toBeInTheDocument();
   });
 
-  it('shows icons on all screen sizes', () => {
+  it('shows all theme icons in dropdown items', () => {
     render(<ThemeToggle />);
 
-    // Icons should always be visible
-    expect(screen.getByTestId('sun-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('moon-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('monitor-icon')).toBeInTheDocument();
+    // All icons should be present (some may appear multiple times)
+    expect(screen.getAllByTestId('sun-icon').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('moon-icon').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('monitor-icon').length).toBeGreaterThan(0);
   });
 
   it('handles theme switching correctly', () => {
     render(<ThemeToggle />);
 
-    // Test all theme options
+    const dropdownItems = screen.getAllByTestId('dropdown-item');
     const themes = ['light', 'dark', 'system'];
-    const buttons = [
-      screen.getByText('Sáng'),
-      screen.getByText('Tối'),
-      screen.getByText('Theo hệ thống'),
-    ];
 
-    buttons.forEach((button, index) => {
-      fireEvent.click(button);
+    dropdownItems.forEach((item, index) => {
+      fireEvent.click(item);
       expect(mockSetTheme).toHaveBeenCalledWith(themes[index]);
     });
   });

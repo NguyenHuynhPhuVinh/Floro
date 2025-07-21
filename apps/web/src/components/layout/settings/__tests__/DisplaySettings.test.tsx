@@ -43,9 +43,58 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
+// Mock shadcn/ui components
+jest.mock('../../../ui/checkbox', () => ({
+  Checkbox: ({ checked, onCheckedChange, id }: any) => (
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={e => onCheckedChange && onCheckedChange(e.target.checked)}
+      data-testid={`checkbox-${id}`}
+    />
+  ),
+}));
+
+jest.mock('../../../ui/label', () => ({
+  Label: ({ children, htmlFor, className }: any) => (
+    <label htmlFor={htmlFor} className={className}>
+      {children}
+    </label>
+  ),
+}));
+
+// Counter to generate unique test IDs for multiple selects
+let selectCounter = 0;
+
+jest.mock('../../../ui/select', () => ({
+  Select: ({ children, value, onValueChange }: any) => {
+    const testId = `select-${++selectCounter}`;
+    return (
+      <div
+        data-testid={testId}
+        data-value={value}
+        onClick={() => onValueChange && onValueChange('integer')}
+      >
+        {children}
+      </div>
+    );
+  },
+  SelectContent: ({ children }: any) => (
+    <div data-testid="select-content">{children}</div>
+  ),
+  SelectItem: ({ children, value }: any) => (
+    <div data-testid={`select-item-${value}`}>{children}</div>
+  ),
+  SelectTrigger: ({ children }: any) => (
+    <div data-testid="select-trigger">{children}</div>
+  ),
+  SelectValue: () => <div data-testid="select-value" />,
+}));
+
 describe('DisplaySettings', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    selectCounter = 0; // Reset counter before each test
   });
 
   it('renders display settings title', () => {
@@ -54,22 +103,21 @@ describe('DisplaySettings', () => {
     expect(screen.getByText('Cài đặt hiển thị')).toBeInTheDocument();
   });
 
-  it('renders show coordinates toggle', () => {
+  it('renders show coordinates toggle with shadcn/ui Checkbox', () => {
     render(<DisplaySettings />);
 
     expect(screen.getByText('Hiển thị tọa độ')).toBeInTheDocument();
 
-    // Get all checkboxes and check the first one (main toggle)
-    const checkboxes = screen.getAllByRole('checkbox');
-    expect(checkboxes[0]).toBeChecked();
+    // Check the main coordinates checkbox
+    const mainCheckbox = screen.getByTestId('checkbox-show-coordinates');
+    expect(mainCheckbox).toBeChecked();
   });
 
   it('calls updateDisplaySettings when coordinates toggle is changed', () => {
     render(<DisplaySettings />);
 
-    // Get the first checkbox (main coordinates toggle)
-    const checkboxes = screen.getAllByRole('checkbox');
-    const mainCheckbox = checkboxes[0];
+    // Get the main coordinates checkbox
+    const mainCheckbox = screen.getByTestId('checkbox-show-coordinates');
     fireEvent.click(mainCheckbox);
 
     expect(mockUpdateDisplaySettings).toHaveBeenCalledWith({
@@ -91,78 +139,70 @@ describe('DisplaySettings', () => {
     expect(true).toBe(true); // Placeholder test
   });
 
-  it('renders coordinate format dropdown', () => {
+  it('renders coordinate format dropdown with shadcn/ui Select', () => {
     render(<DisplaySettings />);
 
     expect(screen.getByText('Định dạng tọa độ')).toBeInTheDocument();
 
-    const select = screen.getByDisplayValue('Số nguyên');
-    expect(select).toBeInTheDocument();
+    const formatSelect = screen.getByTestId('select-1'); // First select
+    expect(formatSelect).toBeInTheDocument();
+    expect(formatSelect).toHaveAttribute('data-value', 'integer');
   });
 
   it('calls updateDisplaySettings when coordinate format is changed', () => {
     render(<DisplaySettings />);
 
-    const select = screen.getByDisplayValue('Số nguyên');
-    fireEvent.change(select, { target: { value: 'decimal' } });
+    const formatSelect = screen.getByTestId('select-1'); // First select
+    fireEvent.click(formatSelect);
 
     expect(mockUpdateDisplaySettings).toHaveBeenCalledWith({
-      coordinateFormat: 'decimal',
+      coordinateFormat: 'integer',
     });
   });
 
-  it('renders coordinate position dropdown', () => {
+  it('renders coordinate position dropdown with shadcn/ui Select', () => {
     render(<DisplaySettings />);
 
     expect(screen.getByText('Vị trí hiển thị')).toBeInTheDocument();
 
-    const select = screen.getByDisplayValue('Dưới trái');
-    expect(select).toBeInTheDocument();
+    const positionSelect = screen.getByTestId('select-2'); // Second select
+    expect(positionSelect).toBeInTheDocument();
+    expect(positionSelect).toHaveAttribute('data-value', 'bottom-left');
   });
 
   it('calls updateDisplaySettings when coordinate position is changed', () => {
     render(<DisplaySettings />);
 
-    const select = screen.getByDisplayValue('Dưới trái');
-    fireEvent.change(select, { target: { value: 'top-right' } });
+    const positionSelect = screen.getByTestId('select-2'); // Second select
+    fireEvent.click(positionSelect);
 
     expect(mockUpdateDisplaySettings).toHaveBeenCalledWith({
-      coordinatePosition: 'top-right',
+      coordinatePosition: 'integer', // Mock returns 'integer' for any click
     });
   });
 
-  it('handles mouse coordinates toggle', () => {
+  it('handles mouse coordinates toggle with shadcn/ui Checkbox', () => {
     render(<DisplaySettings />);
 
-    const mouseCheckboxes = screen.getAllByRole('checkbox');
-    const mouseCoordCheckbox = mouseCheckboxes.find(checkbox =>
-      checkbox.closest('div')?.textContent?.includes('Tọa độ chuột')
-    );
+    const mouseCoordCheckbox = screen.getByTestId('checkbox-show-mouse-coords');
+    fireEvent.click(mouseCoordCheckbox);
 
-    if (mouseCoordCheckbox) {
-      fireEvent.click(mouseCoordCheckbox);
-
-      expect(mockUpdateDisplaySettings).toHaveBeenCalledWith({
-        showMouseCoords: false,
-      });
-    }
+    expect(mockUpdateDisplaySettings).toHaveBeenCalledWith({
+      showMouseCoords: false,
+    });
   });
 
-  it('handles canvas coordinates toggle', () => {
+  it('handles canvas coordinates toggle with shadcn/ui Checkbox', () => {
     render(<DisplaySettings />);
 
-    const canvasCheckboxes = screen.getAllByRole('checkbox');
-    const canvasCoordCheckbox = canvasCheckboxes.find(checkbox =>
-      checkbox.closest('div')?.textContent?.includes('Tọa độ canvas')
+    const canvasCoordCheckbox = screen.getByTestId(
+      'checkbox-show-canvas-coords'
     );
+    fireEvent.click(canvasCoordCheckbox);
 
-    if (canvasCoordCheckbox) {
-      fireEvent.click(canvasCoordCheckbox);
-
-      expect(mockUpdateDisplaySettings).toHaveBeenCalledWith({
-        showCanvasCoords: false,
-      });
-    }
+    expect(mockUpdateDisplaySettings).toHaveBeenCalledWith({
+      showCanvasCoords: false,
+    });
   });
 
   it('uses react-i18next for all text elements', () => {

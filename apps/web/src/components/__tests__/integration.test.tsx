@@ -4,6 +4,11 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AppLayout } from '../layout/AppLayout';
 import { ClientProviders } from '../providers/ClientProviders';
 
+// Mock cn utility function
+jest.mock('../../lib/utils', () => ({
+  cn: (...classes: any[]) => classes.filter(Boolean).join(' '),
+}));
+
 // Mock all the stores and hooks
 jest.mock('../../store/settings.store', () => ({
   useSettingsStore: () => ({
@@ -184,9 +189,9 @@ describe('Integration Tests', () => {
     const mainElement = screen.getByRole('main');
     expect(mainElement).toHaveClass('flex-1', 'relative', 'overflow-hidden');
 
-    // Check header
+    // Check header with shadcn/ui classes
     const header = screen.getByRole('banner');
-    expect(header).toHaveClass('bg-white', 'dark:bg-gray-800');
+    expect(header).toHaveClass('bg-background', 'border-b', 'border-border');
 
     // Check content is rendered
     expect(screen.getByTestId('main-content')).toBeInTheDocument();

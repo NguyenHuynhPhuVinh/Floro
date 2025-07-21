@@ -2,6 +2,7 @@
 
 import React from 'react';
 
+import { cn } from '@/lib/utils';
 import { AppHeader } from './AppHeader';
 import { CoordinateDisplay } from './CoordinateDisplay';
 import { SettingsModal } from './SettingsModal';
@@ -21,7 +22,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 }) => {
   return (
     <div
-      className={`h-screen w-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-300 ${className}`}
+      className={cn(
+        'h-screen w-screen flex flex-col',
+        'bg-background text-foreground',
+        'transition-colors duration-300',
+        className
+      )}
     >
       {/* Application Header */}
       <AppHeader />

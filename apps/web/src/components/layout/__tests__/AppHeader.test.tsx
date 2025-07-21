@@ -23,16 +23,23 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
+// Mock cn utility function
+jest.mock('../../../lib/utils', () => ({
+  cn: (...classes: any[]) => classes.filter(Boolean).join(' '),
+}));
+
 describe('AppHeader', (): void => {
-  it('renders with correct structure', (): void => {
+  it('renders with correct shadcn/ui structure', (): void => {
     render(<AppHeader />);
 
     const header = screen.getByRole('banner');
     expect(header).toHaveClass(
-      'bg-white',
+      'bg-background',
       'border-b',
-      'border-gray-200',
-      'shadow-sm'
+      'border-border',
+      'shadow-sm',
+      'transition-colors',
+      'duration-300'
     );
 
     // Check flex container structure
@@ -54,8 +61,7 @@ describe('AppHeader', (): void => {
     expect(logo).toHaveClass(
       'text-2xl',
       'font-bold',
-      'text-gray-900',
-      'dark:text-white',
+      'text-foreground',
       'tracking-wide'
     );
   });

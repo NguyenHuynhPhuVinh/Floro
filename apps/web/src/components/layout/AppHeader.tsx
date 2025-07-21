@@ -3,6 +3,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { cn } from '@/lib/utils';
 import { SettingsButton } from './SettingsButton';
 
 interface AppHeaderProps {
@@ -18,7 +19,11 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className = '' }) => {
 
   return (
     <header
-      className={`bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm transition-colors duration-300 ${className}`}
+      className={cn(
+        'bg-background border-b border-border shadow-sm',
+        'transition-colors duration-300',
+        className
+      )}
     >
       <div className="flex items-center justify-between px-6 py-3">
         {/* Left spacer for centering */}
@@ -26,7 +31,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ className = '' }) => {
 
         {/* Centered Logo */}
         <div className="flex items-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-wide">
+          <h1 className="text-2xl font-bold text-foreground tracking-wide">
             {ready ? t('appTitle') : 'Floro'}
           </h1>
         </div>

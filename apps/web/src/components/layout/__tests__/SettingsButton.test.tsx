@@ -25,10 +25,25 @@ jest.mock('react-i18next', () => ({
 
 // Mock Lucide React icon
 jest.mock('lucide-react', () => ({
-  Settings: ({ size, className }: { size?: number; className?: string }) => (
-    <svg data-testid="settings-icon" data-size={size} className={className}>
+  Settings: ({ className }: { className?: string }) => (
+    <svg data-testid="settings-icon" className={className}>
       <title>Settings Icon</title>
     </svg>
+  ),
+}));
+
+// Mock shadcn/ui Button component
+jest.mock('../../ui/button', () => ({
+  Button: ({ children, onClick, className, variant, size, ...props }: any) => (
+    <button
+      onClick={onClick}
+      className={className}
+      data-variant={variant}
+      data-size={size}
+      {...props}
+    >
+      {children}
+    </button>
   ),
 }));
 
@@ -37,25 +52,13 @@ describe('SettingsButton', () => {
     jest.clearAllMocks();
   });
 
-  it('renders with correct styling', () => {
+  it('renders with correct shadcn/ui Button styling', () => {
     render(<SettingsButton />);
 
     const button = screen.getByRole('button');
-    expect(button).toHaveClass(
-      'p-2',
-      'rounded-lg',
-      'border',
-      'border-gray-300',
-      'bg-white',
-      'hover:bg-gray-50',
-      'hover:border-gray-400',
-      'focus:outline-none',
-      'focus:ring-2',
-      'focus:ring-blue-500',
-      'focus:border-transparent',
-      'transition-colors',
-      'duration-200'
-    );
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveAttribute('data-variant', 'outline');
+    expect(button).toHaveAttribute('data-size', 'icon');
   });
 
   it('has proper accessibility attributes', () => {
@@ -71,8 +74,7 @@ describe('SettingsButton', () => {
 
     const icon = screen.getByTestId('settings-icon');
     expect(icon).toBeInTheDocument();
-    expect(icon).toHaveAttribute('data-size', '20');
-    expect(icon).toHaveClass('text-gray-600', 'hover:text-gray-800');
+    expect(icon).toHaveClass('h-4', 'w-4');
   });
 
   it('calls openModal when clicked', () => {

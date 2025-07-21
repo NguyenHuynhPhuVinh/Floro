@@ -45,6 +45,11 @@ jest.mock('../../../store/canvas.store', () => ({
   }),
 }));
 
+// Mock cn utility function
+jest.mock('../../../lib/utils', () => ({
+  cn: (...classes: any[]) => classes.filter(Boolean).join(' '),
+}));
+
 describe('CoordinateDisplay', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -93,14 +98,15 @@ describe('CoordinateDisplay', () => {
     expect(coordinateDiv).toHaveClass('bottom-4', 'left-4'); // bottom-left position
   });
 
-  it('has correct styling and accessibility', () => {
+  it('has correct shadcn/ui styling and accessibility', () => {
     const { container } = render(<CoordinateDisplay />);
 
     const coordinateDiv = container.firstChild as HTMLElement;
     expect(coordinateDiv).toHaveClass(
       'fixed',
-      'bg-black/75',
-      'text-white',
+      'bg-background/90',
+      'border',
+      'text-foreground',
       'px-3',
       'py-2',
       'rounded-lg',
@@ -109,7 +115,8 @@ describe('CoordinateDisplay', () => {
       'leading-tight',
       'pointer-events-none',
       'select-none',
-      'z-50'
+      'z-50',
+      'backdrop-blur-sm'
     );
   });
 

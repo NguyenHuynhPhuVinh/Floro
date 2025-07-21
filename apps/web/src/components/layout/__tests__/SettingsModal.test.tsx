@@ -57,10 +57,54 @@ jest.mock('react-i18next', () => ({
 
 // Mock Lucide React icons
 jest.mock('lucide-react', () => ({
-  X: () => <svg data-testid="close-icon">X</svg>,
   Monitor: () => <svg data-testid="monitor-icon">Monitor</svg>,
   Grid: () => <svg data-testid="grid-icon">Grid</svg>,
   Users: () => <svg data-testid="users-icon">Users</svg>,
+}));
+
+// Mock shadcn/ui Dialog components
+jest.mock('../../ui/dialog', () => ({
+  Dialog: ({ children, open, onOpenChange }: any) =>
+    open ? (
+      <div data-testid="dialog" onClick={() => onOpenChange(false)}>
+        {children}
+      </div>
+    ) : null,
+  DialogContent: ({ children, className }: any) => (
+    <div data-testid="dialog-content" className={className}>
+      {children}
+    </div>
+  ),
+  DialogHeader: ({ children }: any) => (
+    <div data-testid="dialog-header">{children}</div>
+  ),
+  DialogTitle: ({ children }: any) => (
+    <h2 data-testid="dialog-title">{children}</h2>
+  ),
+}));
+
+// Mock shadcn/ui Tabs components
+jest.mock('../../ui/tabs', () => ({
+  Tabs: ({ children, value, onValueChange }: any) => (
+    <div
+      data-testid="tabs"
+      data-value={value}
+      onClick={() => onValueChange && onValueChange('canvas')}
+    >
+      {children}
+    </div>
+  ),
+  TabsList: ({ children }: any) => (
+    <div data-testid="tabs-list">{children}</div>
+  ),
+  TabsTrigger: ({ children, value }: any) => (
+    <button data-testid={`tab-trigger-${value}`} data-value={value}>
+      {children}
+    </button>
+  ),
+  TabsContent: ({ children, value }: any) => (
+    <div data-testid={`tab-content-${value}`}>{children}</div>
+  ),
 }));
 
 describe('SettingsModal', () => {
@@ -71,7 +115,8 @@ describe('SettingsModal', () => {
   it('renders when modal is open', () => {
     render(<SettingsModal />);
 
-    expect(screen.getByText('Cài đặt')).toBeInTheDocument();
+    expect(screen.getByTestId('dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('dialog-title')).toHaveTextContent('Cài đặt');
     expect(screen.getByTestId('display-settings')).toBeInTheDocument();
   });
 
@@ -82,12 +127,16 @@ describe('SettingsModal', () => {
     expect(true).toBe(true); // Placeholder test
   });
 
-  it('displays all settings categories in sidebar', () => {
+  it('displays all settings categories in tabs', () => {
     render(<SettingsModal />);
 
-    expect(screen.getByText('Hiển thị')).toBeInTheDocument();
-    expect(screen.getByText('Canvas')).toBeInTheDocument();
-    expect(screen.getByText('Cộng tác')).toBeInTheDocument();
+    expect(screen.getByTestId('tabs')).toBeInTheDocument();
+    expect(screen.getByTestId('tabs-list')).toBeInTheDocument();
+
+    // Check tab triggers exist
+    expect(screen.getByTestId('tab-trigger-display')).toBeInTheDocument();
+    expect(screen.getByTestId('tab-trigger-canvas')).toBeInTheDocument();
+    expect(screen.getByTestId('tab-trigger-collaboration')).toBeInTheDocument();
 
     // Check icons are rendered
     expect(screen.getByTestId('monitor-icon')).toBeInTheDocument();
@@ -95,64 +144,45 @@ describe('SettingsModal', () => {
     expect(screen.getByTestId('users-icon')).toBeInTheDocument();
   });
 
-  it('calls closeModal when close button is clicked', () => {
+  it('calls closeModal when dialog is closed', () => {
     render(<SettingsModal />);
 
-    const closeButton = screen.getByTestId('close-icon').closest('button');
-    fireEvent.click(closeButton!);
+    const dialog = screen.getByTestId('dialog');
+    fireEvent.click(dialog);
 
     expect(mockCloseModal).toHaveBeenCalledTimes(1);
   });
 
-  it('calls setActiveCategory when category button is clicked', () => {
+  it('calls setActiveCategory when tab is clicked', () => {
     render(<SettingsModal />);
 
-    const canvasButton = screen.getByTestId('grid-icon').closest('button');
-    fireEvent.click(canvasButton!);
+    const tabs = screen.getByTestId('tabs');
+    fireEvent.click(tabs);
 
     expect(mockSetActiveCategory).toHaveBeenCalledWith('canvas');
   });
 
-  it('highlights active category', () => {
+  it('shows active tab content', () => {
     render(<SettingsModal />);
 
-    const displayButton = screen.getByTestId('monitor-icon').closest('button');
-    expect(displayButton).toHaveClass('bg-blue-100', 'text-blue-700');
+    const tabs = screen.getByTestId('tabs');
+    expect(tabs).toHaveAttribute('data-value', 'display');
+    expect(screen.getByTestId('tab-content-display')).toBeInTheDocument();
   });
 
-  it('has proper modal structure and styling', () => {
+  it('has proper dialog structure', () => {
     render(<SettingsModal />);
 
-    // Check backdrop using testid
-    const backdrop = screen.getByTestId('close-icon').closest('.fixed');
-    expect(backdrop).toHaveClass(
-      'inset-0',
-      'bg-black/50',
-      'flex',
-      'items-center',
-      'justify-center',
-      'z-50'
-    );
-
-    // Check modal content
-    const modal = screen.getByTestId('close-icon').closest('.bg-white');
-    expect(modal).toHaveClass(
-      'bg-white',
-      'rounded-lg',
-      'shadow-xl',
-      'w-full',
-      'max-w-4xl'
-    );
+    expect(screen.getByTestId('dialog')).toBeInTheDocument();
+    expect(screen.getByTestId('dialog-content')).toBeInTheDocument();
+    expect(screen.getByTestId('dialog-header')).toBeInTheDocument();
+    expect(screen.getByTestId('dialog-title')).toBeInTheDocument();
   });
 
-  it('has proper accessibility attributes', () => {
+  it('has proper dialog content styling', () => {
     render(<SettingsModal />);
 
-    const closeButton = screen.getByTestId('close-icon').closest('button');
-    expect(closeButton).toHaveAttribute('aria-label', 'common:close');
-
-    // Check modal content exists
-    const modalContent = screen.getByTestId('close-icon').closest('.bg-white');
-    expect(modalContent).toBeInTheDocument();
+    const dialogContent = screen.getByTestId('dialog-content');
+    expect(dialogContent).toHaveClass('sm:max-w-[800px]', 'max-h-[80vh]');
   });
 });

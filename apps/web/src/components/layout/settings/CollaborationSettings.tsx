@@ -2,6 +2,9 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
 import { useSettingsStore } from '../../../store/settings.store';
 import type { LanguageType } from '../../../store/settings.store';
 
@@ -25,28 +28,26 @@ export const CollaborationSettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
+        <h3 className="text-lg font-medium text-foreground mb-4">
           {t('collaboration.title')}
         </h3>
 
         <div className="space-y-4">
           {/* Language Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            <Label className="text-sm font-medium mb-3">
               {t('collaboration.language')}
-            </label>
+            </Label>
             <div className="space-y-2">
               {languageOptions.map(option => (
                 <label
                   key={option.value}
-                  className={`
-                    flex items-center p-3 rounded-lg border cursor-pointer transition-colors
-                    ${
-                      collaboration.language === option.value
-                        ? 'bg-blue-50 dark:bg-blue-900 border-blue-300 dark:border-blue-700 text-blue-700 dark:text-blue-300'
-                        : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
-                    }
-                  `}
+                  className={cn(
+                    'flex items-center p-3 rounded-lg border cursor-pointer transition-colors',
+                    collaboration.language === option.value
+                      ? 'bg-accent border-primary text-primary'
+                      : 'bg-background border-border text-foreground hover:bg-accent/50'
+                  )}
                 >
                   <input
                     type="radio"
@@ -63,9 +64,7 @@ export const CollaborationSettings: React.FC = () => {
                   <span className="text-xl mr-3">{option.flag}</span>
                   <span className="font-medium">{option.label}</span>
                   {collaboration.language === option.value && (
-                    <span className="ml-auto text-blue-600 dark:text-blue-400">
-                      ✓
-                    </span>
+                    <span className="ml-auto text-primary">✓</span>
                   )}
                 </label>
               ))}
@@ -73,21 +72,21 @@ export const CollaborationSettings: React.FC = () => {
           </div>
 
           {/* Future collaboration features placeholder */}
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
-            <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="pt-4 border-t border-border">
+            <h4 className="text-sm font-medium text-foreground mb-2">
               {t('collaboration.futureFeatures')}
             </h4>
-            <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+            <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center">
-                <span className="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full mr-2"></span>
+                <span className="w-2 h-2 bg-muted rounded-full mr-2"></span>
                 {t('collaboration.features.realtimeSharing')}
               </div>
               <div className="flex items-center">
-                <span className="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full mr-2"></span>
+                <span className="w-2 h-2 bg-muted rounded-full mr-2"></span>
                 {t('collaboration.features.commentsAndNotes')}
               </div>
               <div className="flex items-center">
-                <span className="w-2 h-2 bg-gray-300 dark:bg-gray-600 rounded-full mr-2"></span>
+                <span className="w-2 h-2 bg-muted rounded-full mr-2"></span>
                 {t('collaboration.features.accessManagement')}
               </div>
             </div>

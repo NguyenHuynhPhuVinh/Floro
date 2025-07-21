@@ -1,7 +1,11 @@
 'use client';
 
 import React from 'react';
+import { CheckCircle, XCircle, X, Loader2 } from 'lucide-react';
 
+import { cn } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { FileUploadProgress as FileUploadProgressType } from '../../types';
 
 interface FileUploadProgressProps {
@@ -29,14 +33,17 @@ export function FileUploadProgress({
 
   return (
     <div
-      className={`fixed ${positionClasses[position]} z-50 w-80 max-h-96 overflow-y-auto`}
+      className={cn(
+        'fixed z-50 w-80 max-h-96 overflow-y-auto',
+        positionClasses[position]
+      )}
     >
-      <div className="bg-white rounded-lg shadow-lg border p-4 space-y-3">
+      <div className="bg-background rounded-lg shadow-lg border border-border p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-gray-900">
+          <h3 className="text-sm font-medium text-foreground">
             File Uploads ({uploadList.length})
           </h3>
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-muted-foreground">
             {uploadList.filter(u => u.status === 'completed').length} completed
           </div>
         </div>
@@ -67,74 +74,30 @@ function FileUploadItem({
   const getStatusIcon = (): React.JSX.Element | null => {
     switch (upload.status) {
       case 'uploading':
-        return (
-          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        );
+        return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
       case 'completed':
-        return (
-          <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
-            <svg
-              className="w-2.5 h-2.5 text-white"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-        );
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'error':
-        return (
-          <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center">
-            <svg
-              className="w-2.5 h-2.5 text-white"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-        );
+        return <XCircle className="h-4 w-4 text-destructive" />;
       case 'cancelled':
-        return (
-          <div className="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center">
-            <svg
-              className="w-2.5 h-2.5 text-white"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-        );
+        return <XCircle className="h-4 w-4 text-muted-foreground" />;
       default:
         return null;
     }
   };
 
-  const getStatusColor = (): string => {
+  const getProgressColor = (): string => {
     switch (upload.status) {
       case 'uploading':
-        return 'bg-blue-500';
+        return 'bg-primary';
       case 'completed':
         return 'bg-green-500';
       case 'error':
-        return 'bg-red-500';
+        return 'bg-destructive';
       case 'cancelled':
-        return 'bg-gray-500';
+        return 'bg-muted';
       default:
-        return 'bg-gray-300';
+        return 'bg-muted';
     }
   };
 
@@ -147,48 +110,47 @@ function FileUploadItem({
   };
 
   return (
-    <div className="border rounded-lg p-3 space-y-2">
+    <div className="border border-border rounded-lg p-3 space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {getStatusIcon()}
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-gray-900 truncate">
+            <p className="text-sm font-medium text-foreground truncate">
               {upload.fileName}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {formatFileSize(upload.loaded)} / {formatFileSize(upload.total)}
             </p>
           </div>
         </div>
 
         {upload.status === 'uploading' && onCancel && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => onCancel(upload.fileId)}
-            className="text-gray-400 hover:text-gray-600 p-1"
+            className="h-6 w-6"
             title="Cancel upload"
           >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
+            <X className="h-4 w-4" />
+          </Button>
         )}
       </div>
 
       {/* Progress bar */}
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className={`h-2 rounded-full transition-all duration-300 ${getStatusColor()}`}
-          style={{ width: `${upload.progress}%` }}
-        />
-      </div>
+      <Progress
+        value={upload.progress}
+        className="w-full"
+        style={
+          {
+            '--progress-background': getProgressColor(),
+          } as React.CSSProperties
+        }
+      />
 
       {/* Error message */}
       {upload.status === 'error' && upload.error && (
-        <p className="text-xs text-red-600 mt-1">{upload.error}</p>
+        <p className="text-xs text-destructive mt-1">{upload.error}</p>
       )}
     </div>
   );

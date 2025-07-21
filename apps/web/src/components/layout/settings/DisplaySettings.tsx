@@ -2,6 +2,16 @@
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useSettingsStore } from '../../../store/settings.store';
 import type {
   CoordinateFormat,
@@ -35,105 +45,116 @@ export const DisplaySettings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">
+        <h3 className="text-lg font-medium text-foreground mb-4">
           {t('display.title')}
         </h3>
 
         {/* Show Coordinates Toggle */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <Label htmlFor="show-coordinates" className="text-sm font-medium">
               {t('display.showCoordinates')}
-            </label>
-            <input
-              type="checkbox"
+            </Label>
+            <Checkbox
+              id="show-coordinates"
               checked={display.showCoordinates}
-              onChange={e =>
-                updateDisplaySettings({ showCoordinates: e.target.checked })
+              onCheckedChange={checked =>
+                updateDisplaySettings({ showCoordinates: !!checked })
               }
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
             />
           </div>
 
           {/* Coordinate Type Options - only show if coordinates are enabled */}
           {display.showCoordinates && (
             <>
-              <div className="ml-4 space-y-3 border-l-2 border-gray-200 dark:border-gray-600 pl-4">
+              <div className="ml-4 space-y-3 border-l-2 border-border pl-4">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm text-gray-600 dark:text-gray-400">
+                  <Label
+                    htmlFor="show-mouse-coords"
+                    className="text-sm text-muted-foreground"
+                  >
                     {t('display.mouseCoordinates')}
-                  </label>
-                  <input
-                    type="checkbox"
+                  </Label>
+                  <Checkbox
+                    id="show-mouse-coords"
                     checked={display.showMouseCoords}
-                    onChange={e =>
+                    onCheckedChange={checked =>
                       updateDisplaySettings({
-                        showMouseCoords: e.target.checked,
+                        showMouseCoords: !!checked,
                       })
                     }
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <label className="text-sm text-gray-600 dark:text-gray-400">
+                  <Label
+                    htmlFor="show-canvas-coords"
+                    className="text-sm text-muted-foreground"
+                  >
                     {t('display.canvasCoordinates')}
-                  </label>
-                  <input
-                    type="checkbox"
+                  </Label>
+                  <Checkbox
+                    id="show-canvas-coords"
                     checked={display.showCanvasCoords}
-                    onChange={e =>
+                    onCheckedChange={checked =>
                       updateDisplaySettings({
-                        showCanvasCoords: e.target.checked,
+                        showCanvasCoords: !!checked,
                       })
                     }
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                   />
                 </div>
               </div>
 
               {/* Coordinate Format */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <Label className="text-sm font-medium mb-2">
                   {t('display.coordinateFormat')}
-                </label>
-                <select
+                </Label>
+                <Select
                   value={display.coordinateFormat}
-                  onChange={e =>
+                  onValueChange={value =>
                     updateDisplaySettings({
-                      coordinateFormat: e.target.value as CoordinateFormat,
+                      coordinateFormat: value as CoordinateFormat,
                     })
                   }
-                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
-                  {coordinateFormatOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {coordinateFormatOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Coordinate Position */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <Label className="text-sm font-medium mb-2">
                   {t('display.coordinatePosition')}
-                </label>
-                <select
+                </Label>
+                <Select
                   value={display.coordinatePosition}
-                  onChange={e =>
+                  onValueChange={value =>
                     updateDisplaySettings({
-                      coordinatePosition: e.target.value as CoordinatePosition,
+                      coordinatePosition: value as CoordinatePosition,
                     })
                   }
-                  className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
-                  {coordinatePositionOptions.map(option => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {coordinatePositionOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </>
           )}

@@ -1,9 +1,9 @@
 'use client';
-'use client';
 
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { cn } from '@/lib/utils';
 import { useCanvasStore } from '../../store/canvas.store';
 import { useSettingsStore } from '../../store/settings.store';
 import { useMousePosition } from '../../hooks/ui/useMousePosition';
@@ -40,13 +40,13 @@ export const CoordinateDisplay: React.FC = () => {
 
   return (
     <div
-      className={`
-        fixed ${positionClasses[display.coordinatePosition]}
-        bg-black/75 text-white px-3 py-2 rounded-lg
-        text-xs font-mono leading-tight
-        pointer-events-none select-none
-        z-50
-      `}
+      className={cn(
+        'fixed bg-background/90 border text-foreground px-3 py-2 rounded-lg',
+        'text-xs font-mono leading-tight',
+        'pointer-events-none select-none',
+        'z-50 backdrop-blur-sm',
+        positionClasses[display.coordinatePosition]
+      )}
     >
       {display.showCanvasCoords && (
         <div className="mb-1">
