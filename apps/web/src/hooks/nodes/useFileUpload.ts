@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { NodeService } from '../../services/core/node.service';
 import { StorageService } from '../../services/core/storage.service';
@@ -33,6 +34,7 @@ export function useFileUpload(): UseFileUploadReturn {
   );
 
   const { addNode } = useNodesStore();
+  const { t } = useTranslation('fileUpload');
 
   const generateFileId = useCallback(() => {
     return `file_${Date.now()}_${Math.random().toString(36).substring(2)}`;
@@ -53,7 +55,7 @@ export function useFileUpload(): UseFileUploadReturn {
       setCancelledUploads(prev => new Set(prev).add(fileId));
       updateProgress(fileId, {
         status: 'cancelled',
-        error: 'Upload cancelled by user',
+        error: t('errors.cancelled'),
       });
     },
     [updateProgress]
@@ -120,7 +122,7 @@ export function useFileUpload(): UseFileUploadReturn {
         if (cancelledUploads.has(fileId)) {
           // Clean up uploaded file
           await StorageService.deleteFile(filePath);
-          throw new Error('Upload cancelled');
+          throw new Error(t('errors.cancelled'));
         }
 
         // Create FileNode in database

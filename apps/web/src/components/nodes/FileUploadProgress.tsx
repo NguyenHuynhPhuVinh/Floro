@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { CheckCircle, XCircle, X, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
@@ -11,19 +12,28 @@ import { FileUploadProgress as FileUploadProgressType } from '../../types';
 interface FileUploadProgressProps {
   uploads: Record<string, FileUploadProgressType>;
   onCancel?: (fileId: string) => void;
+  onClose?: () => void;
   position?: 'top-right' | 'bottom-right' | 'center';
 }
 
 export function FileUploadProgress({
   uploads,
   onCancel,
+  onClose,
   position = 'top-right',
 }: FileUploadProgressProps): React.JSX.Element | null {
+  const [isVisible, setIsVisible] = useState(true);
+  const { t } = useTranslation('fileUpload');
   const uploadList = Object.values(uploads);
 
-  if (uploadList.length === 0) {
+  if (uploadList.length === 0 || !isVisible) {
     return null;
   }
+
+  const handleClose = () => {
+    setIsVisible(false);
+    onClose?.();
+  };
 
   const positionClasses = {
     'top-right': 'top-4 right-4',
@@ -41,10 +51,22 @@ export function FileUploadProgress({
       <div className="bg-background rounded-lg shadow-lg border border-border p-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium text-foreground">
-            File Uploads ({uploadList.length})
+            {t('progress.title')} ({uploadList.length})
           </h3>
-          <div className="text-xs text-muted-foreground">
-            {uploadList.filter(u => u.status === 'completed').length} completed
+          <div className="flex items-center gap-2">
+            <div className="text-xs text-muted-foreground">
+              {uploadList.filter(u => u.status === 'completed').length}{' '}
+              {t('progress.completedCount')}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleClose}
+              className="h-6 w-6"
+              title={t('progress.close')}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
@@ -71,6 +93,7 @@ function FileUploadItem({
   upload,
   onCancel,
 }: FileUploadItemProps): React.JSX.Element {
+  const { t } = useTranslation('fileUpload');
   const getStatusIcon = (): React.JSX.Element | null => {
     switch (upload.status) {
       case 'uploading':
@@ -130,7 +153,7 @@ function FileUploadItem({
             size="icon"
             onClick={() => onCancel(upload.fileId)}
             className="h-6 w-6"
-            title="Cancel upload"
+            title={t('progress.cancel')}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -150,7 +173,11 @@ function FileUploadItem({
 
       {/* Error message */}
       {upload.status === 'error' && upload.error && (
-        <p className="text-xs text-destructive mt-1">{upload.error}</p>
+        <p className="text-xs text-destructive mt-1">
+          {upload.error.includes('cancelled')
+            ? t('errors.cancelled')
+            : upload.error}
+        </p>
       )}
     </div>
   );

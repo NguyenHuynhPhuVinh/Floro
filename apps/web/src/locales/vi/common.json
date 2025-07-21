@@ -9,5 +9,25 @@
   "settings": "Cài đặt",
   "loading": "Đang tải...",
   "error": "Lỗi",
-  "success": "Thành công"
+  "success": "Thành công",
+  "node": "Node",
+  "nodes": "Node",
+  "deleteConfirmation": {
+    "title": "Xóa {{count}} {{type}}",
+    "message": "Bạn có chắc chắn muốn xóa {{count}} {{type}} này không? Hành động này không thể hoàn tác và cũng sẽ xóa các file liên quan khỏi bộ nhớ.",
+    "confirmText": "Xóa",
+    "cancelText": "Hủy"
+  },
+  "nodeDelete": {
+    "success": {
+      "title": "Đã xóa {{count}} {{type}}",
+      "messageSingle": "Node và file liên quan đã được xóa thành công",
+      "messageMultiple": "Các node và file liên quan đã được xóa thành công"
+    },
+    "error": {
+      "title": "Không thể xóa node",
+      "message": "Không thể xóa node đã chọn: {{error}}",
+      "unknown": "Đã xảy ra lỗi không xác định"
+    }
+  }
 }

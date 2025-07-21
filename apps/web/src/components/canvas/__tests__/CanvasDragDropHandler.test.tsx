@@ -3,6 +3,20 @@ import React from 'react';
 
 import { CanvasDragDropHandler } from '../CanvasDragDropHandler';
 
+// Mock useTranslation
+jest.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'dragDrop.title': 'Drop files here to create File Nodes',
+        'dragDrop.subtitle':
+          'Supports documents, images, archives, code files, and more',
+      };
+      return translations[key] || key;
+    },
+  }),
+}));
+
 describe('CanvasDragDropHandler', () => {
   const mockOnFileDrop = jest.fn();
   const mockOnDragOver = jest.fn();

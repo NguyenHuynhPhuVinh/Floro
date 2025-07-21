@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NodeService } from '../../services/core/node.service';
 import { useNodesStore } from '../../store/nodes.store';
 import { useToast } from '../ui/useToast';
@@ -30,6 +31,7 @@ export const useNodeDelete = (): UseNodeDeleteReturn => {
     nodeIds: string[];
   } | null>(null);
 
+  const { t } = useTranslation('common');
   const { removeNode, clearLastDeletedAt } = useNodesStore();
   const { getSelectedNodes, clearSelection } = useNodeSelection();
   const { showSuccess, showError } = useToast();
@@ -92,11 +94,12 @@ export const useNodeDelete = (): UseNodeDeleteReturn => {
 
       // Show success notification
       const nodeCount = nodeIds.length;
+      const nodeType = nodeCount > 1 ? t('nodes') : t('node');
       showSuccess(
-        `Deleted ${nodeCount} node${nodeCount > 1 ? 's' : ''}`,
+        t('nodeDelete.success.title', { count: nodeCount, type: nodeType }),
         nodeCount === 1
-          ? 'Node and associated file removed successfully'
-          : 'Nodes and associated files removed successfully'
+          ? t('nodeDelete.success.messageSingle')
+          : t('nodeDelete.success.messageMultiple')
       );
 
       // Clear the deletion flag after a delay to allow normal loading again
@@ -109,10 +112,10 @@ export const useNodeDelete = (): UseNodeDeleteReturn => {
 
       // Show error notification
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error occurred';
+        error instanceof Error ? error.message : t('nodeDelete.error.unknown');
       showError(
-        'Failed to delete node(s)',
-        `Could not delete the selected node(s): ${errorMessage}`
+        t('nodeDelete.error.title'),
+        t('nodeDelete.error.message', { error: errorMessage })
       );
     } finally {
       setIsDeleting(false);

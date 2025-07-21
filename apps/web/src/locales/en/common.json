@@ -9,5 +9,25 @@
   "settings": "Settings",
   "loading": "Loading...",
   "error": "Error",
-  "success": "Success"
+  "success": "Success",
+  "node": "Node",
+  "nodes": "Nodes",
+  "deleteConfirmation": {
+    "title": "Delete {{count}} {{type}}",
+    "message": "Are you sure you want to delete {{count}} {{type}}? This action cannot be undone and will also remove associated files from storage.",
+    "confirmText": "Delete",
+    "cancelText": "Cancel"
+  },
+  "nodeDelete": {
+    "success": {
+      "title": "Deleted {{count}} {{type}}",
+      "messageSingle": "Node and associated file removed successfully",
+      "messageMultiple": "Nodes and associated files removed successfully"
+    },
+    "error": {
+      "title": "Failed to delete node(s)",
+      "message": "Could not delete the selected node(s): {{error}}",
+      "unknown": "Unknown error occurred"
+    }
+  }
 }

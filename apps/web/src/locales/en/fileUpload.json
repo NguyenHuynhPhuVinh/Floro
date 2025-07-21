@@ -1,0 +1,31 @@
+{
+  "dragDrop": {
+    "title": "Drop files here to create File Nodes",
+    "subtitle": "Supports documents, images, archives, code files, and more",
+    "overlay": "Drop files to upload"
+  },
+  "progress": {
+    "title": "File Uploads",
+    "uploading": "Uploading",
+    "completed": "Completed",
+    "failed": "Failed",
+    "cancelled": "Cancelled",
+    "completedCount": "completed",
+    "cancel": "Cancel upload",
+    "close": "Close",
+    "retry": "Retry"
+  },
+  "errors": {
+    "uploadFailed": "Upload failed. Please check your connection and try again.",
+    "fileTooLarge": "File size exceeds 50MB limit. Please choose a smaller file.",
+    "unsupportedType": "File type not supported. Supported types: Documents, Images, Archives, Code, Data, Text, Spreadsheets, Presentations.",
+    "mediaFilesBlocked": "Media files (video/audio) are not supported. Please upload documents, images, or other supported file types.",
+    "networkError": "Network connection lost. Upload will resume automatically when connection is restored.",
+    "cancelled": "Upload cancelled by user"
+  },
+  "validation": {
+    "maxFileSize": "Maximum file size",
+    "allowedTypes": "Allowed file types",
+    "maxFiles": "Maximum files"
+  }
+}

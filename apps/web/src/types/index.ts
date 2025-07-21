@@ -126,14 +126,5 @@ export const FILE_CONSTRAINTS = {
   MAX_SESSION_SIZE: 500 * 1024 * 1024, // 500MB
 } as const;
 
-// Error messages
-export const FILE_ERROR_MESSAGES = {
-  FILE_TOO_LARGE: 'File size exceeds 50MB limit. Please choose a smaller file.',
-  UNSUPPORTED_TYPE:
-    'File type not supported. Supported types: Documents, Images, Archives, Code, Data, Text, Spreadsheets, Presentations.',
-  MEDIA_FILES_BLOCKED:
-    'Media files (video/audio) are not supported. Please upload documents, images, or other supported file types.',
-  UPLOAD_FAILED: 'Upload failed. Please check your connection and try again.',
-  NETWORK_ERROR:
-    'Network connection lost. Upload will resume automatically when connection is restored.',
-} as const;
+// Error messages - now using translated messages
+export { FILE_ERROR_MESSAGES } from '../lib/errorMessages';

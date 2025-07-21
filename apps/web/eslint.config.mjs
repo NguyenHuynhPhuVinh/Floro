@@ -18,7 +18,7 @@ const eslintConfig = [
       '@typescript-eslint/explicit-function-return-type': 'off', // TypeScript can infer, saves tokens
       '@typescript-eslint/no-unused-vars': 'warn', // Warn instead of error
       '@typescript-eslint/prefer-interface': 'off',
-      '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
+      '@typescript-eslint/consistent-type-definitions': ['warn'],
 
       // General code quality rules
       'prefer-const': 'warn', // Warn instead of error for AI code

@@ -1,0 +1,31 @@
+{
+  "dragDrop": {
+    "title": "Thả file vào đây để tạo File Node",
+    "subtitle": "Hỗ trợ tài liệu, hình ảnh, file nén, code và nhiều loại file khác",
+    "overlay": "Thả file để tải lên"
+  },
+  "progress": {
+    "title": "Tải lên file",
+    "uploading": "Đang tải lên",
+    "completed": "Hoàn thành",
+    "failed": "Thất bại",
+    "cancelled": "Đã hủy",
+    "completedCount": "hoàn thành",
+    "cancel": "Hủy tải lên",
+    "close": "Đóng",
+    "retry": "Thử lại"
+  },
+  "errors": {
+    "uploadFailed": "Tải lên thất bại. Vui lòng kiểm tra kết nối và thử lại.",
+    "fileTooLarge": "Kích thước file vượt quá giới hạn 50MB. Vui lòng chọn file nhỏ hơn.",
+    "unsupportedType": "Loại file không được hỗ trợ. Các loại được hỗ trợ: Tài liệu, Hình ảnh, File nén, Code, Dữ liệu, Text, Bảng tính, Thuyết trình.",
+    "mediaFilesBlocked": "File media (video/audio) không được hỗ trợ. Vui lòng tải lên tài liệu, hình ảnh hoặc các loại file được hỗ trợ khác.",
+    "networkError": "Mất kết nối mạng. Tải lên sẽ tự động tiếp tục khi kết nối được khôi phục.",
+    "cancelled": "Tải lên đã bị hủy bởi người dùng"
+  },
+  "validation": {
+    "maxFileSize": "Kích thước file tối đa",
+    "allowedTypes": "Loại file được phép",
+    "maxFiles": "Số file tối đa"
+  }
+}

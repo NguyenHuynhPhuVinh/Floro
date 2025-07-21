@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface CanvasDragDropHandlerProps {
   onFileDrop: (files: File[], position: { x: number; y: number }) => void;
@@ -20,6 +21,7 @@ export function CanvasDragDropHandler({
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation('fileUpload');
 
   const handleDragEnter = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -130,10 +132,10 @@ export function CanvasDragDropHandler({
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-900">
-                  Drop files here to create File Nodes
+                  {t('dragDrop.title')}
                 </p>
                 <p className="text-xs text-gray-500">
-                  Supports documents, images, archives, code files, and more
+                  {t('dragDrop.subtitle')}
                 </p>
               </div>
             </div>
