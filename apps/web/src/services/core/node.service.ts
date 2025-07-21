@@ -292,6 +292,41 @@ export class NodeService {
    */
   static async deleteMultipleNodes(nodeIds: string[]): Promise<void> {
     try {
+      // First get all nodes to access file information
+      const { data: nodes, error: fetchError } = await supabase
+        .from('floro_nodes')
+        .select('*')
+        .in('id', nodeIds);
+
+      if (fetchError) {
+        this.handleError('Failed to fetch nodes for deletion', fetchError);
+      }
+
+      // Clean up files from storage for FileNodes
+      if (nodes && nodes.length > 0) {
+        const fileCleanupPromises = nodes
+          .filter(node => node.type === 'file' && node.data.fileURL)
+          .map(async node => {
+            try {
+              const fileURL = node.data.fileURL as string;
+              const filePath = this.extractFilePathFromURL(fileURL);
+              if (filePath) {
+                await this.deleteFileFromStorage(filePath);
+              }
+            } catch (storageError) {
+              // eslint-disable-next-line no-console
+              console.warn(
+                `Failed to delete file from storage for node ${node.id}:`,
+                storageError
+              );
+              // Continue with other files even if one fails
+            }
+          });
+
+        // Wait for all file cleanup operations to complete (or fail)
+        await Promise.allSettled(fileCleanupPromises);
+      }
+
       // Delete nodes from database
       const { error } = await supabase
         .from('floro_nodes')

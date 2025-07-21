@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, X, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -25,6 +25,13 @@ export function FileUploadProgress({
   const [isVisible, setIsVisible] = useState(true);
   const { t } = useTranslation('fileUpload');
   const uploadList = Object.values(uploads);
+
+  // Reset visibility when there are new uploads
+  useEffect(() => {
+    if (uploadList.length > 0) {
+      setIsVisible(true);
+    }
+  }, [uploadList.length]);
 
   if (uploadList.length === 0 || !isVisible) {
     return null;
