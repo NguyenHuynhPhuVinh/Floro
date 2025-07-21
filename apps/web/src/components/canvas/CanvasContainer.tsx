@@ -38,7 +38,8 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const { stageProps, updateStageDimensions } = useCanvasViewport();
-  const { uploadMultipleFiles, uploadProgress, cancelUpload } = useFileUpload();
+  const { uploadMultipleFiles, uploadProgress, cancelUpload, clearUploads } =
+    useFileUpload();
   const { viewport } = useCanvasStore();
 
   // Node deletion functionality
@@ -132,13 +133,8 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
         uploads={uploadProgress}
         onCancel={cancelUpload}
         onClose={() => {
-          // Clear completed uploads when modal is closed
-          Object.keys(uploadProgress).forEach(fileId => {
-            if (uploadProgress[fileId].status === 'completed') {
-              // This would need to be implemented in the upload hook
-              // For now, we just close the modal
-            }
-          });
+          // Clear all uploads when modal is closed
+          clearUploads();
         }}
         position="top-right"
       />

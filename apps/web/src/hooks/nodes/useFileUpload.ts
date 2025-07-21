@@ -18,6 +18,7 @@ export interface UseFileUploadReturn {
   uploadProgress: Record<string, FileUploadProgress>;
   isUploading: boolean;
   cancelUpload: (fileId: string) => void;
+  clearUploads: () => void;
   uploadMultipleFiles: (
     files: File[],
     position: { x: number; y: number }
@@ -58,8 +59,13 @@ export function useFileUpload(): UseFileUploadReturn {
         error: t('errors.cancelled'),
       });
     },
-    [updateProgress]
+    [updateProgress, t]
   );
+
+  const clearUploads = useCallback(() => {
+    setUploadProgress({});
+    setCancelledUploads(new Set());
+  }, []);
 
   const uploadFile = useCallback(
     async (
@@ -225,6 +231,7 @@ export function useFileUpload(): UseFileUploadReturn {
     uploadProgress,
     isUploading,
     cancelUpload,
+    clearUploads,
     uploadMultipleFiles,
   };
 }
