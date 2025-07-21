@@ -288,16 +288,66 @@ export class NodeService {
   }
 
   /**
-   * NEW: Delete multiple nodes for batch operations
+   * NEW: Delete multiple nodes for batch operations with file cleanup
    */
   static async deleteMultipleNodes(nodeIds: string[]): Promise<void> {
-    const { error } = await supabase
-      .from('floro_nodes')
-      .delete()
-      .in('id', nodeIds);
+    try {
+      // Delete nodes from database
+      const { error } = await supabase
+        .from('floro_nodes')
+        .delete()
+        .in('id', nodeIds);
+
+      if (error) {
+        this.handleError('Failed to delete multiple nodes', error);
+      }
+    } catch (error) {
+      this.handleError(
+        'Failed to delete multiple nodes with file cleanup',
+        error
+      );
+    }
+  }
+
+  /**
+   * Helper method to extract file path from Supabase Storage URL
+   */
+  private static extractFilePathFromURL(fileURL: string): string | null {
+    try {
+      // URL format: https://[project].supabase.co/storage/v1/object/public/floro-assets/files/filename
+      // We need to extract everything after the bucket name
+
+      const urlParts = fileURL.split('/');
+      const publicIndex = urlParts.findIndex(part => part === 'public');
+
+      if (publicIndex === -1 || publicIndex + 2 >= urlParts.length) {
+        return null;
+      }
+
+      // Skip 'public' and bucket name (floro-assets), get the rest as file path
+      const encodedFilePath = urlParts.slice(publicIndex + 2).join('/');
+
+      // Decode URL to handle spaces and special characters
+      const filePath = decodeURIComponent(encodedFilePath);
+
+      return filePath || null;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to parse file URL:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Helper method to delete file from Supabase Storage
+   */
+  private static async deleteFileFromStorage(filePath: string): Promise<void> {
+    const { error } = await supabase.storage
+      .from('floro-assets') // Use the correct bucket name
+      .remove([filePath]);
 
     if (error) {
-      this.handleError('Failed to delete multiple nodes', error);
+      throw new Error(`Failed to delete file from storage: ${error.message}`);
     }
   }
 
@@ -312,35 +362,17 @@ export class NodeService {
         throw new Error(`Node with ID ${nodeId} not found`);
       }
 
-      // Extract file URL to get storage path
-      const fileURL = node.data.fileURL as string;
-      if (fileURL) {
+      // Clean up file from storage if it's a FileNode
+      if (node.type === 'file' && node.data.fileURL) {
         try {
-          // Extract file path from URL
-          // Assuming URL format: https://[project].supabase.co/storage/v1/object/public/[bucket]/[path]
-          const urlParts = fileURL.split('/');
-          const bucketIndex = urlParts.findIndex(part => part === 'public') + 1;
-          if (bucketIndex > 0 && bucketIndex < urlParts.length) {
-            const bucket = urlParts[bucketIndex];
-            const filePath = urlParts.slice(bucketIndex + 1).join('/');
-
-            // Delete file from storage
-            const { error: storageError } = await supabase.storage
-              .from(bucket)
-              .remove([filePath]);
-
-            if (storageError) {
-              // eslint-disable-next-line no-console
-              console.warn('Failed to delete file from storage:', storageError);
-              // Continue with node deletion even if file deletion fails
-            }
+          const fileURL = node.data.fileURL as string;
+          const filePath = this.extractFilePathFromURL(fileURL);
+          if (filePath) {
+            await this.deleteFileFromStorage(filePath);
           }
         } catch (storageError) {
           // eslint-disable-next-line no-console
-          console.warn(
-            'Failed to parse file URL for storage cleanup:',
-            storageError
-          );
+          console.warn('Failed to delete file from storage:', storageError);
           // Continue with node deletion even if file cleanup fails
         }
       }

@@ -14,14 +14,15 @@ jest.mock('../../../store/settings.store', () => ({
 }));
 
 // Mock i18n module
-const mockI18n = {
-  language: 'vi',
-  changeLanguage: jest.fn(),
-};
-
 jest.mock('../../../lib/i18n', () => ({
   __esModule: true,
-  default: mockI18n,
+  default: {
+    language: 'vi',
+    changeLanguage: jest.fn(),
+    isInitialized: true,
+    on: jest.fn(),
+    off: jest.fn(),
+  },
 }));
 
 // Mock react-i18next
@@ -40,6 +41,9 @@ jest.mock('react-i18next', () => ({
 }));
 
 describe('I18nProvider', () => {
+  // Get the mocked i18n instance
+  const mockI18n = require('../../../lib/i18n').default;
+
   beforeEach(() => {
     jest.clearAllMocks();
   });

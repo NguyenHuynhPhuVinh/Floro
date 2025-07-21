@@ -204,6 +204,26 @@ export class StorageService {
   }
 
   /**
+   * Helper method to normalize file name for safe storage
+   */
+  private static normalizeFileName(fileName: string): string {
+    // Remove Vietnamese diacritics
+    const withoutDiacritics = fileName
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D');
+
+    // Replace spaces and special characters with underscores
+    const normalized = withoutDiacritics
+      .replace(/[^a-zA-Z0-9._-]/g, '_')
+      .replace(/_{2,}/g, '_') // Replace multiple underscores with single
+      .replace(/^_+|_+$/g, ''); // Remove leading/trailing underscores
+
+    return normalized;
+  }
+
+  /**
    * Generate a unique file path
    */
   static generateFilePath(directory: string, fileName: string): string {
@@ -212,7 +232,10 @@ export class StorageService {
     const fileExtension = fileName.split('.').pop();
     const baseName = fileName.replace(`.${fileExtension}`, '');
 
-    return `${directory}/${baseName}_${timestamp}_${randomId}.${fileExtension}`;
+    // Normalize the base name to remove Vietnamese diacritics and special characters
+    const normalizedBaseName = this.normalizeFileName(baseName);
+
+    return `${directory}/${normalizedBaseName}_${timestamp}_${randomId}.${fileExtension}`;
   }
 
   /**

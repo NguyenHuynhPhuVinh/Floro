@@ -173,6 +173,34 @@ describe('StorageService', () => {
       const path = StorageService.generateFilePath('uploads', 'document.docx');
       expect(path).toMatch(/\.docx$/);
     });
+
+    it('should normalize Vietnamese file names', () => {
+      const path = StorageService.generateFilePath(
+        'uploads',
+        'tài liệu (1).pdf'
+      );
+      expect(path).toMatch(/^uploads\/tai_lieu_1_\d+_[a-z0-9]+\.pdf$/);
+    });
+
+    it('should handle special characters and spaces', () => {
+      const path = StorageService.generateFilePath(
+        'uploads',
+        'file with spaces & symbols!.txt'
+      );
+      expect(path).toMatch(
+        /^uploads\/file_with_spaces_symbols_\d+_[a-z0-9]+\.txt$/
+      );
+    });
+
+    it('should remove multiple consecutive underscores', () => {
+      const path = StorageService.generateFilePath(
+        'uploads',
+        'file___with___many___spaces.txt'
+      );
+      expect(path).toMatch(
+        /^uploads\/file_with_many_spaces_\d+_[a-z0-9]+\.txt$/
+      );
+    });
   });
 
   describe('getSupportedExtensions', () => {

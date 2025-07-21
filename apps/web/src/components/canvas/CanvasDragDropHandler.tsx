@@ -112,12 +112,12 @@ export function CanvasDragDropHandler({
 
       {/* Drag overlay */}
       {isDragOver && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-blue-500/20 border-2 border-dashed border-blue-500 pointer-events-none">
-          <div className="bg-white/90 backdrop-blur-sm rounded-lg p-6 shadow-lg border">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-primary/20 border-2 border-dashed border-primary pointer-events-none">
+          <div className="bg-background/90 backdrop-blur-sm rounded-lg p-6 shadow-lg border border-border">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-white"
+                  className="w-5 h-5 text-primary-foreground"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -131,10 +131,10 @@ export function CanvasDragDropHandler({
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-foreground">
                   {t('dragDrop.title')}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   {t('dragDrop.subtitle')}
                 </p>
               </div>

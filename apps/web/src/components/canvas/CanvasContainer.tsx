@@ -11,6 +11,7 @@ import { CanvasDragDropHandler } from './CanvasDragDropHandler';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { useNodeDelete } from '../../hooks/nodes/useNodeDelete';
 import { CanvasBackground } from './CanvasBackground';
+import { useCanvasStore } from '../../store/canvas.store';
 
 // Dynamically import Konva wrapper to avoid SSR issues
 const KonvaCanvas = dynamic(() => import('./KonvaCanvas'), {
@@ -38,6 +39,7 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const { stageProps, updateStageDimensions } = useCanvasViewport();
   const { uploadMultipleFiles, uploadProgress, cancelUpload } = useFileUpload();
+  const { viewport } = useCanvasStore();
 
   // Node deletion functionality
   const {
@@ -86,7 +88,14 @@ const CanvasContainerComponent: React.FC<CanvasContainerProps> = ({
     position: { x: number; y: number }
   ): Promise<void> => {
     try {
-      await uploadMultipleFiles(files, position);
+      // Convert screen coordinates to canvas coordinates
+      // Account for canvas pan/zoom transformation
+      const canvasPosition = {
+        x: (position.x - viewport.x) / viewport.scale,
+        y: (position.y - viewport.y) / viewport.scale,
+      };
+
+      await uploadMultipleFiles(files, canvasPosition);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to upload files:', error);
