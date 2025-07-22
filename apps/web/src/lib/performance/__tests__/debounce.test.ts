@@ -1,4 +1,4 @@
-import { debounce, throttle, rafThrottle } from './debounce';
+import { debounce, throttle, rafThrottle } from '../debounce';
 
 // Mock requestAnimationFrame
 const mockRequestAnimationFrame = jest.fn((cb: FrameRequestCallback) => {

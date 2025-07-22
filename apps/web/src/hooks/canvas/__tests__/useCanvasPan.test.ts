@@ -1,12 +1,12 @@
 import { renderHook, act } from '@testing-library/react';
 import Konva from 'konva';
 
-import { useCanvasStore } from '../../store/canvas.store';
+import { useCanvasStore } from '../../../store/canvas.store';
 
-import { useCanvasPan } from './useCanvasPan';
+import { useCanvasPan } from '../useCanvasPan';
 
 // Mock the canvas store
-jest.mock('../../store/canvas.store');
+jest.mock('../../../store/canvas.store');
 
 const mockUseCanvasStore = useCanvasStore as jest.MockedFunction<
   typeof useCanvasStore

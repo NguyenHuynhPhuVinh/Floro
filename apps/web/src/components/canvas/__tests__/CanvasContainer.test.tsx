@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { useCanvasViewport } from '../../hooks/canvas/useCanvasViewport';
+import { useCanvasViewport } from '../../../hooks/canvas/useCanvasViewport';
 
-import { CanvasContainer } from './CanvasContainer';
+import { CanvasContainer } from '../CanvasContainer';
 
 // Mock Next.js dynamic import with proper component
 const mockUpdateStageDimensions = jest.fn();
@@ -54,7 +54,7 @@ jest.mock('next/dynamic', () => {
   };
 });
 
-jest.mock('../../hooks/canvas/useCanvasViewport');
+jest.mock('../../../hooks/canvas/useCanvasViewport');
 
 const mockUseCanvasViewport = useCanvasViewport as jest.MockedFunction<
   typeof useCanvasViewport

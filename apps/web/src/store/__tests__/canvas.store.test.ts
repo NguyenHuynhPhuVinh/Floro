@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react';
 
-import { useCanvasStore } from './canvas.store';
+import { useCanvasStore } from '../canvas.store';
 
 describe('useCanvasStore', () => {
   beforeEach(() => {
