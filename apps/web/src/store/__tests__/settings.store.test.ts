@@ -175,7 +175,7 @@ describe('useSettingsStore', () => {
 
       // Check all settings are back to defaults
       expect(result.current.display.showCoordinates).toBe(true);
-      expect(result.current.canvas.backgroundType).toBe('grid');
+      expect(result.current.canvas.backgroundType).toBe('dots');
       expect(result.current.collaboration.language).toBe('vi');
     });
   });

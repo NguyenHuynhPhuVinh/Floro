@@ -32,8 +32,7 @@
     "backgrounds": {
       "none": "Không có",
       "grid": "Lưới",
-      "dots": "Chấm",
-      "lines": "Đường kẻ"
+      "dots": "Chấm"
     },
     "themes": {
       "light": "Sáng",

@@ -32,7 +32,6 @@ export const CanvasSettings: React.FC = () => {
     { value: 'none', label: t('canvas.backgrounds.none') },
     { value: 'grid', label: t('canvas.backgrounds.grid') },
     { value: 'dots', label: t('canvas.backgrounds.dots') },
-    { value: 'lines', label: t('canvas.backgrounds.lines') },
   ];
 
   return (

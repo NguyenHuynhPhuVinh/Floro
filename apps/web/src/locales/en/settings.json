@@ -32,8 +32,7 @@
     "backgrounds": {
       "none": "None",
       "grid": "Grid",
-      "dots": "Dots",
-      "lines": "Lines"
+      "dots": "Dots"
     },
     "themes": {
       "light": "Light",

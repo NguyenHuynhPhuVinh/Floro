@@ -1040,7 +1040,7 @@ const useSettingsCategories = () => {
 
 ```typescript
 // Canvas Background Types
-type CanvasBackgroundType = "none" | "grid" | "dots" | "lines";
+type CanvasBackgroundType = "none" | "grid" | "dots";
 
 interface CanvasBackgroundProps {
   type: CanvasBackgroundType;
@@ -1054,7 +1054,6 @@ interface CanvasBackgroundProps {
 const backgroundRenderers = {
   grid: (props: CanvasBackgroundProps) => <GridBackground {...props} />,
   dots: (props: CanvasBackgroundProps) => <DotsBackground {...props} />,
-  lines: (props: CanvasBackgroundProps) => <LinesBackground {...props} />,
   none: () => null,
 };
 ```

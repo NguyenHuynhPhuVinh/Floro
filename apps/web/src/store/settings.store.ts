@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 // Types for settings configuration
-export type CanvasBackgroundType = 'none' | 'grid' | 'dots' | 'lines';
+export type CanvasBackgroundType = 'none' | 'grid' | 'dots';
 export type LanguageType = 'vi' | 'en';
 export type CoordinateFormat = 'decimal' | 'integer';
 export type CoordinatePosition =
@@ -61,9 +61,9 @@ const defaultDisplaySettings: DisplaySettings = {
 };
 
 const defaultCanvasSettings: CanvasSettings = {
-  backgroundType: 'grid',
-  backgroundSize: 20,
-  backgroundOpacity: 0.3,
+  backgroundType: 'dots',
+  backgroundSize: 100,
+  backgroundOpacity: 0.5,
 };
 
 const defaultCollaborationSettings: CollaborationSettings = {

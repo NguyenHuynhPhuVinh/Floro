@@ -29,7 +29,7 @@ export interface CanvasBackgroundProps {
 
 /**
  * Canvas background component that renders different background patterns
- * based on settings configuration. Supports grid, dots, and lines patterns.
+ * based on settings configuration. Supports grid and dots patterns.
  */
 export const CanvasBackground: React.FC = () => {
   const { canvas } = useSettingsStore();
@@ -62,7 +62,6 @@ export const CanvasBackground: React.FC = () => {
   const backgroundRenderers = {
     grid: (): React.JSX.Element => <GridBackground {...backgroundProps} />,
     dots: (): React.JSX.Element => <DotsBackground {...backgroundProps} />,
-    lines: (): React.JSX.Element => <GridBackground {...backgroundProps} />, // Use grid for lines for now
     none: (): null => null,
   };
 
